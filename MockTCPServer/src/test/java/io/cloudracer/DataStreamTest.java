@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
-import pg.HostMessageTypeConstants;
+import io.cloudracer.HostMessageTypeConstants;
 
 public class DataStreamTest {
 

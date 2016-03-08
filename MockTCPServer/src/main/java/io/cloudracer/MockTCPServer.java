@@ -12,9 +12,9 @@ import java.net.SocketException;
 
 import org.apache.log4j.Logger;
 
-import pg.HostMessageConstants;
-import pg.HostMessageTypeConstants;
-import pg.RegexMatcher;
+import io.cloudracer.HostMessageConstants;
+import io.cloudracer.HostMessageTypeConstants;
+import io.cloudracer.RegexMatcher;
 
 /**
  * A mock server used for testing purposes only.
