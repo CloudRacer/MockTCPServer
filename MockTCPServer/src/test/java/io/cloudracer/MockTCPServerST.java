@@ -15,8 +15,8 @@ public class MockTCPServerST {
 
 	@Before
 	public void setUp() throws Exception {
-		server = new MockTCPServer(HostMessageConstants.MOCK_SERVER_PORT);
-		client = new TCPClient(HostMessageConstants.MOCK_SERVER_PORT);
+		server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT);
+		client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
 	}
 
 	@After
@@ -27,8 +27,8 @@ public class MockTCPServerST {
 
 	@Test
 	public void testMockTCPServer() throws ClassNotFoundException, IOException {
-		final String message = String.format("%s%s", "Test message!!", HostMessageTypeConstants.VALID_TERMINATOR);
+		final String message = String.format("%s%s", "Test message!!", TestConstants.VALID_TERMINATOR);
 
-		assertEquals("Unexpected server response.", HostMessageConstants.ACK, client.send(message));
+		assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message));
 	}
 }
