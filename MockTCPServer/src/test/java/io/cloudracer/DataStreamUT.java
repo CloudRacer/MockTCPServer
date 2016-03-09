@@ -2,24 +2,22 @@ package io.cloudracer;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
 
-import io.cloudracer.HostMessageTypeConstants;
-
-public class DataStreamTest {
+public class DataStreamUT {
 
     @Test
     public void dataStreamTest() throws IOException {
         DataStream dataStream = new DataStream(this.getClass().getSimpleName());
 
         writeStringToStream(HostMessageTypeConstants.MESSAGE_8, dataStream);
-        final byte[] actualTail = new byte[] { dataStream.getTail().get(0), dataStream.getTail().get(1), dataStream.getTail().get(2) };
-        assertArrayEquals("Tail contains an unexpected value.", actualTail, HostMessageTypeConstants.VALID_TERMINATOR.getBytes());
-        assertEquals("getTailLength() of returns an unexpected value.", dataStream.getTailLength(), actualTail.length, 0);
+        assertArrayEquals("Tail contains an unexpected value.", dataStream.getTail(), HostMessageTypeConstants.VALID_TERMINATOR.getBytes());
+        assertEquals("getTailLength() of returns an unexpected value.", dataStream.getTailLength(), dataStream.getTail().length, 0);
 
         assertEquals("getLastByte() of returns an unexpected value.", dataStream.getLastByte(), HostMessageTypeConstants.MESSAGE_8.getBytes()[HostMessageTypeConstants.MESSAGE_8.length() - 1]);
         assertEquals("getLength() of returns an unexpected value.", dataStream.size(), HostMessageTypeConstants.MESSAGE_8.length(), 0);
@@ -32,7 +30,7 @@ public class DataStreamTest {
     }
 
     @Test
-    public synchronized void OneHundredMBDataStreamTest() throws IOException {
+    public void OneHundredMBDataStreamTest() throws IOException {
         final int numberOfBytesToWrite = 102400000; // 100Mb
         final byte testCharacter = 65; // 65 = A.
         final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68 = D.
@@ -40,6 +38,7 @@ public class DataStreamTest {
         final byte testStream[] = new byte[totalLength];
 
         DataStream dataStream = new DataStream(this.getClass().getSimpleName());
+        checkDataStreamInternalConsistency(dataStream);
 
         // Write the test data to the stream.
         for (int i = 0; i < numberOfBytesToWrite; i++) {
@@ -47,10 +46,14 @@ public class DataStreamTest {
             testStream[i] = testCharacter;
             // write the test data to the stream.
             dataStream.write(testCharacter);
+
+            checkDataStreamInternalConsistency(dataStream);
         }
         // Write the test tail to the stream.
         for (int i = 0; i < testTail.length; i++) {
             dataStream.write(testTail[i]);
+
+            checkDataStreamInternalConsistency(dataStream);
         }
         // Create add the tail data to the test array.
         System.arraycopy(testTail, 0, testStream, testStream.length - testTail.length, testTail.length);
@@ -60,9 +63,8 @@ public class DataStreamTest {
         assertEquals("size() of returns an unexpected value.", totalLength, dataStream.size(), 0);
 
         // Check the tail.
-        final byte[] actualTail = new byte[] { dataStream.getTail().get(0), dataStream.getTail().get(1), dataStream.getTail().get(2) };
         assertEquals("getTailLength() of has an unexpected value.", testTail.length, dataStream.getTailLength(), 0);
-        assertArrayEquals("getTail() contains an unexpected value.", testTail, actualTail);
+        assertArrayEquals("getTail() contains an unexpected value.", testTail, dataStream.getTail());
 
         // Ensure that the stream can be successfully read more than once (i.e. the stream can be reset).
         assertEquals("toString() of has an unexpected value.", testString, dataStream.toString());
@@ -88,6 +90,17 @@ public class DataStreamTest {
 
         for (int i = 0; i < dataBytes.length; i++) {
             dataStream.write(dataBytes[i]);
+
+            checkDataStreamInternalConsistency(dataStream);
         }
+    }
+
+    /**
+     * Conduct a series of checks that must always pass on <b>every</b> {@link DataStream} at <b>any</b> time.
+     *
+     * @param dataStream the {@link DataStream} to check.
+     */
+    private void checkDataStreamInternalConsistency(final DataStream dataStream) {
+        assertTrue("Tail data longer than required tail length.", dataStream.getTail().length <= dataStream.getTailLength());
     }
 }

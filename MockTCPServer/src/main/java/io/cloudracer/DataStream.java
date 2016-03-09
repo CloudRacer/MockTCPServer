@@ -17,8 +17,7 @@ public class DataStream {
     public final static int TAIL_LENGTH_DEFAULT = 3;
 
     private ByteArrayOutputStream output;
-
-    private ArrayList<Byte> tail = null;
+    private ArrayList<Byte> tailList = null;
     private int lastByte;
     private Integer tailLength = null;
     private String rootLoggerName;
@@ -74,7 +73,7 @@ public class DataStream {
                 public synchronized void write(int b) {
                     super.write(b);
                     setLastByte(b);
-                    addToTail();
+                    addToTailList();
                 }
             };
         }
@@ -148,20 +147,39 @@ public class DataStream {
      *
      * @return
      */
-    public List<Byte> getTail() {
-        if (tail == null) {
-            tail = new ArrayList<Byte>(3);
+    private List<Byte> getTailList() {
+        if (tailList == null) {
+            tailList = new ArrayList<Byte>(3);
+        }
+
+        return tailList;
+    }
+
+    /**
+     * The tail of the specified {@link DataStream#getTailLength() length}.
+     *
+     * @return
+     */
+    public byte[] getTail() {
+        if (tailList == null) {
+            tailList = new ArrayList<Byte>(3);
+        }
+
+        // Convert the list to an array.
+        byte[] tail = new byte[tailList.size()];
+        for (int i = 0; i < tailList.size(); i++) {
+            tail[i] = tailList.get(i);
         }
 
         return tail;
     }
 
-    private void addToTail() {
+    private void addToTailList() {
         if (size() <= getTailLength()) {
-            getTail().add(size() - 1, getLastByte());
+            getTailList().add(size() - 1, getLastByte());
         } else {
-            getTail().remove(0);
-            getTail().add(getTail().size(), getLastByte());
+            getTailList().remove(0);
+            getTailList().add(getTailList().size(), getLastByte());
         }
     }
 
@@ -194,12 +212,12 @@ public class DataStream {
      */
     private void setRootLoggerName(String rootLoggerName) {
         this.rootLoggerName = new String(rootLoggerName);
-        logger = Logger.getLogger(rootLoggerName + "." + this.getClass().getSimpleName());
+        logger = Logger.getLogger(String.format("%s.%s", this.rootLoggerName, getClazzName()));
     }
 
     private Logger getLogger() {
         if (logger == null) {
-            logger = Logger.getLogger(String.format("%s.%s", getRootLoggerName(), this.getClass().getName()));
+            logger = Logger.getLogger(String.format("%s.%s", getRootLoggerName(), getClazzName()));
         }
 
         return logger;
@@ -218,6 +236,32 @@ public class DataStream {
                 final String nameSegments[] = this.getClass().getName().split(regEx);
 
                 name = String.format("%s-%s", this.getClass().getSuperclass().getSimpleName(), nameSegments[nameSegments.length - 1]);
+            } else {
+                name = this.getClass().getName();
+            }
+        }
+
+        return name;
+    }
+
+    /**
+     * This class name, even if instantiated as an anonymous class.
+     *
+     * @return a root logger name.
+     */
+    private String getClazzName() {
+        final String delimeter = ".";
+        final String regEx = "\\.";
+
+        String name = null;
+
+        if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() != 0) {
+            name = this.getClass().getSimpleName();
+        } else {
+            if (this.getClass().getName().contains(delimeter)) {
+                final String nameSegments[] = this.getClass().getName().split(regEx);
+
+                name = nameSegments[nameSegments.length - 1];
             } else {
                 name = this.getClass().getName();
             }
