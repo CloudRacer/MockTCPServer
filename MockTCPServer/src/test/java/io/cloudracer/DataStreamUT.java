@@ -30,7 +30,7 @@ public class DataStreamUT {
     }
 
     @Test
-    public void OneHundredMBDataStreamTest() throws IOException {
+    public void oneHundredMBDataStreamTest() throws IOException {
         final int numberOfBytesToWrite = 102400000; // 100Mb
         final byte testCharacter = 65; // 65 = A.
         final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68 = D.
