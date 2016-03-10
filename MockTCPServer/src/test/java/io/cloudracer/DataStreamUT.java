@@ -17,7 +17,7 @@ public class DataStreamUT {
 
 		writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 		assertArrayEquals("Tail contains an unexpected value.", dataStream.getTail(),
-				TestConstants.VALID_TERMINATOR.getBytes());
+				TestConstants.DEFAULT_TERMINATOR.getBytes());
 		assertEquals("getTailLength() of returns an unexpected value.", dataStream.getTailLength(),
 				dataStream.getTail().length, 0);
 		assertEquals("getLastByte() of returns an unexpected value.", dataStream.getLastByte(),

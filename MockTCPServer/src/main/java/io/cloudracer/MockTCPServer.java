@@ -17,12 +17,19 @@ import org.apache.log4j.Logger;
 /**
  * A mock server used for testing purposes only.
  *
- * @author v7mcdoj
+ * @author John McDonnell
  */
 public class MockTCPServer extends Thread {
 
 	private Logger logger = Logger.getLogger(String.format("%s.%s", getRootLoggerName(), getClazzName()));
-	public final static String DEFAULT_TERMINATOR = "\r\n\n";
+
+	public final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
+	public final static byte[] DEFAULT_ACK = { 65 };
+	public final static byte[] DEFAULT_NAK = { 78 };
+
+	public byte[] terminator = null;
+	public byte[] ACK = null;
+	public byte[] NAK = null;
 
 	private AssertionError assertionError;
 
@@ -31,7 +38,7 @@ public class MockTCPServer extends Thread {
 	private DataOutputStream outputStream;
 	private RegexMatcher expectedMessage;
 
-	private static int port;
+	private int port;
 	private boolean setIsAlwaysNAKResponse = false;
 	private boolean setIsAlwaysNoResponse = false;
 	private boolean isCloseAfterNextResponse = false;
@@ -56,19 +63,19 @@ public class MockTCPServer extends Thread {
 				logger.info("Mock Host Server connected.");
 				setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
 				setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
-				final DataStream dataStream = new DataStream(getRootLoggerName(), DEFAULT_TERMINATOR.getBytes().length);
+				final DataStream dataStream = new DataStream(getRootLoggerName(), getTerminator().length);
 				int c;
 				logger.info("Mock Host Server ready to receive input.");
 				while ((c = getInputStream().read()) != -1) {
 					dataStream.write(c);
-					if (Arrays.equals(dataStream.getTail(), DEFAULT_TERMINATOR.getBytes())) {
+					if (Arrays.equals(dataStream.getTail(), getTerminator())) {
 						incrementMessagesReceivedCount();
 
 						break;
 					}
 				}
 				// Ignore null in order allow a probing ping e.g. paping.exe
-				if (StringUtils.isNotBlank(dataStream.toString())) {
+				if (dataStream != null && dataStream.size() > 0) {
 					setAssertionError(null);
 					try {
 						if (getExpectedMessage() != null) {
@@ -78,15 +85,15 @@ public class MockTCPServer extends Thread {
 						setAssertionError(e);
 					}
 					onMessage(dataStream);
-					String response = null;
+					byte[] response = null;
 					if (!getIsAlwaysNoResponse()) {
 						if (getAssertionError() == null && !getIsAlwaysNAKResponse()) {
-							response = TestConstants.ACK;
+							response = getACK();
 						} else {
-							response = TestConstants.NAK;
+							response = getNAK();
 						}
 
-						getOutputStream().writeBytes(response);
+						getOutputStream().write(response);
 
 						afterResponse(response);
 					}
@@ -102,6 +109,75 @@ public class MockTCPServer extends Thread {
 	}
 
 	/**
+	 * The server will read the stream until these characters are encountered.
+	 *
+	 * @return the terminator.
+	 */
+	public byte[] getTerminator() {
+		if (terminator == null) {
+			terminator = DEFAULT_TERMINATOR;
+		}
+
+		return terminator;
+	}
+
+	/**
+	 * The server will read the stream until these characters are encountered.
+	 *
+	 * @param terminator
+	 *            the terminator.
+	 */
+	public void setTerminator(byte[] terminator) {
+		this.terminator = terminator;
+	}
+
+	/**
+	 * The <b>positive</b> acknowledgement response.
+	 *
+	 * @return positive acknowledgement
+	 */
+	public byte[] getACK() {
+		if (this.ACK == null) {
+			this.ACK = DEFAULT_ACK;
+		}
+
+		return ACK;
+	}
+
+	/**
+	 * The <b>positive</b> acknowledgement response.
+	 *
+	 * @param ACK
+	 *            positive acknowledgement
+	 */
+	public void setACK(byte[] ACK) {
+		this.ACK = ACK;
+	}
+
+	/**
+	 * The <b>negative</b> acknowledgement response.
+	 *
+	 * @return negative acknowledgement
+	 */
+	public byte[] getNAK() {
+		if (this.NAK == null) {
+			this.NAK = DEFAULT_NAK;
+		}
+
+		return NAK;
+	}
+
+	/**
+	 * The <b>negative</b> acknowledgement response.
+	 *
+	 * @param NAK
+	 *            negative acknowledgement
+	 */
+	public void setNAK(byte[] NAK) {
+		this.NAK = NAK;
+	}
+
+	/**
 	 * A server callback when a message has been processed, and a response has
 	 * been sent to the client.
 	 *
@@ -109,8 +185,8 @@ public class MockTCPServer extends Thread {
 	 *            the response that has been sent.
 	 * @throws IOException
 	 */
-	public void afterResponse(final String response) throws IOException {
-		logger.info(String.format("Mock Host Server sent the response: %s.", response));
+	public void afterResponse(final byte[] response) throws IOException {
+		logger.info(String.format("Mock Host Server sent the response: %s.", new String(response)));
 
 		if (getIsCloseAfterNextResponse()) {
 			close();
@@ -282,12 +358,12 @@ public class MockTCPServer extends Thread {
 		setSocket(null);
 	}
 
-	private static int getPort() {
+	private int getPort() {
 		return port;
 	}
 
-	private static void setPort(int port) {
-		MockTCPServer.port = port;
+	private void setPort(int port) {
+		this.port = port;
 	}
 
 	private ServerSocket getSocket() {

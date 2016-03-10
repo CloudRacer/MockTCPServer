@@ -22,16 +22,17 @@ public abstract class TestConstants {
 	public final static String HOST_CLIENT_MODULE_NAME = "HOST_CLIENT";
 
 	// Test terminators.
-	public final static String VALID_TERMINATOR = "\r\n\n";
+	public final static String DEFAULT_TERMINATOR = "\r\n\n";
+	public final static String CUSTOM_TERMINATOR = "xyz";
 	public final static String INVALID_TERMINATOR = "INVALID_TERMINATOR";
 	// Test XML.
 	public final static String WELLFORMED_XML = "<test-root><test-element></test-element></test-root>";
 	public final static String MALFORMED_XML = "<test-root><test-element><test-element></test-root>";
 	// Test well-formed XML.
-	public final static String WELLFORMED_XML_WITH_VALID_TERMINATOR = WELLFORMED_XML + VALID_TERMINATOR;
+	public final static String WELLFORMED_XML_WITH_VALID_TERMINATOR = WELLFORMED_XML + DEFAULT_TERMINATOR;
 	public final static String WELLFORMED_XML_WITH_INVALID_TERMINATOR = WELLFORMED_XML + INVALID_TERMINATOR;
 	// Test malformed XML.
-	public final static String MALFORMED_XML_WITH_VALID_TERMINATOR = MALFORMED_XML + VALID_TERMINATOR;
+	public final static String MALFORMED_XML_WITH_VALID_TERMINATOR = MALFORMED_XML + DEFAULT_TERMINATOR;
 	public final static String MALFORMED_XML_WITH_INVALID_TERMINATOR = MALFORMED_XML + INVALID_TERMINATOR;
 
 	/**
