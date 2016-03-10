@@ -31,8 +31,8 @@ public class MockTCPServer extends Thread {
 	public final static byte[] DEFAULT_NAK = { 78 };
 
 	public byte[] terminator = null;
-	public byte[] ACK = null;
-	public byte[] NAK = null;
+	public byte[] ack = null;
+	public byte[] nak = null;
 
 	private AssertionError assertionError;
 
@@ -140,11 +140,11 @@ public class MockTCPServer extends Thread {
 	 * @return positive acknowledgement
 	 */
 	public byte[] getACK() {
-		if (this.ACK == null) {
-			this.ACK = DEFAULT_ACK;
+		if (this.ack == null) {
+			this.ack = DEFAULT_ACK;
 		}
 
-		return ACK;
+		return ack;
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class MockTCPServer extends Thread {
 	 *            positive acknowledgement
 	 */
 	public void setACK(byte[] ACK) {
-		this.ACK = ACK;
+		this.ack = ACK;
 	}
 
 	/**
@@ -163,11 +163,11 @@ public class MockTCPServer extends Thread {
 	 * @return negative acknowledgement
 	 */
 	public byte[] getNAK() {
-		if (this.NAK == null) {
-			this.NAK = DEFAULT_NAK;
+		if (this.nak == null) {
+			this.nak = DEFAULT_NAK;
 		}
 
-		return NAK;
+		return nak;
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class MockTCPServer extends Thread {
 	 *            negative acknowledgement
 	 */
 	public void setNAK(byte[] NAK) {
-		this.NAK = NAK;
+		this.nak = NAK;
 	}
 
 	/**
