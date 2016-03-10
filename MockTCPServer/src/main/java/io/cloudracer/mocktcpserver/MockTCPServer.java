@@ -1,4 +1,4 @@
-package io.cloudracer;
+package io.cloudracer.mocktcpserver;
 
 import static org.junit.Assert.assertThat;
 
@@ -13,6 +13,9 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+
+import io.cloudracer.datastream.DataStream;
+import io.cloudracer.datastream.RegexMatcher;
 
 /**
  * A mock server used for testing purposes only.

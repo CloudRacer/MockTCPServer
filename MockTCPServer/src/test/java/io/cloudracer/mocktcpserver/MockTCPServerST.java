@@ -1,4 +1,4 @@
-package io.cloudracer;
+package io.cloudracer.mocktcpserver;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,9 +8,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.cloudracer.TestConstants;
+import io.cloudracer.tcpclient.TCPClient;
+
 public class MockTCPServerST {
 
-	private TCPClient client;
+	private io.cloudracer.tcpclient.TCPClient client;
 	private MockTCPServer server;
 
 	@Before

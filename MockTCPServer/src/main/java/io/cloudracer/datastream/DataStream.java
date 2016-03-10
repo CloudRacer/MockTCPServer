@@ -1,4 +1,4 @@
-package io.cloudracer;
+package io.cloudracer.datastream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

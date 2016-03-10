@@ -1,4 +1,4 @@
-package io.cloudracer;
+package io.cloudracer.tcpclient;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
+
+import io.cloudracer.datastream.DataStream;
 
 /**
  * @author John McDonnell

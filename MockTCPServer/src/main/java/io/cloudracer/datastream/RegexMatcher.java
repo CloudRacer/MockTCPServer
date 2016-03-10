@@ -1,4 +1,4 @@
-package io.cloudracer;
+package io.cloudracer.datastream;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
