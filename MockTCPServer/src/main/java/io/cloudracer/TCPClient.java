@@ -12,7 +12,7 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 
 /**
- * @author v7mcdoj
+ * @author John McDonnell
  */
 public class TCPClient {
 
