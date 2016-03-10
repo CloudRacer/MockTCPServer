@@ -150,11 +150,11 @@ public class MockTCPServer extends Thread {
 	/**
 	 * The <b>positive</b> acknowledgement response.
 	 *
-	 * @param ACK
+	 * @param ack
 	 *            positive acknowledgement
 	 */
-	public void setACK(byte[] ACK) {
-		this.ack = ACK;
+	public void setACK(byte[] ack) {
+		this.ack = ack;
 	}
 
 	/**
@@ -173,11 +173,11 @@ public class MockTCPServer extends Thread {
 	/**
 	 * The <b>negative</b> acknowledgement response.
 	 *
-	 * @param NAK
+	 * @param nak
 	 *            negative acknowledgement
 	 */
-	public void setNAK(byte[] NAK) {
-		this.nak = NAK;
+	public void setNAK(byte[] nak) {
+		this.nak = nak;
 	}
 
 	/**
