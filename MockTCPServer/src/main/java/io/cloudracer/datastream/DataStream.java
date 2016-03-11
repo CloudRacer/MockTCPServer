@@ -198,7 +198,7 @@ public class DataStream {
 	/**
 	 * Get the most recently received byte of the stream.
 	 *
-	 * @return the first {@link byte} in the stream.
+	 * @return the first byte in the stream.
 	 */
 	public byte getLastByte() {
 		return (byte) lastByte;
