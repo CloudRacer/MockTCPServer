@@ -2,10 +2,11 @@ package io.cloudracer.datastream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -13,112 +14,128 @@ import io.cloudracer.TestConstants;
 
 public class DataStreamUT {
 
-	@Test
-	public void dataStreamTest() throws IOException {
-		DataStream dataStream = new DataStream(this.getClass().getSimpleName());
+    @Test
+    public void dataStream() throws IOException {
+        DataStream dataStream = new DataStream(this.getClass().getSimpleName());
 
-		writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
-		assertArrayEquals("Tail contains an unexpected value.", dataStream.getTail(),
-				TestConstants.DEFAULT_TERMINATOR.getBytes());
-		assertEquals("getTailLength() of returns an unexpected value.", dataStream.getTailLength(),
-				dataStream.getTail().length, 0);
-		assertEquals("getLastByte() of returns an unexpected value.", dataStream.getLastByte(),
-				TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR
-						.getBytes()[TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR.length() - 1]);
-		assertEquals("getLength() of returns an unexpected value.", dataStream.size(),
-				TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR.length(), 0);
+        writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
-		// Ensure that the stream can be successfully read more than once (i.e.
-		// the stream can be reset).
-		assertEquals("toString() of returns an unexpected value.", dataStream.toString(),
-				TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
-		assertEquals("toString() of returns an unexpected value.", dataStream.toString(),
-				TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+        // Ensure that the stream can be successfully read more than once (i.e.
+        // the stream can be reset).
+        assertEquals("toString() of returns an unexpected value.", dataStream.toString(),
+                TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+        assertEquals("toString() of returns an unexpected value.", dataStream.toString(),
+                TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
 
-		dataStream.close();
-	}
+        dataStream.close();
+    }
 
-	@Test
-	public void oneHundredMBDataStreamTest() throws IOException {
-		final int numberOfBytesToWrite = 102400000; // 100Mb
-		final byte testCharacter = 65; // 65 = A.
-		final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68
-															// = D.
-		final int totalLength = numberOfBytesToWrite + testTail.length;
-		final byte testStream[] = new byte[totalLength];
+    @Test
+    public void dataStreamOfOneHundredMB() throws IOException {
+        final int numberOfBytesToWrite = 102400000; // 10Mb
+        final byte testCharacter = 65; // 65 = A.
+        final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68
+                                                           // = D.
+        int totalLength = numberOfBytesToWrite + testTail.length;
+        byte testStream[] = new byte[totalLength];
 
-		DataStream dataStream = new DataStream(this.getClass().getSimpleName());
-		checkDataStreamInternalConsistency(dataStream);
+        DataStream dataStream = new DataStream(this.getClass().getSimpleName());
+        checkDataStreamInternalConsistency(dataStream);
 
-		// Write the test data to the stream.
-		for (int i = 0; i < numberOfBytesToWrite; i++) {
-			// Create an array using the test data, which can be compared to the
-			// stream in order to assert that the stream is as expected.
-			testStream[i] = testCharacter;
-			// write the test data to the stream.
-			dataStream.write(testCharacter);
+        // Write the test data to the stream.
+        for (int i = 0; i < numberOfBytesToWrite; i++) {
+            // Create an array using the test data, which can be compared to the
+            // stream in order to assert that the stream is as expected.
+            testStream[i] = testCharacter;
+            // write the test data to the stream.
+            dataStream.write(testCharacter);
+        }
 
-			checkDataStreamInternalConsistency(dataStream);
-		}
-		// Write the test tail to the stream.
-		for (int i = 0; i < testTail.length; i++) {
-			dataStream.write(testTail[i]);
+        checkDataStreamInternalConsistency(dataStream, new String(Arrays.copyOf(testStream, testStream.length - testTail.length), "UTF-8"));
 
-			checkDataStreamInternalConsistency(dataStream);
-		}
-		// Create add the tail data to the test array.
-		System.arraycopy(testTail, 0, testStream, testStream.length - testTail.length, testTail.length);
-		final String testString = new String(testStream);
+        // Write the test tail to the stream.
+        for (int i = 0; i < testTail.length; i++) {
+            dataStream.write(testTail[i]);
+        }
+        // Create add the tail data to the test array.
+        System.arraycopy(testTail, 0, testStream, testStream.length - testTail.length, testTail.length);
+        final String testString = new String(testStream, "UTF-8");
+        checkDataStreamInternalConsistency(dataStream, testString);
 
-		// Check the size.
-		assertEquals("size() of returns an unexpected value.", totalLength, dataStream.size(), 0);
+        dataStream.close();
+    }
 
-		// Check the tail.
-		assertEquals("getTailLength() of has an unexpected value.", testTail.length, dataStream.getTailLength(), 0);
-		assertArrayEquals("getTail() contains an unexpected value.", testTail, dataStream.getTail());
+    @Test
+    public void dataStreamWithCustomTailLength() throws IOException {
+        final int maximumTailLength = 10;
+        DataStream dataStream = new DataStream(maximumTailLength);
 
-		// Ensure that the stream can be successfully read more than once (i.e.
-		// the stream can be reset).
-		assertEquals("toString() of has an unexpected value.", testString, dataStream.toString());
-		assertEquals("toString() of has an unexpected value.", testString, dataStream.toString());
+        writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
-		// Ensure that the stream can be successfully copied more than once
-		// (i.e. the stream can be reset).
-		assertEquals("copyToInputStream() of has an unexpected value.", testString,
-				convertCopiedStreamToString(dataStream));
-		assertEquals("copyToInputStream() of has an unexpected value.", testString,
-				convertCopiedStreamToString(dataStream));
+        checkDataStreamInternalConsistency(dataStream, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+    }
 
-		dataStream.close();
-	}
+    private void writeStringToStream(final String data, final DataStream dataStream) throws IOException {
+        final byte[] dataBytes = data.getBytes();
+        final StringBuilder dataWritten = new StringBuilder();
 
-	private String convertCopiedStreamToString(final DataStream dataStream) throws IOException {
-		final InputStream inputStream = dataStream.copyToInputStream();
-		final byte rawData[] = new byte[dataStream.size()];
-		inputStream.read(rawData);
+        for (int i = 0; i < dataBytes.length; i++) {
+            dataStream.write(dataBytes[i]);
+            byte[] nextByte = new byte[] { dataBytes[i] };
+            dataWritten.append(new String(nextByte, "UTF-8"));
 
-		return new String(rawData);
-	}
+            checkDataStreamInternalConsistency(dataStream, dataWritten.toString());
+        }
+    }
 
-	private void writeStringToStream(final String data, final DataStream dataStream) throws IOException {
-		final byte[] dataBytes = data.getBytes();
+    private void checkDataStreamInternalConsistency(final DataStream dataStream) throws IOException {
+        checkDataStreamInternalConsistency(dataStream, null);
+    }
 
-		for (int i = 0; i < dataBytes.length; i++) {
-			dataStream.write(dataBytes[i]);
+    /**
+     * Conduct a series of checks that must always pass on <b>every</b>
+     * {@link DataStream} at <b>any</b> time.
+     *
+     * @param dataStream
+     *        the {@link DataStream} to check.
+     * @throws IOException
+     */
+    private void checkDataStreamInternalConsistency(final DataStream dataStream, final String data) throws IOException {
+        assertTrue("Tail data longer than required tail length.", dataStream.getTail().length <= dataStream.getTailMaximumLength());
+        assertTrue("Tail data longer than stream size.", dataStream.getTail().length <= dataStream.size());
 
-			checkDataStreamInternalConsistency(dataStream);
-		}
-	}
+        // toInputStream() conversion; the converted size equals the DataStrem size.
+        final byte[] input = new byte[dataStream.size()];
+        dataStream.toInputStream().read(input);
+        assertEquals("Input stream of unexpected size.", dataStream.size(), input.length);
+        assertArrayEquals("Input stream of unexpected value.", input, dataStream.toString().getBytes());
 
-	/**
-	 * Conduct a series of checks that must always pass on <b>every</b>
-	 * {@link DataStream} at <b>any</b> time.
-	 *
-	 * @param dataStream
-	 *            the {@link DataStream} to check.
-	 */
-	private void checkDataStreamInternalConsistency(final DataStream dataStream) {
-		assertTrue("Tail data longer than required tail length.",
-				dataStream.getTail().length <= dataStream.getTailLength());
-	}
+        // toString() conversion; the converted size equals the DataStrem size.
+        byte[] expectedString = dataStream.toString().getBytes();
+        assertEquals("toString() conversion of unexpected size.", dataStream.size(), expectedString.length);
+        assertArrayEquals("toString() compared to toInputStream().", input, expectedString);
+
+        // getTail() size, and content, equals the DataStrem.
+        final byte[] expectedTail = Arrays.copyOfRange(expectedString, expectedString.length - dataStream.getTail().length, expectedString.length);
+        assertEquals("Tail of unexpected size.", expectedTail.length, dataStream.getTail().length);
+        assertArrayEquals("Tail contains an unexpected value.", expectedTail, dataStream.getTail());
+
+        if (dataStream.size() == 0) {
+            assertEquals("getTailLength() of returns an unexpected value.", 0, dataStream.size());
+            assertEquals("size() returns an unexpected value.", 0, dataStream.getOutput().size());
+            assertEquals("getTailLength() of returns an unexpected value.", 0, dataStream.getTail().length);
+            assertNull("getLastByte() of returns an unexpected value.", dataStream.getLastByte());
+        } else if (dataStream.size() > dataStream.getTail().length) {
+            assertEquals("getTailLength() of returns an unexpected value.", dataStream.getTailMaximumLength(), dataStream.getTail().length);
+        } else if (dataStream.size() < dataStream.getTail().length) {
+            assertEquals("getTailLength() of returns an unexpected value.", dataStream.size(), dataStream.getTail().length);
+        } else if (dataStream.size() == dataStream.getTail().length) {
+            assertEquals("getTailLength() of returns an unexpected value.", dataStream.size(), dataStream.getTail().length);
+        }
+
+        if (data != null) {
+            assertEquals("getLastByte() of returns an unexpected value.", data.getBytes()[data.length() - 1], dataStream.getLastByte(), 0);
+            assertEquals("DataStream size different to data size.", data.length(), dataStream.size());
+        }
+    }
 }
