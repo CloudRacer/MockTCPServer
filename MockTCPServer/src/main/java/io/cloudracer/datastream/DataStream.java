@@ -24,7 +24,10 @@ public class DataStream {
 	private String rootLoggerName;
 
 	/**
-	 * Default constructor.
+	 * Specify a log4j root logger.
+	 *
+	 * @param rootLoggerName
+	 *            log4j root logger
 	 */
 	public DataStream(final String rootLoggerName) {
 		setTailLength(TAIL_LENGTH_DEFAULT);
@@ -32,9 +35,11 @@ public class DataStream {
 	}
 
 	/**
-	 * The PipeStream will maintain a tail (most recently read bytes) of the
-	 * specified length.
+	 * Specify a {@link DataStream#getRootLoggerName() log4j root logger} and
+	 * the {@link DataStream#getTailLength() maximum length of the stream tail}.
 	 *
+	 * @param rootLoggerName
+	 *            log4j root logger. Default to the
 	 * @param tailLength
 	 *            tail length. Default of {@link DataStream#TAIL_LENGTH_DEFAULT}
 	 */
@@ -145,7 +150,7 @@ public class DataStream {
 	 * The length of the tail.
 	 *
 	 * @return the length of the tail. Default of
-	 *         {@link DataStream#TAIL_LENGTH_DEFAULT length}.
+	 *         {@link DataStream#TAIL_LENGTH_DEFAULT}.
 	 */
 	public int getTailLength() {
 		return tailLength;
@@ -162,7 +167,7 @@ public class DataStream {
 	 */
 	private Deque<Byte> getTailQueue() {
 		if (tailQueue == null) {
-			tailQueue = new ArrayDeque<Byte>();
+			tailQueue = new ArrayDeque<Byte>(getTailLength());
 		}
 
 		return tailQueue;
