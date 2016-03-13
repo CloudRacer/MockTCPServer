@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
@@ -17,7 +18,7 @@ public class DataStream {
 	public final static int TAIL_LENGTH_DEFAULT = 3;
 
 	private ByteArrayOutputStream output;
-	private ArrayList<Byte> tailList = null;
+	private Deque<Byte> tailQueue = null;
 	private int lastByte;
 	private Integer tailLength = null;
 	private String rootLoggerName;
@@ -146,11 +147,11 @@ public class DataStream {
 	 * @return the length of the tail. Default of
 	 *         {@link DataStream#TAIL_LENGTH_DEFAULT length}.
 	 */
-	public Integer getTailLength() {
+	public int getTailLength() {
 		return tailLength;
 	}
 
-	private void setTailLength(final Integer tailLength) {
+	private void setTailLength(final int tailLength) {
 		this.tailLength = tailLength;
 	}
 
@@ -159,12 +160,12 @@ public class DataStream {
 	 *
 	 * @return
 	 */
-	private List<Byte> getTailList() {
-		if (tailList == null) {
-			tailList = new ArrayList<Byte>(3);
+	private Deque<Byte> getTailQueue() {
+		if (tailQueue == null) {
+			tailQueue = new ArrayDeque<Byte>();
 		}
 
-		return tailList;
+		return tailQueue;
 	}
 
 	/**
@@ -173,25 +174,23 @@ public class DataStream {
 	 * @return
 	 */
 	public byte[] getTail() {
-		if (tailList == null) {
-			tailList = new ArrayList<Byte>(3);
-		}
-
 		// Convert the list to an array.
-		byte[] tail = new byte[tailList.size()];
-		for (int i = 0; i < tailList.size(); i++) {
-			tail[i] = tailList.get(i);
+		final byte[] tail = new byte[getTailQueue().size()];
+		int i = 0;
+		for (Iterator<Byte> iterator = getTailQueue().iterator(); iterator.hasNext();) {
+			final Byte nextByte = iterator.next();
+			tail[i] = nextByte;
+
+			i++;
 		}
 
 		return tail;
 	}
 
 	private void addToTailList() {
-		if (size() <= getTailLength()) {
-			getTailList().add(size() - 1, getLastByte());
-		} else {
-			getTailList().remove(0);
-			getTailList().add(getTailList().size(), getLastByte());
+		getTailQueue().addLast(getLastByte());
+		if (getTailQueue().size() > getTailLength()) {
+			getTailQueue().removeFirst();
 		}
 	}
 
