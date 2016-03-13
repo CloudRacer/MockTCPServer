@@ -31,7 +31,6 @@ public class DataStream {
      * @param rootLoggerName log4j root logger
      */
     public DataStream() {
-        setTailMaximumLength(TAIL_MAXIMUM_LENGTH_DEFAULT);
         setRootLoggerName(getClssName());
     }
 
@@ -41,8 +40,16 @@ public class DataStream {
      * @param rootLoggerName log4j root logger
      */
     public DataStream(final String rootLoggerName) {
-        setTailMaximumLength(TAIL_MAXIMUM_LENGTH_DEFAULT);
         setRootLoggerName(rootLoggerName);
+    }
+
+    /**
+     * Specify a {@link DataStream#getTailMaximumLength() maximum length of the stream tail}.
+     *
+     * @param tailMaximumLength tail length.
+     */
+    public DataStream(final int tailMaximumLength) {
+        setTailMaximumLength(tailMaximumLength);
     }
 
     /**
@@ -158,6 +165,10 @@ public class DataStream {
      * @return the length of the tail. Default of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT}.
      */
     public int getTailMaximumLength() {
+        if (tailMaximumLength == null) {
+            tailMaximumLength = TAIL_MAXIMUM_LENGTH_DEFAULT;
+        }
+
         return tailMaximumLength;
     }
 
