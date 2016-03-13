@@ -15,13 +15,25 @@ public class DataStream {
 
     private Logger logger;
 
-    public final static int TAIL_LENGTH_DEFAULT = 3;
+    public final static int TAIL_MAXIMUM_LENGTH_DEFAULT = 3;
 
     private ByteArrayOutputStream output;
     private Deque<Byte> tailQueue = null;
-    private int lastByte;
-    private Integer tailLength = null;
+    private Byte lastByte;
+    private Integer tailMaximumLength = null;
     private String rootLoggerName;
+
+    /**
+     * Default constructor.
+     * <p>
+     * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT} and a default {@link Logger#getLogger(Class) log4j root logger} of the Class name.
+     *
+     * @param rootLoggerName log4j root logger
+     */
+    public DataStream() {
+        setTailMaximumLength(TAIL_MAXIMUM_LENGTH_DEFAULT);
+        setRootLoggerName(getClssName());
+    }
 
     /**
      * Specify a log4j root logger.
@@ -29,25 +41,25 @@ public class DataStream {
      * @param rootLoggerName log4j root logger
      */
     public DataStream(final String rootLoggerName) {
-        setTailLength(TAIL_LENGTH_DEFAULT);
+        setTailMaximumLength(TAIL_MAXIMUM_LENGTH_DEFAULT);
         setRootLoggerName(rootLoggerName);
     }
 
     /**
-     * Specify a {@link DataStream#getRootLoggerName() log4j root logger} and the {@link DataStream#getTailLength() maximum length of the stream tail}.
+     * Specify a {@link DataStream#getRootLoggerName() log4j root logger} and the {@link DataStream#getTailMaximumLength() maximum length of the stream tail}.
      *
-     * @param rootLoggerName log4j root logger. Default to the
-     * @param tailLength tail length. Default of {@link DataStream#TAIL_LENGTH_DEFAULT}
+     * @param rootLoggerName log4j root logger.
+     * @param tailMaximumLength tail length.
      */
-    public DataStream(final String rootLoggerName, final int tailLength) {
-        setTailLength(tailLength);
+    public DataStream(final String rootLoggerName, final int tailMaximumLength) {
+        setTailMaximumLength(tailMaximumLength);
         setRootLoggerName(rootLoggerName);
     }
 
     /**
-     * Delegate of {@link PipedOutputStream#write(int)}.
+     * Delegate of {@link ByteArrayOutputStream#write(int)}.
      *
-     * @param data data to write to the {@link PipedInputStream}.
+     * @param data data to write to the {@link ByteArrayOutputStream}.
      * @throws IOException
      */
     public synchronized void write(final int data) throws IOException {
@@ -76,7 +88,7 @@ public class DataStream {
                 @Override
                 public synchronized void write(int b) {
                     super.write(b);
-                    setLastByte(b);
+                    setLastByte((byte) b);
                     addToTailList();
                 }
             };
@@ -93,29 +105,36 @@ public class DataStream {
      * @return {@link PipedInputStream input stream} populated with all available data.
      * @throws IOException
      */
-    public PipedInputStream copyToInputStream() throws IOException {
-        PipedInputStream inputStream = new PipedInputStream(getOutput().size());
-        final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+    public PipedInputStream toInputStream() throws IOException {
+        PipedInputStream inputStream = null;
 
-        Thread copy = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    getOutput().writeTo(outputStream);
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
+        if (getOutput().size() == 0) {
+            inputStream = new PipedInputStream();
+        } else {
+            inputStream = new PipedInputStream(getOutput().size());
+            final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+
+            Thread copy = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        getOutput().writeTo(outputStream);
+                    } catch (IOException e) {
+                        logger.error(e.getMessage(), e);
+                    }
                 }
+            });
+            copy.setName(String.format("%s-InputStream-Creator", getThreadName()));
+            copy.start();
+            try {
+                copy.join();
+            } catch (InterruptedException e) {
+                logger.error(e.getCause(), e);
             }
-        });
-        copy.setName(String.format("%s-InputStream-Creator", getThreadName()));
-        copy.start();
-        try {
-            copy.join();
-        } catch (InterruptedException e) {
-            logger.error(e.getCause(), e);
         }
 
         return inputStream;
+
     }
 
     /**
@@ -136,31 +155,31 @@ public class DataStream {
     /**
      * The length of the tail.
      *
-     * @return the length of the tail. Default of {@link DataStream#TAIL_LENGTH_DEFAULT}.
+     * @return the length of the tail. Default of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT}.
      */
-    public int getTailLength() {
-        return tailLength;
+    public int getTailMaximumLength() {
+        return tailMaximumLength;
     }
 
-    private void setTailLength(final int tailLength) {
-        this.tailLength = tailLength;
+    private void setTailMaximumLength(final int tailLength) {
+        this.tailMaximumLength = tailLength;
     }
 
     /**
-     * The tail of the specified {@link DataStream#getTailLength() length}.
+     * The tail of the specified {@link DataStream#getTailMaximumLength() length}.
      *
      * @return
      */
     private Deque<Byte> getTailQueue() {
         if (tailQueue == null) {
-            tailQueue = new ArrayDeque<Byte>(getTailLength());
+            tailQueue = new ArrayDeque<Byte>(getTailMaximumLength());
         }
 
         return tailQueue;
     }
 
     /**
-     * The tail of the specified {@link DataStream#getTailLength() length}.
+     * The tail of the specified {@link DataStream#getTailMaximumLength() length}.
      *
      * @return a byte[] containing the tail data, of specified maximum length.
      */
@@ -180,7 +199,7 @@ public class DataStream {
 
     private void addToTailList() {
         getTailQueue().addLast(getLastByte());
-        if (getTailQueue().size() > getTailLength()) {
+        if (getTailQueue().size() > getTailMaximumLength()) {
             getTailQueue().removeFirst();
         }
     }
@@ -190,11 +209,11 @@ public class DataStream {
      *
      * @return the first byte in the stream.
      */
-    public byte getLastByte() {
-        return (byte) lastByte;
+    public Byte getLastByte() {
+        return lastByte;
     }
 
-    private void setLastByte(final int lastByte) {
+    private void setLastByte(final byte lastByte) {
         this.lastByte = lastByte;
     }
 
@@ -214,12 +233,12 @@ public class DataStream {
      */
     private void setRootLoggerName(String rootLoggerName) {
         this.rootLoggerName = new String(rootLoggerName);
-        logger = Logger.getLogger(String.format("%s.%s", this.rootLoggerName, getClazzName()));
+        logger = Logger.getLogger(String.format("%s.%s", this.rootLoggerName, getClssName()));
     }
 
     private Logger getLogger() {
         if (logger == null) {
-            logger = Logger.getLogger(String.format("%s.%s", getRootLoggerName(), getClazzName()));
+            logger = Logger.getLogger(String.format("%s.%s", getRootLoggerName(), getClssName()));
         }
 
         return logger;
@@ -250,9 +269,9 @@ public class DataStream {
     /**
      * This class name, even if instantiated as an anonymous class.
      *
-     * @return a root logger name.
+     * @return a Class name.
      */
-    private String getClazzName() {
+    private String getClssName() {
         final String delimeter = ".";
         final String regEx = "\\.";
 
