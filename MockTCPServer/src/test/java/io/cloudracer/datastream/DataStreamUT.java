@@ -95,7 +95,7 @@ public class DataStreamUT {
 	private String convertCopiedStreamToString(final DataStream dataStream) throws IOException {
 		final InputStream inputStream = dataStream.copyToInputStream();
 		final byte rawData[] = new byte[dataStream.size()];
-		inputStream.read(rawData, 0, rawData.length);
+		inputStream.read(rawData);
 
 		return new String(rawData);
 	}
