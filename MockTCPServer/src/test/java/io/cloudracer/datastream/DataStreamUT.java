@@ -20,10 +20,6 @@ public class DataStreamUT {
 
         writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
-        // Ensure that the stream can be successfully read more than once (i.e. the stream can be reset).
-        assertEquals("toString() of returns an unexpected value.", dataStream.toString(), TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
-        assertEquals("toString() of returns an unexpected value.", dataStream.toString(), TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
-
         dataStream.close();
     }
 
