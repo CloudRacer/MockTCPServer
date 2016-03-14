@@ -22,10 +22,8 @@ public class DataStreamUT {
 
         // Ensure that the stream can be successfully read more than once (i.e.
         // the stream can be reset).
-        assertEquals("toString() of returns an unexpected value.", dataStream.toString(),
-                TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
-        assertEquals("toString() of returns an unexpected value.", dataStream.toString(),
-                TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+        assertEquals("toString() of returns an unexpected value.", dataStream.toString(), TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+        assertEquals("toString() of returns an unexpected value.", dataStream.toString(), TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
 
         dataStream.close();
     }
@@ -93,11 +91,9 @@ public class DataStreamUT {
     }
 
     /**
-     * Conduct a series of checks that must always pass on <b>every</b>
-     * {@link DataStream} at <b>any</b> time.
+     * Conduct a series of checks that must always pass on <b>every</b> {@link DataStream} at <b>any</b> time.
      *
-     * @param dataStream
-     *        the {@link DataStream} to check.
+     * @param dataStream the {@link DataStream} to check.
      * @throws IOException
      */
     private void checkDataStreamInternalConsistency(final DataStream dataStream, final String data) throws IOException {
