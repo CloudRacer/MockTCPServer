@@ -20,8 +20,7 @@ public class DataStreamUT {
 
         writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
-        // Ensure that the stream can be successfully read more than once (i.e.
-        // the stream can be reset).
+        // Ensure that the stream can be successfully read more than once (i.e. the stream can be reset).
         assertEquals("toString() of returns an unexpected value.", dataStream.toString(), TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
         assertEquals("toString() of returns an unexpected value.", dataStream.toString(), TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
 
@@ -29,7 +28,7 @@ public class DataStreamUT {
     }
 
     @Test
-    public void dataStreamOfOneHundredMB() throws IOException {
+    public void dataStreamOf100MB() throws IOException {
         final int numberOfBytesToWrite = 102400000; // 10Mb
         final byte testCharacter = 65; // 65 = A.
         final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68
@@ -42,8 +41,7 @@ public class DataStreamUT {
 
         // Write the test data to the stream.
         for (int i = 0; i < numberOfBytesToWrite; i++) {
-            // Create an array using the test data, which can be compared to the
-            // stream in order to assert that the stream is as expected.
+            // Create an array using the test data, which can be compared to the stream in order to assert that the stream is as expected.
             testStream[i] = testCharacter;
             // write the test data to the stream.
             dataStream.write(testCharacter);
