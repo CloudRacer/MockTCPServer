@@ -11,11 +11,12 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import io.cloudracer.datastream.DataStream;
-import io.cloudracer.datastream.RegexMatcher;
+import io.cloudracer.datastream.DataStreamRegexMatcher;
 
 /**
  * A mock server used for testing purposes only.
@@ -39,7 +40,7 @@ public class MockTCPServer extends Thread {
     private ServerSocket socket;
     private BufferedReader inputStream;
     private DataOutputStream outputStream;
-    private RegexMatcher expectedMessage;
+    private DataStreamRegexMatcher expectedMessage;
 
     private DataStream dataStream;
 
@@ -302,7 +303,7 @@ public class MockTCPServer extends Thread {
      *
      * @return ignore if null.
      */
-    public RegexMatcher getExpectedMessage() {
+    public DataStreamRegexMatcher getExpectedMessage() {
         return expectedMessage;
     }
 
@@ -316,7 +317,7 @@ public class MockTCPServer extends Thread {
      *        message will be.
      */
     public void setExpectedMessage(final String expectedMessage) {
-        this.expectedMessage = new RegexMatcher(expectedMessage);
+        this.expectedMessage = new DataStreamRegexMatcher(expectedMessage);
     }
 
     /**
@@ -379,7 +380,7 @@ public class MockTCPServer extends Thread {
     private void setSocket(ServerSocket socket) {
         if (socket == null && this.socket != null) {
             try {
-                logger.info("Mock Host closing the server socket...");
+                logger.info("Closing the server socket...");
                 this.socket.close();
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);
@@ -407,8 +408,8 @@ public class MockTCPServer extends Thread {
 
     private void setInputStream(BufferedReader inputStream) throws IOException {
         if (inputStream == null && this.inputStream != null) {
-            logger.info("Mock Host closing the input stream...");
-            this.inputStream.close();
+            logger.info("Closing the input stream...");
+            IOUtils.closeQuietly(this.inputStream);
         }
 
         this.inputStream = inputStream;
@@ -420,10 +421,8 @@ public class MockTCPServer extends Thread {
 
     private void setOutputStream(DataOutputStream outputStream) throws IOException {
         if (outputStream == null && this.outputStream != null) {
-            logger.info("Mock Host flushing the output stream...");
-            this.outputStream.flush();
-            logger.info("Mock Host closing the output stream...");
-            this.outputStream.close();
+            logger.info("Closing the output stream...");
+            IOUtils.closeQuietly(this.outputStream);
         }
 
         this.outputStream = outputStream;
