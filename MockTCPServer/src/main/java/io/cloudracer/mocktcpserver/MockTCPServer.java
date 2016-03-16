@@ -463,30 +463,4 @@ public class MockTCPServer extends Thread {
 
         return name;
     }
-
-    /**
-     * This class name, even if instantiated as an anonymous class.
-     *
-     * @return a root logger name.
-     */
-    private String getClazzName() {
-        final String delimeter = ".";
-        final String regEx = "\\.";
-
-        String name = null;
-
-        if (StringUtils.isNotBlank(this.getClass().getSimpleName())) {
-            name = this.getClass().getSimpleName();
-        } else {
-            if (this.getClass().getName().contains(delimeter)) {
-                final String nameSegments[] = this.getClass().getName().split(regEx);
-
-                name = nameSegments[nameSegments.length - 1];
-            } else {
-                name = this.getClass().getName();
-            }
-        }
-
-        return name;
-    }
 }
