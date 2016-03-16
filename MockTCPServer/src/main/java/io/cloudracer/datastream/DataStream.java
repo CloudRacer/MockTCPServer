@@ -64,13 +64,17 @@ public class DataStream {
     }
 
     /**
-     * Delegate of {@link ByteArrayOutputStream#write(int)}.
+     * Write byte to the {@link ByteArrayOutputStream#write(int)}.
      *
-     * @param data data to write to the {@link ByteArrayOutputStream}.
+     * @param data written to the {@link ByteArrayOutputStream}.
+     * @return the data written (equal to the data parameter).
      * @throws IOException
      */
-    public synchronized void write(final int data) throws IOException {
+
+    public synchronized int write(final int data) throws IOException {
         getOutput().write(data);
+
+        return data;
     }
 
     /**
