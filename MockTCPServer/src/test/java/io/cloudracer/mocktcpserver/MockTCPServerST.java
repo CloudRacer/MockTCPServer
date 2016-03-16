@@ -29,14 +29,14 @@ public class MockTCPServerST {
 	}
 
 	@Test
-	public void testMockTCPServer() throws ClassNotFoundException, IOException {
+	public void mockTCPServerACK() throws ClassNotFoundException, IOException {
 		final String message = String.format("%s%s", "Test message!!", TestConstants.DEFAULT_TERMINATOR);
 
 		assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message).toString());
 	}
 
 	@Test
-	public void testMockTCPServerWithCustomTerminator() throws ClassNotFoundException, IOException {
+	public void mockTCPServerACKWithCustomTerminator() throws ClassNotFoundException, IOException {
 		final String message = String.format("%s%s", "Test message!!", TestConstants.CUSTOM_TERMINATOR);
 
 		server.setTerminator(TestConstants.CUSTOM_TERMINATOR.getBytes());
