@@ -1,6 +1,7 @@
 package io.cloudracer.datastream;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -12,7 +13,7 @@ import java.util.Iterator;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-public class DataStream {
+public class DataStream implements Closeable {
 
     private Logger logger;
 
@@ -83,6 +84,7 @@ public class DataStream {
      *
      * @throws IOException
      */
+    @Override
     public void close() throws IOException {
         setOutput(null);
     }
