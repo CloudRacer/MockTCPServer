@@ -3,6 +3,7 @@ package io.cloudracer.mocktcpserver;
 import static org.junit.Assert.assertThat;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,7 +24,7 @@ import io.cloudracer.datastream.DataStreamRegexMatcher;
  *
  * @author John McDonnell
  */
-public class MockTCPServer extends Thread {
+public class MockTCPServer extends Thread implements Closeable {
 
     private Logger logger = Logger.getLogger(getRootLoggerName());
 
@@ -346,8 +347,9 @@ public class MockTCPServer extends Thread {
      *
      * @throws IOException
      */
+    @Override
     public void close() throws IOException {
-        logger.info("Stopping...");
+        logger.info("Closing...");
 
         setOutputStream(null);
         setInputStream(null);
