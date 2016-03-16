@@ -13,7 +13,7 @@ import io.cloudracer.tcpclient.TCPClient;
 
 public class MockTCPServerST {
 
-    private io.cloudracer.tcpclient.TCPClient client;
+    private TCPClient client;
     private MockTCPServer server;
 
     @Before
