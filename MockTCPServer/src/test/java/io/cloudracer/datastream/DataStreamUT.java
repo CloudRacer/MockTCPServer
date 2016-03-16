@@ -24,7 +24,7 @@ public class DataStreamUT {
     }
 
     @Test
-    public void dataStreamOf100MB() throws IOException {
+    public void dataStream100MB() throws IOException {
         final int numberOfBytesToWrite = 102400000; // 10Mb
         final byte testCharacter = 65; // 65 = A.
         final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68
