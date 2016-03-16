@@ -63,7 +63,7 @@ public class MockTCPServer extends Thread implements Closeable {
     @Override
     public void run() {
         try {
-            while (getSocket() != null && !getSocket().isClosed()) {
+            while (!getSocket().isClosed()) {
                 while ((getDataStream().write(getInputStream().read())) != -1) {
                     if (Arrays.equals(getDataStream().getTail(), getTerminator())) {
                         incrementMessagesReceivedCount();
