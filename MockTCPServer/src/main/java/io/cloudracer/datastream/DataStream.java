@@ -9,6 +9,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 public class DataStream {
@@ -156,7 +157,7 @@ public class DataStream {
      */
     private void setOutput(final ByteArrayOutputStream output) throws IOException {
         if (output == null && this.output != null) {
-            this.output.close();
+            IOUtils.closeQuietly(this.output);
         }
 
         this.output = output;
