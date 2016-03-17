@@ -1,106 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>MockTCPServer</groupId>
-	<artifactId>MockTCPServer-root</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>Mock TCP Server</name>
+    <groupId>MockTCPServer</groupId>
+    <artifactId>MockTCPServer-root</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Mock TCP Server</name>
 
-	<properties>
-		<maven.compiler.source.version>1.6</maven.compiler.source.version>
-		<maven.compiler.target.version>1.6</maven.compiler.target.version>
-		<maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
-		<surefire.forkCount>1</surefire.forkCount>
-		<surefire.reuseForks>false</surefire.reuseForks>
-		<log4j.version>1.2.8</log4j.version>
-		<junit.version>4.12</junit.version>
-		<org.apache.commons.commons-lang3.version>3.4</org.apache.commons.commons-lang3.version>
-		<commons-io.commons-io.version>2.4</commons-io.commons-io.version>
-	</properties>
+    <properties>
+        <maven.compiler.source.version>1.6</maven.compiler.source.version>
+        <maven.compiler.target.version>1.6</maven.compiler.target.version>
+        <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
+        <surefire.forkCount>1</surefire.forkCount>
+        <surefire.reuseForks>false</surefire.reuseForks>
+        <log4j.version>1.2.8</log4j.version>
+        <junit.version>4.12</junit.version>
+        <org.apache.commons.commons-lang3.version>3.4</org.apache.commons.commons-lang3.version>
+        <commons-io.commons-io.version>2.4</commons-io.commons-io.version>
+    </properties>
 
-	<build>
-		<finalName>${project.artifactId}-${project.version}</finalName>
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
 
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven.compiler.plugin.version}</version>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-				</configuration>
-			</plugin>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.4</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<tasks>
-								<echo>[surefire.forkCount]: ${surefire.forkCount}</echo>
-								<echo>[surefire.reuseForks]: ${surefire.reuseForks}</echo>
-							</tasks>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo>[surefire.forkCount]:
+                                    ${surefire.forkCount}</echo>
+                                <echo>[surefire.reuseForks]:
+                                    ${surefire.reuseForks}</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19</version>
-				<configuration>
-					<!-- Ensures that each test is entirely isolated from the preceding
-						test. Without this, test results achieved in Eclipse can differ from those
-						received in Maven. -->
-					<forkCount>${surefire.forkCount}</forkCount>
-					<reuseForks>${surefire.reuseForks}</reuseForks>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                    <!-- Ensures that each test is entirely isolated from
+                        the preceding test. Without this, test results achieved in Eclipse can differ
+                        from those received in Maven. -->
+                    <forkCount>${surefire.forkCount}</forkCount>
+                    <reuseForks>${surefire.reuseForks}</reuseForks>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven.compiler.plugin.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>log4j</groupId>
-				<artifactId>log4j</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-lang3</artifactId>
-				<version>${org.apache.commons.commons-lang3.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.commons-io.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons.commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.commons-io.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<modules>
-		<module>MockTCPServer</module>
-	</modules>
+    <modules>
+        <module>MockTCPServer</module>
+    </modules>
 </project>
