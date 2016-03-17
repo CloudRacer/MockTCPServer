@@ -8,6 +8,30 @@
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Mock TCP Server</name>
+    <description>Simulate a TCP Server that is not available in a CI or testing environment.</description>
+    <url>http://mocktcpserver.cloudracer.io</url>
+
+    <licenses>
+        <license>
+            <name>The BSD 2-Clause License</name>
+            <url>https://github.com/CloudRacer/MockTCPServer/blob/master/LICENSE.md</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>John McDonnell</name>
+            <email>mocktcpserver@cloudracer.io</email>
+            <organization>CloudRacer</organization>
+            <organizationUrl>http://www.cloudracer.io</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:CloudRacer:CloudRacer/MockTCPServer.git</connection>
+        <developerConnection>scm:git:CloudRacer:CloudRacer/MockTCPServer.git</developerConnection>
+        <url>CloudRacer:CloudRacer/MockTCPServer.git</url>
+    </scm>
 
     <properties>
         <maven.compiler.source.version>1.6</maven.compiler.source.version>
