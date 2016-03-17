@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.cloudracer</groupId>
         <artifactId>MockTCPServer-root</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>MockTCPServer</artifactId>
