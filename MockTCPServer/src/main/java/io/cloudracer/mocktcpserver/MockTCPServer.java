@@ -366,7 +366,7 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info("Closing...");
 
         isClosed = true;
-        setSocket(null);
+        interrupt();
 
         // Wait for the Mock TCP Server Thread to end.
         try {
