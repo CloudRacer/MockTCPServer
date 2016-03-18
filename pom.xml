@@ -43,6 +43,7 @@
         <junit.version>4.12</junit.version>
         <org.apache.commons.commons-lang3.version>3.4</org.apache.commons.commons-lang3.version>
         <commons-io.commons-io.version>2.4</commons-io.commons-io.version>
+        <maven-surefire-plugin.version>2.19</maven-surefire-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.3</nexus-staging-maven-plugin.version>
         <maven-antrun-plugin.version>1.4</maven-antrun-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
@@ -100,7 +101,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <!-- Ensures that each test is entirely isolated from
                         the preceding test. Without this, test results achieved in Eclipse can differ
