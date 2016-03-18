@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import io.cloudracer.TestConstants;
 
-public class DataStreamUT {
+public class TestDataStreamUT {
 
     @Test
     public void dataStream() throws IOException {

@@ -11,7 +11,7 @@ import org.junit.Test;
 import io.cloudracer.TestConstants;
 import io.cloudracer.tcpclient.TCPClient;
 
-public class MockTCPServerST {
+public class TestMockTCPServerST {
 
     private TCPClient client;
     private MockTCPServer server;
