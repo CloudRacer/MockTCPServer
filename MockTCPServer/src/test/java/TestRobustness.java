@@ -50,10 +50,8 @@ public class TestRobustness {
         for (int i = 0; i < totalServerRestarts; i++) {
             logger.info(String.format("Restart itteration: %d", i));
 
-            client.close();
-            server.close();
-            server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT);
-            client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
+            tearDown();
+            setUp();
         }
     }
 
