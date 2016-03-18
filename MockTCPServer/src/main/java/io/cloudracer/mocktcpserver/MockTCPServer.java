@@ -370,6 +370,7 @@ public class MockTCPServer extends Thread implements Closeable {
         } catch (InterruptedException e) {
             // Do nothing.
         } finally {
+            setSocket(null);
             logger.info("Closed.");
         }
     }
@@ -402,12 +403,9 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void setSocket(ServerSocket socket) {
         if (socket == null && this.socket != null) {
-            try {
-                logger.info("Closing the server socket...");
-                this.socket.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
+            logger.info("Closing the server socket...");
+            IOUtils.closeQuietly(this.socket);
+            logger.info("Closed the server socket.");
         }
 
         this.socket = socket;
