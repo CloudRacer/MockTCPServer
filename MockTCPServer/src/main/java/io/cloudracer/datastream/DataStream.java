@@ -29,8 +29,6 @@ public class DataStream implements Closeable {
      * Default constructor.
      * <p>
      * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT} and a default {@link Logger#getLogger(Class) log4j root logger} of the Class name.
-     *
-     * @param rootLoggerName log4j root logger
      */
     public DataStream() {
         setRootLoggerName(getClssName());
@@ -186,7 +184,7 @@ public class DataStream implements Closeable {
     /**
      * The tail of the specified {@link DataStream#getTailMaximumLength() length}.
      *
-     * @return
+     * @return the {@link Bytes} that represent the tail of the DataStrean.
      */
     private Deque<Byte> getTailQueue() {
         if (tailQueue == null) {

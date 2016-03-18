@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -61,8 +60,7 @@ public class TCPClient implements Closeable {
      *         {@link Socket}).
      * @throws IOException
      * @throws ClassNotFoundException
-     * @see {@link TCPClient#convertPipedInputStreamToString(PipedInputStream)}
-     * @see {@link TCPClient#getResponse()}
+     * @see TCPClient#getResponse()
      */
     public DataStream send(final String message) throws IOException, ClassNotFoundException {
         logger.info(String.format("Sending the message: %s.", message));

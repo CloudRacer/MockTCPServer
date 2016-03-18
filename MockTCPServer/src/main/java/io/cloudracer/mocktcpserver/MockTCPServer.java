@@ -247,8 +247,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * <p>
      * Default is false.
      *
-     * @param isCloseAfterNextResponse
-     *        if true, the Servers next response will always be a NAK.
+     * @param isAlwaysNAKResponse if true, the Servers next response will always be a NAK.
      */
     public void setIsAlwaysNAKResponse(final boolean isAlwaysNAKResponse) {
         this.setIsAlwaysNAKResponse = isAlwaysNAKResponse;
