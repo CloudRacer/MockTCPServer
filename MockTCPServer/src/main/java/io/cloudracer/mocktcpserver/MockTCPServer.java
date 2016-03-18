@@ -112,7 +112,11 @@ public class MockTCPServer extends Thread implements Closeable {
                 setDataStream(null);
             }
         } catch (SocketException e) {
-            logger.warn(e.getMessage());
+            if (e.getMessage().equals("socket closed")) {
+                logger.warn(e.getMessage());
+            } else {
+                logger.error(e.getMessage(), e);
+            }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -390,14 +394,27 @@ public class MockTCPServer extends Thread implements Closeable {
     private ServerSocket getSocket() throws IOException {
         if (socket == null) {
             logger.info(String.format("Opening a socket on port %d...", getPort()));
-            setSocket(new ServerSocket(getPort()));
-            logger.info("Waiting for a connection...");
             if (!isClosed) {
-                final Socket connectionSocket = socket.accept();
-                logger.info(String.format("Accepted a connection from %s.", socket.getLocalSocketAddress()));
-                setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
-                setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
-                logger.info("Ready to receive input.");
+                setSocket(new ServerSocket(getPort()));
+                logger.info("Waiting for a connection...");
+                if (!isClosed) {
+                    try {
+                        final Socket connectionSocket = socket.accept();
+                        logger.info(String.format("Accepted a connection from %s.", socket.getLocalSocketAddress()));
+                        setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
+                        setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
+                        logger.info("Ready to receive input.");
+                    } catch (NullPointerException e) {
+                        // Ignore the exception *only* if the Server is in the process of closing.
+                        if (isClosed) {
+                            logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
+                        } else {
+                            throw e;
+                        }
+                    }
+                } else {
+                    logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
+                }
             } else {
                 logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
             }
