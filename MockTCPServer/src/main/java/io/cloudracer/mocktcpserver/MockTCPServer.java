@@ -70,6 +70,7 @@ public class MockTCPServer extends Thread implements Closeable {
             getSocket();
 
             while (!isClosed && (response == null || response[0] != -1)) {
+                setDataStream(null);
                 while ((getDataStream().write(getInputStream().read())) != -1) {
                     if (Arrays.equals(getDataStream().getTail(), getTerminator())) {
                         incrementMessagesReceivedCount();
@@ -106,7 +107,9 @@ public class MockTCPServer extends Thread implements Closeable {
             }
 
             if (isClosed) {
-                close();
+                setOutputStream(null);
+                setInputStream(null);
+                setDataStream(null);
             }
         } catch (SocketException e) {
             logger.warn(e.getMessage());
@@ -369,8 +372,6 @@ public class MockTCPServer extends Thread implements Closeable {
         } catch (InterruptedException e) {
             // Do nothing.
         } finally {
-            setOutputStream(null);
-            setInputStream(null);
             logger.info("Closed.");
         }
     }
@@ -391,11 +392,15 @@ public class MockTCPServer extends Thread implements Closeable {
             logger.info(String.format("Opening a socket on port %d...", getPort()));
             setSocket(new ServerSocket(getPort()));
             logger.info("Waiting for a connection...");
-            final Socket connectionSocket = socket.accept();
-            logger.info(String.format("Accepted a connection from %s.", socket.getLocalSocketAddress()));
-            setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
-            setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
-            logger.info("Ready to receive input.");
+            if (!isClosed) {
+                final Socket connectionSocket = socket.accept();
+                logger.info(String.format("Accepted a connection from %s.", socket.getLocalSocketAddress()));
+                setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
+                setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
+                logger.info("Ready to receive input.");
+            } else {
+                logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
+            }
         }
 
         return socket;
@@ -411,7 +416,7 @@ public class MockTCPServer extends Thread implements Closeable {
         this.socket = socket;
     }
 
-    public DataStream getDataStream() {
+    private DataStream getDataStream() {
         if (dataStream == null) {
             dataStream = new DataStream(getRootLoggerName(), getTerminator().length);
         }
@@ -419,7 +424,11 @@ public class MockTCPServer extends Thread implements Closeable {
         return dataStream;
     }
 
-    public void setDataStream(DataStream dataStream) {
+    private void setDataStream(DataStream dataStream) {
+        if (dataStream == null && this.dataStream != null) {
+            IOUtils.closeQuietly(this.dataStream);
+        }
+
         this.dataStream = dataStream;
     }
 
