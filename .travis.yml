@@ -1,4 +1,6 @@
+#https://docs.travis-ci.com/user/customizing-the-build/
 language: java
+# Skip the default install portion of the lifecycle.
 install: true
 # The default is "mvn nstall". This custome command is intended only as a means of skipping the gpg signing as the *private* is not available on the *public* cloud service.
 script: "mvn install -Dgpg.skip=true"
