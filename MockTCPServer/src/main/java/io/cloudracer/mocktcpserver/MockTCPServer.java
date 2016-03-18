@@ -203,7 +203,7 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info(String.format("Sent the response: %s.", new String(response)));
 
         if (getIsCloseAfterNextResponse()) {
-            close();
+            isClosed = true;
         }
     }
 
@@ -366,7 +366,10 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info("Closing...");
 
         isClosed = true;
-        interrupt();
+        setOutputStream(null);
+        setInputStream(null);
+        setSocket(null);
+        setDataStream(null);
 
         // Wait for the Mock TCP Server Thread to end.
         try {
