@@ -65,62 +65,90 @@ public class MockTCPServer extends Thread implements Closeable {
     @Override
     public void run() {
         try {
-            byte[] response = null;
+            while (!isClosed && (getSocket() != null)) {
+                try {
+                    setDataStream(null);
+                    while ((getDataStream().write(getInputStream().read())) != -1) {
+                        if (Arrays.equals(getDataStream().getTail(), getTerminator())) {
+                            incrementMessagesReceivedCount();
 
-            getSocket();
-
-            while (!isClosed && (response == null || response[0] != -1)) {
-                setDataStream(null);
-                while ((getDataStream().write(getInputStream().read())) != -1) {
-                    if (Arrays.equals(getDataStream().getTail(), getTerminator())) {
-                        incrementMessagesReceivedCount();
-
-                        break;
-                    }
-                }
-                // Ignore null in order allow a probing ping e.g. paping.exe
-                if (getDataStream().size() > 0) {
-                    setAssertionError(null);
-                    try {
-                        if (getExpectedMessage() != null) {
-                            assertThat("Unexpected message from the AM Host Client.", getDataStream(), getExpectedMessage());
+                            break;
                         }
-                    } catch (AssertionError e) {
-                        setAssertionError(e);
                     }
-                    onMessage(getDataStream());
-                    // If the stream has not ended and a response is required, send one.
-                    if (getDataStream().getLastByte() != -1 && !getIsAlwaysNoResponse()) {
-                        if (getAssertionError() == null && !getIsAlwaysNAKResponse()) {
-                            response = getACK();
-                        } else {
-                            response = getNAK();
+                    // Ignore null in order allow a probing ping e.g. paping.exe
+                    if (getDataStream().size() > 0) {
+                        setAssertionError(null);
+                        try {
+                            if (getExpectedMessage() != null) {
+                                assertThat("Unexpected message from the AM Host Client.", getDataStream(), getExpectedMessage());
+                            }
+                        } catch (AssertionError e) {
+                            setAssertionError(e);
+                        }
+                        onMessage(getDataStream());
+                        // If the stream has not ended and a response is required, send one.
+                        if (!isClosed && getDataStream().getLastByte() != -1 && !getIsAlwaysNoResponse()) {
+                            byte[] response = null;
+
+                            if (getAssertionError() == null && !getIsAlwaysNAKResponse()) {
+                                response = getACK();
+                            } else {
+                                response = getNAK();
+                            }
+
+                            getOutputStream().write(response);
+
+                            afterResponse(response);
                         }
 
-                        getOutputStream().write(response);
-
-                        afterResponse(response);
+                        setOutputStream(null);
                     }
-
-                    setOutputStream(null);
+                } catch (SocketException e) {
+                    if (e.getMessage().equals("socket closed")) {
+                        logger.warn(e.getMessage());
+                    } else {
+                        // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
+                        if (!isClosed) {
+                            logger.error(e.getMessage(), e);
+                        }
+                    }
+                } catch (IOException e) {
+                    logger.error(e.getMessage(), e);
+                } catch (NullPointerException e) {
+                    // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
+                    if (!isClosed) {
+                        logger.error(e.getMessage(), e);
+                    }
+                } finally {
+                    closeStreams();
                 }
             }
         } catch (SocketException e) {
-            isClosed = true;
-
             if (e.getMessage().equals("socket closed")) {
                 logger.warn(e.getMessage());
             } else {
-                logger.error(e.getMessage(), e);
+                // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
+                if (!isClosed) {
+                    logger.error(e.getMessage(), e);
+                }
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
+        } catch (NullPointerException e) {
+            // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
+            if (!isClosed) {
+                logger.error(e.getMessage(), e);
+            }
         } finally {
-            setOutputStream(null);
-            setInputStream(null);
-            setDataStream(null);
-            setSocket(null);
+            closeStreams();
         }
+    }
+
+    private void closeStreams() {
+        setOutputStream(null);
+        setInputStream(null);
+        setDataStream(null);
+        setSocket(null);
     }
 
     /**
@@ -366,10 +394,7 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info("Closing...");
 
         isClosed = true;
-        setOutputStream(null);
-        setInputStream(null);
-        setSocket(null);
-        setDataStream(null);
+        closeStreams();
 
         // Wait for the Mock TCP Server Thread to end.
         try {
