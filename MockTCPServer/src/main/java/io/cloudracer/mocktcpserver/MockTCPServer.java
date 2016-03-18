@@ -105,13 +105,9 @@ public class MockTCPServer extends Thread implements Closeable {
                     setOutputStream(null);
                 }
             }
-
-            if (isClosed) {
-                setOutputStream(null);
-                setInputStream(null);
-                setDataStream(null);
-            }
         } catch (SocketException e) {
+            isClosed = true;
+
             if (e.getMessage().equals("socket closed")) {
                 logger.warn(e.getMessage());
             } else {
@@ -119,6 +115,11 @@ public class MockTCPServer extends Thread implements Closeable {
             }
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
+        } finally {
+            setOutputStream(null);
+            setInputStream(null);
+            setDataStream(null);
+            setSocket(null);
         }
     }
 
@@ -197,9 +198,8 @@ public class MockTCPServer extends Thread implements Closeable {
      *
      * @param response
      *        the response that has been sent.
-     * @throws IOException
      */
-    public void afterResponse(final byte[] response) throws IOException {
+    public void afterResponse(final byte[] response) {
         logger.info(String.format("Sent the response: %s.", new String(response)));
 
         if (getIsCloseAfterNextResponse()) {
@@ -360,11 +360,9 @@ public class MockTCPServer extends Thread implements Closeable {
 
     /**
      * Close the socket (if it is open) and any open data streams.
-     *
-     * @throws IOException
      */
     @Override
-    public void close() throws IOException {
+    public void close() {
         logger.info("Closing...");
 
         isClosed = true;
@@ -390,6 +388,11 @@ public class MockTCPServer extends Thread implements Closeable {
 
     /**
      * Open the Server Socket and wait for a connection.
+     * <p>
+     * The socket is opened on the configured {@link #getPort() port} on localhost.
+     *
+     * @return a new ServerSocket.
+     * @throws IOException
      */
     private ServerSocket getSocket() throws IOException {
         if (socket == null) {
@@ -453,7 +456,7 @@ public class MockTCPServer extends Thread implements Closeable {
         return inputStream;
     }
 
-    private void setInputStream(BufferedReader inputStream) throws IOException {
+    private void setInputStream(BufferedReader inputStream) {
         if (inputStream == null && this.inputStream != null) {
             logger.info("Closing the input stream...");
             IOUtils.closeQuietly(this.inputStream);
@@ -466,7 +469,7 @@ public class MockTCPServer extends Thread implements Closeable {
         return outputStream;
     }
 
-    private void setOutputStream(DataOutputStream outputStream) throws IOException {
+    private void setOutputStream(DataOutputStream outputStream) {
         if (outputStream == null && this.outputStream != null) {
             logger.info("Closing the output stream...");
             IOUtils.closeQuietly(this.outputStream);
