@@ -43,7 +43,7 @@ public class TestRobustness {
         server.close();
     }
 
-    @Test
+    @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
     public void serverRestart() throws Exception {
         final int totalServerRestarts = 1000;
 
