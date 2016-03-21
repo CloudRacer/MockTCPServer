@@ -104,26 +104,33 @@ public class MockTCPServer extends Thread implements Closeable {
                         setOutputStream(null);
                     }
                 } catch (SocketException e) {
-                    if (e.getMessage().equals("socket closed")) {
-                        logger.warn(e.getMessage());
-                    } else {
-                        // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
-                        if (!isClosed) {
-                            logger.error(e.getMessage(), e);
-                        }
-                    }
+                    handleException(e);
                 } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
+                    handleException(e);
                 } catch (NullPointerException e) {
-                    // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
-                    if (!isClosed) {
-                        logger.error(e.getMessage(), e);
-                    }
+                    handleException(e);
                 } finally {
                     closeStreams();
                 }
             }
         } catch (SocketException e) {
+            handleException(e);
+        } catch (IOException e) {
+            handleException(e);
+        } catch (NullPointerException e) {
+            handleException(e);
+        } finally {
+            closeStreams();
+        }
+    }
+
+    private void handleException(Exception e) {
+        if (e instanceof NullPointerException) {
+            // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
+            if (!isClosed) {
+                logger.error(e.getMessage(), e);
+            }
+        } else {
             if (e.getMessage().equals("socket closed")) {
                 logger.warn(e.getMessage());
             } else {
@@ -132,15 +139,6 @@ public class MockTCPServer extends Thread implements Closeable {
                     logger.error(e.getMessage(), e);
                 }
             }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
-            // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
-            if (!isClosed) {
-                logger.error(e.getMessage(), e);
-            }
-        } finally {
-            closeStreams();
         }
     }
 
