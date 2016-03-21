@@ -32,9 +32,9 @@ public class MockTCPServer extends Thread implements Closeable {
     public final static byte[] DEFAULT_ACK = { 65 };
     public final static byte[] DEFAULT_NAK = { 78 };
 
-    public byte[] terminator = null;
-    public byte[] ack = null;
-    public byte[] nak = null;
+    private byte[] terminator = null;
+    private byte[] ack = null;
+    private byte[] nak = null;
 
     private AssertionError assertionError;
 
@@ -65,7 +65,7 @@ public class MockTCPServer extends Thread implements Closeable {
     @Override
     public void run() {
         try {
-            while (!isClosed && (getSocket() != null)) {
+            while (!isClosed() && (getSocket() != null)) {
                 try {
                     setDataStream(null);
                     while ((getDataStream().write(getInputStream().read())) != -1) {
@@ -87,7 +87,7 @@ public class MockTCPServer extends Thread implements Closeable {
                         }
                         onMessage(getDataStream());
                         // If the stream has not ended and a response is required, send one.
-                        if (!isClosed && getDataStream().getLastByte() != -1 && !getIsAlwaysNoResponse()) {
+                        if (getDataStream().getLastByte() != -1 && !getIsAlwaysNoResponse()) {
                             byte[] response = null;
 
                             if (getAssertionError() == null && !getIsAlwaysNAKResponse()) {
@@ -100,45 +100,35 @@ public class MockTCPServer extends Thread implements Closeable {
 
                             afterResponse(response);
                         }
-
-                        setOutputStream(null);
                     }
                 } catch (SocketException e) {
                     handleException(e);
                 } catch (IOException e) {
                     handleException(e);
-                } catch (NullPointerException e) {
+                } catch (Exception e) {
                     handleException(e);
-                } finally {
-                    setSocket(null);
                 }
             }
         } catch (SocketException e) {
             handleException(e);
         } catch (IOException e) {
             handleException(e);
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             handleException(e);
         } finally {
-            setSocket(null);
+            close();
         }
     }
 
     private void handleException(Exception e) {
-        if (e instanceof NullPointerException) {
-            // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
-            if (!isClosed) {
-                logger.error(e.getMessage(), e);
-            }
+        if (e.getMessage().toLowerCase().equals("socket closed")) {
+            logger.warn(e.getMessage());
+        } else if (e.getMessage().toLowerCase().equals("socket is closed")) {
+            logger.warn(e.getMessage());
+        } else if (e.getMessage().toLowerCase().equals("stream closed")) {
+            logger.warn(e.getMessage());
         } else {
-            if (e.getMessage().equals("socket closed")) {
-                logger.warn(e.getMessage());
-            } else {
-                // If the server is already closing, because this error likely to be spurious and almost certainly irrelevant.
-                if (!isClosed) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -161,7 +151,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param terminator
      *        the terminator.
      */
-    public void setTerminator(byte[] terminator) {
+    public synchronized void setTerminator(byte[] terminator) {
         this.terminator = terminator;
     }
 
@@ -184,7 +174,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param ack
      *        positive acknowledgement
      */
-    public void setACK(byte[] ack) {
+    public synchronized void setACK(byte[] ack) {
         this.ack = ack;
     }
 
@@ -207,7 +197,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param nak
      *        negative acknowledgement
      */
-    public void setNAK(byte[] nak) {
+    public synchronized void setNAK(byte[] nak) {
         this.nak = nak;
     }
 
@@ -218,11 +208,11 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param response
      *        the response that has been sent.
      */
-    public void afterResponse(final byte[] response) {
-        logger.info(String.format("Sent the response: %s.", new String(response)));
+    public synchronized void afterResponse(final byte[] response) {
+        logger.debug(String.format("Sent the response: %s.", new String(response)));
 
         if (getIsCloseAfterNextResponse()) {
-            isClosed = true;
+            setClosed(true);
         }
     }
 
@@ -253,7 +243,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param assertionError
      *        a recorded error.
      */
-    public void setAssertionError(AssertionError assertionError) {
+    private void setAssertionError(AssertionError assertionError) {
         this.assertionError = assertionError;
     }
 
@@ -285,7 +275,7 @@ public class MockTCPServer extends Thread implements Closeable {
      *
      * @param isAlwaysNAKResponse if true, the Servers next response will always be a NAK.
      */
-    public void setIsAlwaysNAKResponse(final boolean isAlwaysNAKResponse) {
+    public synchronized void setIsAlwaysNAKResponse(final boolean isAlwaysNAKResponse) {
         this.setIsAlwaysNAKResponse = isAlwaysNAKResponse;
     }
 
@@ -293,7 +283,7 @@ public class MockTCPServer extends Thread implements Closeable {
         return setIsAlwaysNoResponse;
     }
 
-    public void setIsAlwaysNoResponse(final boolean isAlwaysNoResponse) {
+    public synchronized void setIsAlwaysNoResponse(final boolean isAlwaysNoResponse) {
         this.setIsAlwaysNoResponse = isAlwaysNoResponse;
     }
 
@@ -328,7 +318,7 @@ public class MockTCPServer extends Thread implements Closeable {
      *        if true, the Server will close after the message processing is
      *        complete.
      */
-    public void setIsCloseAfterNextResponse(boolean isCloseAfterNextResponse) {
+    public synchronized void setIsCloseAfterNextResponse(boolean isCloseAfterNextResponse) {
         this.isCloseAfterNextResponse = isCloseAfterNextResponse;
     }
 
@@ -352,7 +342,8 @@ public class MockTCPServer extends Thread implements Closeable {
      *        a Regular Expression that describes what the next received
      *        message will be.
      */
-    public void setExpectedMessage(final String expectedMessage) {
+
+    public synchronized void setExpectedMessage(final String expectedMessage) {
         this.expectedMessage = new DataStreamRegexMatcher(expectedMessage);
     }
 
@@ -365,7 +356,7 @@ public class MockTCPServer extends Thread implements Closeable {
      *        a Regular Expression that describes what the next received
      *        message will be.
      */
-    public void setExpectedMessage(final StringBuffer expectedMessage) {
+    public synchronized void setExpectedMessage(final StringBuffer expectedMessage) {
         setExpectedMessage(expectedMessage.toString());
     }
 
@@ -380,21 +371,25 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * Close the socket (if it is open) and any open data streams.
      */
+
     @Override
-    public void close() {
+    public synchronized void close() {
         logger.info("Closing...");
 
-        isClosed = true;
-        setSocket(null);
+        setClosed(true);
+        IOUtils.closeQuietly(socket);
+        IOUtils.closeQuietly(inputStream);
+        IOUtils.closeQuietly(outputStream);
 
-        // Wait for the Mock TCP Server Thread to end.
-        try {
-            super.join();
-        } catch (InterruptedException e) {
-            // Do nothing.
-        } finally {
-            logger.info("Closed.");
-        }
+        logger.info("Closed.");
+    }
+
+    private boolean isClosed() {
+        return isClosed;
+    }
+
+    private synchronized void setClosed(boolean isClosed) {
+        this.isClosed = isClosed;
     }
 
     private int getPort() {
@@ -416,45 +411,19 @@ public class MockTCPServer extends Thread implements Closeable {
     private ServerSocket getSocket() throws IOException {
         if (socket == null) {
             logger.info(String.format("Opening a socket on port %d...", getPort()));
-            if (!isClosed) {
-                setSocket(new ServerSocket(getPort()));
-                logger.info("Waiting for a connection...");
-                if (!isClosed) {
-                    try {
-                        final Socket connectionSocket = socket.accept();
-                        logger.info(String.format("Accepted a connection from %s.", socket.getLocalSocketAddress()));
-                        setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
-                        setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
-                        logger.info("Ready to receive input.");
-                    } catch (NullPointerException e) {
-                        // Ignore the exception *only* if the Server is in the process of closing.
-                        if (isClosed) {
-                            logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
-                        } else {
-                            throw e;
-                        }
-                    }
-                } else {
-                    logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
-                }
-            } else {
-                logger.info("Server closure in progress. Abandoned the opening of the Server socket.");
-            }
+            setSocket(new ServerSocket(getPort()));
+            logger.info("Waiting for a connection...");
+            final Socket connectionSocket = socket.accept();
+            logger.info(String.format("Accepted a connection."));
+            setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
+            setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
+            logger.info("Ready to receive input.");
         }
 
         return socket;
     }
 
     private void setSocket(ServerSocket socket) {
-        if (socket == null) {
-            setOutputStream(null);
-            setDataStream(null);
-
-            logger.info("Closing the server socket...");
-            IOUtils.closeQuietly(this.socket);
-            logger.info("Closed the server socket.");
-        }
-
         this.socket = socket;
     }
 
@@ -467,9 +436,9 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setDataStream(DataStream dataStream) {
-        if (dataStream == null) {
-            IOUtils.closeQuietly(this.dataStream);
-        }
+        logger.debug("Closing the DataStream...");
+        IOUtils.closeQuietly(this.dataStream);
+        logger.debug("Closed the DataStream.");
 
         this.dataStream = dataStream;
     }
@@ -479,11 +448,6 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setInputStream(BufferedReader inputStream) {
-        if (inputStream == null) {
-            logger.info("Closing the input stream...");
-            IOUtils.closeQuietly(this.inputStream);
-        }
-
         this.inputStream = inputStream;
     }
 
@@ -492,12 +456,9 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setOutputStream(DataOutputStream outputStream) {
-        if (outputStream == null) {
-            setInputStream(null);
-
-            logger.info("Closing the output stream...");
-            IOUtils.closeQuietly(this.outputStream);
-        }
+        logger.info("Closing the output stream...");
+        IOUtils.closeQuietly(this.outputStream);
+        logger.info("Closed the output stream.");
 
         this.outputStream = outputStream;
     }

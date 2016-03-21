@@ -1,6 +1,7 @@
 package io.cloudracer;
 
-import org.apache.log4j.Logger;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,9 +9,7 @@ import org.junit.Test;
 import io.cloudracer.mocktcpserver.MockTCPServer;
 import io.cloudracer.tcpclient.TCPClient;
 
-public class TestServerRestartReliability {
-
-    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+public class TestRapidMessageThroughput {
 
     private TCPClient client;
     private MockTCPServer server;
@@ -28,14 +27,13 @@ public class TestServerRestartReliability {
     }
 
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
-    public void serverRestart() throws Exception {
-        final int totalServerRestarts = 10; // 1000;
+    public void rapidMessageThroughput() throws Exception {
+        final int totalServerRestarts = 1000;
 
         for (int i = 0; i < totalServerRestarts; i++) {
-            logger.info(String.format("Restart itteration: %d", i));
+            final String message = String.format("Test %d%s", i, TestConstants.DEFAULT_TERMINATOR);
 
-            tearDown();
-            setUp();
+            assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message).toString());
         }
     }
 
