@@ -110,7 +110,7 @@ public class MockTCPServer extends Thread implements Closeable {
                 } catch (NullPointerException e) {
                     handleException(e);
                 } finally {
-                    closeStreams();
+                    setSocket(null);
                 }
             }
         } catch (SocketException e) {
@@ -120,7 +120,7 @@ public class MockTCPServer extends Thread implements Closeable {
         } catch (NullPointerException e) {
             handleException(e);
         } finally {
-            closeStreams();
+            setSocket(null);
         }
     }
 
@@ -140,13 +140,6 @@ public class MockTCPServer extends Thread implements Closeable {
                 }
             }
         }
-    }
-
-    private void closeStreams() {
-        setOutputStream(null);
-        setInputStream(null);
-        setDataStream(null);
-        setSocket(null);
     }
 
     /**
@@ -392,7 +385,7 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info("Closing...");
 
         isClosed = true;
-        closeStreams();
+        setSocket(null);
 
         // Wait for the Mock TCP Server Thread to end.
         try {
@@ -454,6 +447,9 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void setSocket(ServerSocket socket) {
         if (socket == null && this.socket != null) {
+            setOutputStream(null);
+            setDataStream(null);
+
             logger.info("Closing the server socket...");
             IOUtils.closeQuietly(this.socket);
             logger.info("Closed the server socket.");
@@ -497,6 +493,8 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void setOutputStream(DataOutputStream outputStream) {
         if (outputStream == null && this.outputStream != null) {
+            setInputStream(null);
+
             logger.info("Closing the output stream...");
             IOUtils.closeQuietly(this.outputStream);
         }
