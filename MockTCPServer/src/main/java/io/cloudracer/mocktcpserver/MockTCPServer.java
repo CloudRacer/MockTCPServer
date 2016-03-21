@@ -446,7 +446,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setSocket(ServerSocket socket) {
-        if (socket == null && this.socket != null) {
+        if (socket == null) {
             setOutputStream(null);
             setDataStream(null);
 
@@ -467,7 +467,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setDataStream(DataStream dataStream) {
-        if (dataStream == null && this.dataStream != null) {
+        if (dataStream == null) {
             IOUtils.closeQuietly(this.dataStream);
         }
 
@@ -479,7 +479,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setInputStream(BufferedReader inputStream) {
-        if (inputStream == null && this.inputStream != null) {
+        if (inputStream == null) {
             logger.info("Closing the input stream...");
             IOUtils.closeQuietly(this.inputStream);
         }
@@ -492,7 +492,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setOutputStream(DataOutputStream outputStream) {
-        if (outputStream == null && this.outputStream != null) {
+        if (outputStream == null) {
             setInputStream(null);
 
             logger.info("Closing the output stream...");
