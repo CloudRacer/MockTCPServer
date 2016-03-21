@@ -29,7 +29,7 @@ public class TestServerRestartReliability {
 
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
     public void serverRestart() throws Exception {
-        final int totalServerRestarts = 10; // 1000;
+        final int totalServerRestarts = 1000;
 
         for (int i = 0; i < totalServerRestarts; i++) {
             logger.info(String.format("Restart itteration: %d", i));
@@ -38,5 +38,4 @@ public class TestServerRestartReliability {
             setUp();
         }
     }
-
 }

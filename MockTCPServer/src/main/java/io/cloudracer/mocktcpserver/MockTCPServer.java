@@ -44,6 +44,7 @@ public class MockTCPServer extends Thread implements Closeable {
     private DataStreamRegexMatcher expectedMessage;
 
     private DataStream dataStream;
+    private Socket connectionSocket;
 
     private int port;
     private boolean setIsAlwaysNAKResponse = false;
@@ -122,6 +123,8 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void handleException(Exception e) {
         if (e.getMessage().toLowerCase().equals("socket closed")) {
+            logger.warn(e.getMessage());
+        } else if (e.getMessage().toLowerCase().equals("socket input is shutdown")) {
             logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("socket is closed")) {
             logger.warn(e.getMessage());
@@ -377,9 +380,27 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info("Closing...");
 
         setClosed(true);
-        IOUtils.closeQuietly(socket);
+        Thread.currentThread().interrupt();
+        try {
+            if (getConnectionSocket() != null && !getConnectionSocket().isInputShutdown()) {
+                getConnectionSocket().shutdownInput();
+            }
+            if (getConnectionSocket() != null && !getConnectionSocket().isOutputShutdown()) {
+                getConnectionSocket().shutdownOutput();
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+        }
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(outputStream);
+        IOUtils.closeQuietly(socket);
+
+        try {
+            // Wait for the server thread to close.
+            super.join();
+        } catch (InterruptedException e) {
+            // Do nothing
+        }
 
         logger.info("Closed.");
     }
@@ -413,14 +434,22 @@ public class MockTCPServer extends Thread implements Closeable {
             logger.info(String.format("Opening a socket on port %d...", getPort()));
             setSocket(new ServerSocket(getPort()));
             logger.info("Waiting for a connection...");
-            final Socket connectionSocket = socket.accept();
+            setConnectionSocket(socket.accept());
             logger.info(String.format("Accepted a connection."));
-            setInputStream(new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())));
-            setOutputStream(new DataOutputStream(connectionSocket.getOutputStream()));
+            setInputStream(new BufferedReader(new InputStreamReader(getConnectionSocket().getInputStream())));
+            setOutputStream(new DataOutputStream(getConnectionSocket().getOutputStream()));
             logger.info("Ready to receive input.");
         }
 
         return socket;
+    }
+
+    private Socket getConnectionSocket() {
+        return connectionSocket;
+    }
+
+    private void setConnectionSocket(Socket connectionSocket) {
+        this.connectionSocket = connectionSocket;
     }
 
     private void setSocket(ServerSocket socket) {
