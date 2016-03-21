@@ -380,7 +380,7 @@ public class MockTCPServer extends Thread implements Closeable {
         logger.info("Closing...");
 
         setClosed(true);
-        Thread.currentThread().interrupt();
+        super.interrupt();
         try {
             if (getConnectionSocket() != null && !getConnectionSocket().isInputShutdown()) {
                 getConnectionSocket().shutdownInput();
