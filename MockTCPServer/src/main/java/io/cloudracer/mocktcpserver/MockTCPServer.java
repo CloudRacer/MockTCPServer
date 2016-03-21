@@ -126,6 +126,8 @@ public class MockTCPServer extends Thread implements Closeable {
             logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("socket input is shutdown")) {
             logger.warn(e.getMessage());
+        } else if (e.getMessage().toLowerCase().equals("socket output is shutdown")) {
+            logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("socket is closed")) {
             logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("stream closed")) {
