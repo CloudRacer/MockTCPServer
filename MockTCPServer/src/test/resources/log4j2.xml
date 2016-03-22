@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
-    <!-- http://logging.apache.org/log4j/2.x/manual/migration.html -->
+<Configuration status="error">
+    <!--
+        http://logging.apache.org/log4j/2.x/manual/migration.html
+        http://logging.apache.org/log4j/2.x/manual/layouts.html#LocationInformation
+    -->
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{ISO8601} %-5p [%t] %C(%L) - %m%n" />
         </Console>
         <File name="FILE" fileName="logs/mocktcpserver.log" append="false">
-            <PatternLayout pattern="%t %-5p [%t]%c{2} - %m%n" />
+            <PatternLayout pattern="%d{ISO8601} %-5p [%t] %C(%L) - %m%n" />
         </File>
-        <Async name="ASYNC">
+        <Async name="ASYNC" includeLocation="true">
             <AppenderRef ref="CONSOLE" />
             <AppenderRef ref="FILE" />
         </Async>
