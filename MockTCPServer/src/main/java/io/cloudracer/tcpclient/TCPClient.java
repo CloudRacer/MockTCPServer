@@ -10,7 +10,8 @@ import java.net.Socket;
 import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import io.cloudracer.datastream.DataStream;
 
@@ -19,7 +20,7 @@ import io.cloudracer.datastream.DataStream;
  */
 public class TCPClient implements Closeable {
 
-    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+    private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
     public static final byte ACK = 65;
     private static final byte NAK = 78;

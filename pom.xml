@@ -39,8 +39,8 @@
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <surefire.forkCount>1</surefire.forkCount>
         <surefire.reuseForks>false</surefire.reuseForks>
-        <log4j.version>1.2.8</log4j.version>
         <junit.version>4.12</junit.version>
+        <org.apache.logging.log4j-log4j.version>2.5</org.apache.logging.log4j-log4j.version>
         <org.apache.commons.commons-lang3.version>3.4</org.apache.commons.commons-lang3.version>
         <commons-io.commons-io.version>2.4</commons-io.commons-io.version>
         <maven-surefire-plugin.version>2.19</maven-surefire-plugin.version>
@@ -179,9 +179,14 @@
                 <version>${maven.compiler.plugin.version}</version>
             </dependency>
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${org.apache.logging.log4j-log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${org.apache.logging.log4j-log4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>

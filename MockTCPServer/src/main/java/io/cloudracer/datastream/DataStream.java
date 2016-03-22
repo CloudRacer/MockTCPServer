@@ -11,7 +11,8 @@ import java.util.Deque;
 import java.util.Iterator;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DataStream implements Closeable {
 
@@ -249,12 +250,12 @@ public class DataStream implements Closeable {
      */
     private void setRootLoggerName(String rootLoggerName) {
         this.rootLoggerName = new String(rootLoggerName);
-        logger = Logger.getLogger(String.format("%s.%s", this.rootLoggerName, getClssName()));
+        logger = LogManager.getLogger(String.format("%s.%s", this.rootLoggerName, getClssName()));
     }
 
     private Logger getLogger() {
         if (logger == null) {
-            logger = Logger.getLogger(String.format("%s.%s", getRootLoggerName(), getClssName()));
+            logger = LogManager.getLogger(String.format("%s.%s", getRootLoggerName(), getClssName()));
         }
 
         return logger;

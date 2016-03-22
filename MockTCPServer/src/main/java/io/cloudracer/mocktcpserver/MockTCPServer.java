@@ -14,7 +14,8 @@ import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import io.cloudracer.datastream.DataStream;
 import io.cloudracer.datastream.DataStreamRegexMatcher;
@@ -26,7 +27,7 @@ import io.cloudracer.datastream.DataStreamRegexMatcher;
  */
 public class MockTCPServer extends Thread implements Closeable {
 
-    private Logger logger = Logger.getLogger(getRootLoggerName());
+    private Logger logger = LogManager.getLogger(getRootLoggerName());
 
     public final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
     public final static byte[] DEFAULT_ACK = { 65 };

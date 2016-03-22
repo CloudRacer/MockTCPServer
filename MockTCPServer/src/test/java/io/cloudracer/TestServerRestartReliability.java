@@ -1,6 +1,7 @@
 package io.cloudracer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +11,7 @@ import io.cloudracer.tcpclient.TCPClient;
 
 public class TestServerRestartReliability {
 
-    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+    private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
     private TCPClient client;
     private MockTCPServer server;
