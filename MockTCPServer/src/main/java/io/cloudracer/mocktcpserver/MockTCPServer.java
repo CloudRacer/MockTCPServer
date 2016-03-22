@@ -381,42 +381,38 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     @Override
     public synchronized void close() {
-        if (isClosed()) {
-            logger.info("Already instructed to close.");
-        } else {
-            logger.info("Closing...");
+        logger.info("Closing...");
 
-            setClosed(true);
-            super.interrupt();
-            try {
-                if (getConnectionSocket() != null && !getConnectionSocket().isInputShutdown()) {
-                    getConnectionSocket().shutdownInput();
-                }
-                if (getConnectionSocket() != null && !getConnectionSocket().isOutputShutdown()) {
-                    getConnectionSocket().shutdownOutput();
-                }
-            } catch (Exception e) {
-                handleException(e);
+        setClosed(true);
+        super.interrupt();
+        try {
+            if (getConnectionSocket() != null && !getConnectionSocket().isInputShutdown()) {
+                getConnectionSocket().shutdownInput();
             }
-            logger.info("Closing input stream...");
-            IOUtils.closeQuietly(inputStream);
-            logger.info("Closed input stream.");
-            logger.info("Closing output stream...");
-            IOUtils.closeQuietly(outputStream);
-            logger.info("Closed output stream.");
-            logger.info("Closing the socket...");
-            IOUtils.closeQuietly(socket);
-            logger.info("Closed the socket.");
-
-            try {
-                // Wait for the server thread to close.
-                super.join();
-            } catch (InterruptedException e) {
-                // Do nothing
+            if (getConnectionSocket() != null && !getConnectionSocket().isOutputShutdown()) {
+                getConnectionSocket().shutdownOutput();
             }
-
-            logger.info("Closed.");
+        } catch (Exception e) {
+            handleException(e);
         }
+        logger.info("Closing input stream...");
+        IOUtils.closeQuietly(inputStream);
+        logger.info("Closed input stream.");
+        logger.info("Closing output stream...");
+        IOUtils.closeQuietly(outputStream);
+        logger.info("Closed output stream.");
+        logger.info("Closing the socket...");
+        IOUtils.closeQuietly(socket);
+        logger.info("Closed the socket.");
+
+        try {
+            // Wait for the server thread to close.
+            super.join();
+        } catch (InterruptedException e) {
+            // Do nothing
+        }
+
+        logger.info("Closed.");
     }
 
     private boolean isClosed() {
