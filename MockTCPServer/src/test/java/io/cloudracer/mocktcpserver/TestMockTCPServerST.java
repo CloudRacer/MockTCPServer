@@ -8,10 +8,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
 import io.cloudracer.tcpclient.TCPClient;
 
-public class TestMockTCPServerST {
+public class TestMockTCPServerST extends AbstractTestTools {
 
     private TCPClient client;
     private MockTCPServer server;
@@ -33,6 +34,8 @@ public class TestMockTCPServerST {
         final String message = String.format("%s%s", "Test message!!", TestConstants.DEFAULT_TERMINATOR);
 
         assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message).toString());
+
+        checkForUnexpectedLogMessages();
     }
 
     @Test

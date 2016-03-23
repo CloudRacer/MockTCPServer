@@ -9,7 +9,7 @@ import org.junit.Test;
 import io.cloudracer.mocktcpserver.MockTCPServer;
 import io.cloudracer.tcpclient.TCPClient;
 
-public class TestRapidMessageThroughput {
+public class TestRapidMessageThroughput extends AbstractTestTools {
 
     private TCPClient client;
     private MockTCPServer server;
@@ -35,6 +35,8 @@ public class TestRapidMessageThroughput {
 
             assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message).toString());
         }
+
+        checkForUnexpectedLogMessages();
     }
 
 }

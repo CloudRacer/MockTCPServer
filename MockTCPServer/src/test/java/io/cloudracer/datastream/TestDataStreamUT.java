@@ -10,9 +10,10 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
+import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
 
-public class TestDataStreamUT {
+public class TestDataStreamUT extends AbstractTestTools {
 
     @Test
     public void dataStream() throws IOException {
@@ -55,6 +56,8 @@ public class TestDataStreamUT {
         checkDataStreamInternalConsistency(dataStream, testString);
 
         dataStream.close();
+
+        checkForUnexpectedLogMessages();
     }
 
     @Test
@@ -65,6 +68,8 @@ public class TestDataStreamUT {
         writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
         checkDataStreamInternalConsistency(dataStream, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+
+        checkForUnexpectedLogMessages();
     }
 
     private void writeStringToStream(final String data, final DataStream dataStream) throws IOException {

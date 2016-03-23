@@ -9,7 +9,7 @@ import org.junit.Test;
 import io.cloudracer.mocktcpserver.MockTCPServer;
 import io.cloudracer.tcpclient.TCPClient;
 
-public class TestServerRestartReliability {
+public class TestServerRestartReliability extends AbstractTestTools {
 
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
@@ -38,5 +38,7 @@ public class TestServerRestartReliability {
             tearDown();
             setUp();
         }
+
+        checkForUnexpectedLogMessages();
     }
 }
