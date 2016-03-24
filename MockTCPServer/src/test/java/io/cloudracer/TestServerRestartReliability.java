@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.cloudracer.mocktcpserver.MockTCPServer;
-import io.cloudracer.tcpclient.TCPClient;
+import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
 
 public class TestServerRestartReliability extends AbstractTestTools {
 

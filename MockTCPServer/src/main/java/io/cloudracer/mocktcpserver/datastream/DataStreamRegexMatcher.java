@@ -1,4 +1,4 @@
-package io.cloudracer.datastream;
+package io.cloudracer.mocktcpserver.datastream;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;

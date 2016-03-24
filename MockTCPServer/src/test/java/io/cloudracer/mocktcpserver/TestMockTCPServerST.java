@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
-import io.cloudracer.tcpclient.TCPClient;
+import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
 
 public class TestMockTCPServerST extends AbstractTestTools {
 

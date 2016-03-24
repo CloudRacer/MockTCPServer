@@ -1,4 +1,4 @@
-package io.cloudracer.datastream;
+package io.cloudracer.mocktcpserver.datastream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;

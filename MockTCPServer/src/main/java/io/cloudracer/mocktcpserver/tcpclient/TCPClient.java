@@ -1,4 +1,4 @@
-package io.cloudracer.tcpclient;
+package io.cloudracer.mocktcpserver.tcpclient;
 
 import java.io.Closeable;
 import java.io.DataInputStream;
@@ -13,17 +13,19 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import io.cloudracer.datastream.DataStream;
+import io.cloudracer.mocktcpserver.datastream.DataStream;
 
 /**
+ * A TCP Client provided primarily for demonstration purposes, and for use in test suites.
+ *
  * @author John McDonnell
  */
 public class TCPClient implements Closeable {
 
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
-    public static final byte ACK = 65;
-    private static final byte NAK = 78;
+    private final byte ACK = 65;
+    private final byte NAK = 78;
     private int port;
 
     private Socket socket;

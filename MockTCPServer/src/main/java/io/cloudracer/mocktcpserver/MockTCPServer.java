@@ -17,11 +17,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import io.cloudracer.datastream.DataStream;
-import io.cloudracer.datastream.DataStreamRegexMatcher;
+import io.cloudracer.mocktcpserver.datastream.DataStream;
+import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
 
 /**
- * A mock server used for testing purposes only.
+ * A TCP Server that is designed to simulate success <b>and</b> failure conditions in System/Integration test environments.
  *
  * @author John McDonnell
  */

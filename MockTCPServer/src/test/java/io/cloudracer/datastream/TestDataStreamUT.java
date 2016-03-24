@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
+import io.cloudracer.mocktcpserver.datastream.DataStream;
 
 public class TestDataStreamUT extends AbstractTestTools {
 
