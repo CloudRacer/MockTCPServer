@@ -38,8 +38,6 @@ public class TCPClient implements Closeable {
 
     private byte[] terminatorDefault = new byte[] { 13, 10 };
 
-    private int byteCount;
-
     public TCPClient(final int port, final byte ACK, final byte NAK) throws IOException {
         this.ACK = ACK;
         this.NAK = NAK;
@@ -131,39 +129,20 @@ public class TCPClient implements Closeable {
     public DataStream getResponse(final byte[] terminator) throws IOException {
         setDataInputStream(new DataInputStream(getSocket().getInputStream()));
 
-        final DataStream dataStream = new DataStream(this.getClass().getSimpleName());
+        final DataStream dataStream = new DataStream(this.getClass().getSimpleName(), terminator.length);
 
-        setByteCount(1);
-        int nextByte;
-        final byte[] potentialTerminator = new byte[terminator.length];
-        while ((nextByte = getDataInputStream().read()) != -1) {
-            dataStream.write(nextByte);
-
-            if (getByteCount() > terminator.length) {
-                for (int i = 0; i < potentialTerminator.length - 1; i++) {
-                    potentialTerminator[i] = potentialTerminator[i + 1];
-                }
-                potentialTerminator[potentialTerminator.length - 1] = (byte) nextByte;
-            } else {
-                potentialTerminator[getByteCount() - 1] = (byte) nextByte;
-            }
-
-            if (isTerminated(potentialTerminator, terminator)) {
+        while (dataStream.write(getDataInputStream().read()) != -1) {
+            if (isTerminated(dataStream, terminator)) {
                 break;
             }
-
-            setByteCount(getByteCount() + 1);
-        }
-        if (nextByte == -1) {
-            dataStream.write(nextByte);
         }
 
         return dataStream;
     }
 
-    private boolean isTerminated(final byte[] potentialTerminator, final byte[] terminator) {
-        return (isEqualByteArray(potentialTerminator, terminator)
-                || (getByteCount() == 1 && (potentialTerminator[0] == ACK || potentialTerminator[0] == NAK)));
+    private boolean isTerminated(final DataStream dataStream, final byte[] terminator) {
+        return (isEqualByteArray(dataStream.getTail(), terminator)
+                || (dataStream.size() == 1 && (dataStream.getTail()[0] == ACK || dataStream.getTail()[0] == NAK)));
     }
 
     private boolean isEqualByteArray(final byte[] byteByteArrayA, final byte[] byteByteArrayB) {
@@ -238,13 +217,5 @@ public class TCPClient implements Closeable {
         }
 
         this.dataInputStream = dataInputStream;
-    }
-
-    private int getByteCount() {
-        return byteCount;
-    }
-
-    private void setByteCount(int byteCount) {
-        this.byteCount = byteCount;
     }
 }
