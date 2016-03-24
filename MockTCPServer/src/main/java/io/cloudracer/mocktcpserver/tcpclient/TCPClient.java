@@ -24,8 +24,10 @@ public class TCPClient implements Closeable {
 
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
-    private final byte ACK = 65;
-    private final byte NAK = 78;
+    public static final byte ACK_DEFAULT = 65;
+    private final byte ACK;
+    public static final byte NAK_DEFAULT = 78;
+    private final byte NAK;
     private int port;
 
     private Socket socket;
@@ -38,7 +40,19 @@ public class TCPClient implements Closeable {
 
     private int byteCount;
 
+    public TCPClient(final int port, final byte ACK, final byte NAK) throws IOException {
+        this.ACK = ACK;
+        this.NAK = NAK;
+
+        setPort(port);
+        // Open a socket;
+        getSocket();
+    }
+
     public TCPClient(final int port) throws IOException {
+        this.ACK = ACK_DEFAULT;
+        this.NAK = NAK_DEFAULT;
+
         setPort(port);
         // Open a socket;
         getSocket();
