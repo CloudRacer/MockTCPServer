@@ -79,7 +79,7 @@ public class DataStream implements Closeable {
     }
 
     /**
-     * {@link ByteArrayOutputStream#close() Close} the {@link ByteArrayOutputStream output stream}.
+     * {@link PipedOutputStream#close() close} the {@link PipedOutputStream output stream}.
      *
      * @throws IOException
      */
