@@ -67,22 +67,17 @@ public class TCPClient implements Closeable {
     }
 
     /**
-     * Send a message down the socket.
+     * Send a message down the socket and wait for a response.
      *
      * @param message
      *        the message to send.
-     * @return the response from server (i.e. the other end of the
-     *         {@link Socket}).
+     * @return the response from server (i.e. the other end of the {@link Socket}).
      * @throws IOException
      * @throws ClassNotFoundException
      * @see TCPClient#getResponse()
      */
     public DataStream send(final String message) throws IOException, ClassNotFoundException {
-        logger.info(String.format("Sending the message: %s.", message));
-
-        getDataOutputStream().write(message.getBytes());
-
-        return getResponse();
+        return send(message, true);
     }
 
     /**
@@ -90,27 +85,44 @@ public class TCPClient implements Closeable {
      *
      * @param message
      *        the message to send.
+     * @param waitForResponse
+     *        if true, wait for a response from the server, otherwise return null.
+     * @return the response from server (i.e. the other end of the {@link Socket}) or null if waitForResponse is false.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @see TCPClient#getResponse()
+     */
+    public DataStream send(final String message, final boolean waitForResponse) throws IOException, ClassNotFoundException {
+        return send(message, true, null);
+    }
+
+    /**
+     * Send a message down the socket.
+     *
+     * @param message
+     *        the message to send.
+     * @param waitForResponse
+     *        if true, wait for a response from the server, otherwise return null.
      * @param responseTerminator
      *        the terminator to wait for on the response. Ignored if null.
-     * @return the response from server (i.e. the other end of the
-     *         {@link Socket}).
+     * @return the response from server (i.e. the other end of the {@link Socket}) or null if waitForResponse is false.
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public String send(final String message, final byte[] responseTerminator)
-            throws IOException, ClassNotFoundException {
+    public DataStream send(final String message, final boolean waitForResponse, final byte[] responseTerminator) throws IOException, ClassNotFoundException {
         logger.info(String.format("Sending the message %s.", message));
 
         getDataOutputStream().write(message.getBytes(), 0, message.getBytes().length);
 
-        DataStream response;
-        if (responseTerminator == null) {
-            response = getResponse();
+        if (waitForResponse) {
+            if (responseTerminator == null) {
+                return getResponse();
+            } else {
+                return getResponse(responseTerminator);
+            }
         } else {
-            response = getResponse(responseTerminator);
+            return null;
         }
-
-        return response.toString();
     }
 
     public DataStream getResponse() throws IOException {
@@ -120,8 +132,7 @@ public class TCPClient implements Closeable {
     /**
      * Read and display the response message sent by server application.
      *
-     * @return the response from server (i.e. the other end of the
-     *         {@link Socket}).
+     * @return the response from server (i.e. the other end of the {@link Socket}).
      * @throws UnsupportedEncodingException
      * @throws IOException
      * @throws ClassNotFoundException
@@ -164,8 +175,7 @@ public class TCPClient implements Closeable {
     /**
      * Open a Socket, if not already open.
      *
-     * @return an open {@link Socket} to the local machine, on the specified
-     *         port ({@link TCPClient#getPort()}).
+     * @return an open {@link Socket} to the local machine, on the specified port ({@link TCPClient#getPort()}).
      * @throws IOException
      */
     public Socket getSocket() throws IOException {
