@@ -11,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +79,14 @@ public class MockTCPServer extends Thread implements Closeable {
 
         setPort(port);
         start();
+        /*
+         * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
+         */
+        try {
+            TimeUnit.MILLISECONDS.sleep(20);
+        } catch (InterruptedException e) {
+            // Do nothing.
+        }
     }
 
     @Override
