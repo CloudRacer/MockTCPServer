@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
@@ -16,6 +17,11 @@ import io.cloudracer.mocktcpserver.datastream.DataStream;
 
 public class TestDataStreamUT extends AbstractTestTools {
 
+    @Before
+    public void setup() {
+        resetLogMonitor();
+    }
+
     @Test
     public void dataStream() throws IOException {
         DataStream dataStream = new DataStream(this.getClass().getSimpleName());
@@ -23,11 +29,13 @@ public class TestDataStreamUT extends AbstractTestTools {
         writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
         dataStream.close();
+
+        checkLogMonitorForUnexpectedMessages();
     }
 
     @Test
-    public void dataStream100MB() throws IOException {
-        final int numberOfBytesToWrite = 102400000; // 10Mb
+    public void dataStream10MB() throws IOException {
+        final int numberOfBytesToWrite = 10240000; // 10Mb
         final byte testCharacter = 65; // 65 = A.
         final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68
                                                            // = D.
@@ -58,7 +66,7 @@ public class TestDataStreamUT extends AbstractTestTools {
 
         dataStream.close();
 
-        checkForUnexpectedLogMessages();
+        checkLogMonitorForUnexpectedMessages();
     }
 
     @Test
@@ -70,7 +78,7 @@ public class TestDataStreamUT extends AbstractTestTools {
 
         checkDataStreamInternalConsistency(dataStream, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
 
-        checkForUnexpectedLogMessages();
+        checkLogMonitorForUnexpectedMessages();
     }
 
     private void writeStringToStream(final String data, final DataStream dataStream) throws IOException {
@@ -93,7 +101,8 @@ public class TestDataStreamUT extends AbstractTestTools {
     /**
      * Conduct a series of checks that must always pass on <b>every</b> {@link DataStream} at <b>any</b> time.
      *
-     * @param dataStream the {@link DataStream} to check.
+     * @param dataStream
+     *        the {@link DataStream} to check.
      * @throws IOException
      */
     private void checkDataStreamInternalConsistency(final DataStream dataStream, final String data) throws IOException {

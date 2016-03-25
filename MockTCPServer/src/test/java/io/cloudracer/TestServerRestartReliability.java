@@ -18,12 +18,14 @@ public class TestServerRestartReliability extends AbstractTestTools {
 
     @Before
     public void setUp() throws Exception {
+        resetLogMonitor();
+
         server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT);
         client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void cleanUp() throws Exception {
         client.close();
         server.close();
     }
@@ -35,10 +37,10 @@ public class TestServerRestartReliability extends AbstractTestTools {
         for (int i = 0; i < totalServerRestarts; i++) {
             logger.info(String.format("Restart itteration: %d", i));
 
-            tearDown();
+            cleanUp();
             setUp();
         }
 
-        checkForUnexpectedLogMessages();
+        checkLogMonitorForUnexpectedMessages();
     }
 }

@@ -28,8 +28,7 @@ public final class LogMonitor extends AbstractAppender {
 
     private static LogEvent lastEventLogged = null;
 
-    private LogMonitor(String name, Filter filter,
-            Layout layout, final boolean ignoreExceptions) {
+    private LogMonitor(String name, Filter filter, Layout layout, final boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions);
     }
 
@@ -38,11 +37,8 @@ public final class LogMonitor extends AbstractAppender {
     // and call this factory method to construct an appender instance with
     // the configured attributes.
     @PluginFactory
-    public static LogMonitor createAppender(
-            @PluginAttribute("name") String name,
-            @PluginElement("Layout") Layout layout,
-            @PluginElement("Filter") final Filter filter,
-            @PluginAttribute("otherAttribute") String otherAttribute) {
+    public static LogMonitor createAppender(@PluginAttribute("name") String name, @PluginElement("Layout") Layout layout, @PluginElement("Filter")
+    final Filter filter, @PluginAttribute("otherAttribute") String otherAttribute) {
         if (name == null) {
             LOGGER.error("No name provided for TestLog4j2Appender");
             return null;
@@ -62,7 +58,7 @@ public final class LogMonitor extends AbstractAppender {
     // 3. Error handling
     @Override
     public void append(LogEvent event) {
-        LogMonitor.lastEventLogged = event;
+        LogMonitor.setLastEventLogged(event);
     }
 
     public static LogMonitor createAppender(final Logger logger) {
@@ -75,6 +71,10 @@ public final class LogMonitor extends AbstractAppender {
 
     public static LogEvent getLastEventLogged() {
         return lastEventLogged;
+    }
+
+    public static void setLastEventLogged(LogEvent lastEventLogged) {
+        LogMonitor.lastEventLogged = lastEventLogged;
     }
 
     public static URI getFileName() {

@@ -19,6 +19,8 @@ public class TestMockTCPServerST extends AbstractTestTools {
 
     @Before
     public void setUp() throws Exception {
+        resetLogMonitor();
+
         server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT);
         client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
     }
@@ -35,7 +37,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
 
         assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message).toString());
 
-        checkForUnexpectedLogMessages();
+        checkLogMonitorForUnexpectedMessages();
     }
 
     @Test
