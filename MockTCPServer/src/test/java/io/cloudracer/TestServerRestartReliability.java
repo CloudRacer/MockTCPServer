@@ -6,28 +6,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.cloudracer.mocktcpserver.MockTCPServer;
-import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
-
 public class TestServerRestartReliability extends AbstractTestTools {
 
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
-
-    private TCPClient client;
-    private MockTCPServer server;
 
     @Before
     public void setUp() throws Exception {
         resetLogMonitor();
 
-        server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT);
-        client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
+        getServer();
+        getClient();
     }
 
     @After
     public void cleanUp() throws Exception {
-        client.close();
-        server.close();
+        close();
     }
 
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)

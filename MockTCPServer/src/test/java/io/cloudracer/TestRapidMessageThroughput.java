@@ -6,26 +6,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.cloudracer.mocktcpserver.MockTCPServer;
-import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
-
 public class TestRapidMessageThroughput extends AbstractTestTools {
-
-    private TCPClient client;
-    private MockTCPServer server;
 
     @Before
     public void setUp() throws Exception {
         resetLogMonitor();
 
-        server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT);
-        client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
+        getServer();
+        getClient();
     }
 
     @After
     public void cleanUp() throws Exception {
-        client.close();
-        server.close();
+        close();
     }
 
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
@@ -35,7 +28,7 @@ public class TestRapidMessageThroughput extends AbstractTestTools {
         for (int i = 0; i < totalServerRestarts; i++) {
             final String message = String.format("Test %d%s", i, TestConstants.DEFAULT_TERMINATOR);
 
-            assertEquals("Unexpected server response.", TestConstants.ACK, client.send(message).toString());
+            assertEquals("Unexpected server response.", TestConstants.ACK, getClient().send(message).toString());
         }
 
         checkLogMonitorForUnexpectedMessages();
