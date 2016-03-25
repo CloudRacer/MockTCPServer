@@ -29,7 +29,7 @@ public abstract class AbstractTestTools {
      *
      * Adjust the log4j.xml Appenders to match on only the messages that should cause this method to raise {@link AssertionError}.
      */
-    public final void checkForUnexpectedLogMessages() {
+    protected final void checkLogMonitorForUnexpectedMessages() {
         try {
             final int delayDuration = 1;
             // Pause to allow messages to be flushed to the disk (and, hence, through the appenders).
@@ -38,5 +38,9 @@ public abstract class AbstractTestTools {
             // Do nothing
         }
         assertNull(String.format("An unexpected message was logged to the file \"%s\".", LogMonitor.getFileName()), LogMonitor.getLastEventLogged());
+    }
+
+    protected void resetLogMonitor() {
+        LogMonitor.setLastEventLogged(null);
     }
 }
