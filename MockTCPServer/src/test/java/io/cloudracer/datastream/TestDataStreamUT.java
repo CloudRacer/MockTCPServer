@@ -18,7 +18,7 @@ import io.cloudracer.mocktcpserver.datastream.DataStream;
 public class TestDataStreamUT extends AbstractTestTools {
 
     @Before
-    public void setup() {
+    public void setUp() {
         resetLogMonitor();
     }
 

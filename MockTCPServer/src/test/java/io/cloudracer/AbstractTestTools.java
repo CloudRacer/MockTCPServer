@@ -32,6 +32,17 @@ public abstract class AbstractTestTools {
     private TCPClient client;
     private MockTCPServer server;
 
+    protected void setUp() throws IOException {
+        resetLogMonitor();
+
+        getServer();
+        getClient();
+    }
+
+    protected void cleanUp() throws IOException {
+        close();
+    }
+
     /**
      * Asserts that the "TEST" {@link Appender log4j Appender} did not log any messages.
      *

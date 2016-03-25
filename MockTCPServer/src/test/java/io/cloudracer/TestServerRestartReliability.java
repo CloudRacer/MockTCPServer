@@ -1,5 +1,7 @@
 package io.cloudracer;
 
+import java.io.IOException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
@@ -11,16 +13,13 @@ public class TestServerRestartReliability extends AbstractTestTools {
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
     @Before
-    public void setUp() throws Exception {
-        resetLogMonitor();
-
-        getServer();
-        getClient();
+    public void setUp() throws IOException {
+        super.setUp();
     }
 
     @After
-    public void cleanUp() throws Exception {
-        close();
+    public void cleanUp() throws IOException {
+        super.cleanUp();
     }
 
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)

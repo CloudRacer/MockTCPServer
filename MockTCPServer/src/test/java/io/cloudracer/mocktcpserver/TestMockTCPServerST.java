@@ -14,16 +14,13 @@ import io.cloudracer.TestConstants;
 public class TestMockTCPServerST extends AbstractTestTools {
 
     @Before
-    public void setUp() throws Exception {
-        resetLogMonitor();
-
-        getServer();
-        getClient();
+    public void setUp() throws IOException {
+        super.setUp();
     }
 
     @After
-    public void cleanUp() throws Exception {
-        close();
+    public void cleanUp() throws IOException {
+        super.cleanUp();
     }
 
     @Test

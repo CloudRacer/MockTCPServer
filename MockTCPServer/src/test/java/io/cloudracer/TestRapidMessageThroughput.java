@@ -2,6 +2,8 @@ package io.cloudracer;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,16 +11,13 @@ import org.junit.Test;
 public class TestRapidMessageThroughput extends AbstractTestTools {
 
     @Before
-    public void setUp() throws Exception {
-        resetLogMonitor();
-
-        getServer();
-        getClient();
+    public void setUp() throws IOException {
+        super.setUp();
     }
 
     @After
-    public void cleanUp() throws Exception {
-        close();
+    public void cleanUp() throws IOException {
+        super.cleanUp();
     }
 
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
