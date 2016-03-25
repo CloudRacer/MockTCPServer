@@ -29,6 +29,7 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private Logger logger = LogManager.getLogger(getRootLoggerName());
 
+    public final static int DEFAULT_PORT = 6789;
     public final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
     public final static byte[] DEFAULT_ACK = { 65 };
     public final static byte[] DEFAULT_NAK = { 78 };
@@ -55,6 +56,21 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private boolean isClosed = false;
 
+    /**
+     * Start the server on the {@link MockTCPServer#DEFAULT_PORT default} port.
+     * 
+     * This constructor is the equivalent of passing the {@link MockTCPServer#DEFAULT_PORT default} port to the other {@link MockTCPServer#MockTCPServer(int) constructor}.
+     */
+    public MockTCPServer() {
+        this(DEFAULT_PORT);
+    }
+
+    /**
+     * Start the server on the specified port.
+     * 
+     * @param port
+     *        the TCP Server will listen on this port.
+     */
     public MockTCPServer(final int port) {
         logger.info("Starting...");
 
@@ -210,8 +226,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * A server callback when a message has been processed, and a response has
-     * been sent to the client.
+     * A server callback when a message has been processed, and a response has been sent to the client.
      *
      * @param response
      *        the response that has been sent.
@@ -235,8 +250,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * An error is recorded if a message other than that which is expected is
-     * received.
+     * An error is recorded if a message other than that which is expected is received.
      *
      * @return a recorded error.
      */
@@ -245,8 +259,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * An error will be recorded if a message other than that which is
-     * {@link MockTCPServer#getAssertionError() expected} is received.
+     * An error will be recorded if a message other than that which is {@link MockTCPServer#getAssertionError() expected} is received.
      *
      * @param assertionError
      *        a recorded error.
@@ -256,12 +269,9 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * Forces the Server to return a NAK in response to the next message
-     * received (regardless of <u>any</u> other conditions). The next message
-     * will first be processed as normal; irrespective of this property.
+     * Forces the Server to return a NAK in response to the next message received (regardless of <u>any</u> other conditions). The next message will first be processed as normal; irrespective of this property.
      * <p>
-     * This is intended to be used to test a clients response to receiving a
-     * NAK.
+     * This is intended to be used to test a clients response to receiving a NAK.
      * <p>
      * Default is false.
      *
@@ -272,16 +282,14 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * Forces the Server to return a NAK in response to the next message
-     * received (regardless of <u>any</u> other conditions). The next message
-     * will first be processed as normal; irrespective of this property.
+     * Forces the Server to return a NAK in response to the next message received (regardless of <u>any</u> other conditions). The next message will first be processed as normal; irrespective of this property.
      * <p>
-     * This is intended to be used to test a clients response to receiving a
-     * NAK.
+     * This is intended to be used to test a clients response to receiving a NAK.
      * <p>
      * Default is false.
      *
-     * @param isAlwaysNAKResponse if true, the Servers next response will always be a NAK.
+     * @param isAlwaysNAKResponse
+     *        if true, the Servers next response will always be a NAK.
      */
     public synchronized void setIsAlwaysNAKResponse(final boolean isAlwaysNAKResponse) {
         this.setIsAlwaysNAKResponse = isAlwaysNAKResponse;
@@ -296,44 +304,34 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * Forces the Server to close down after processing the next message
-     * received (regardless of <u>any</u> other conditions). The next message
-     * will first be processed as normal; irrespective of this property.
+     * Forces the Server to close down after processing the next message received (regardless of <u>any</u> other conditions). The next message will first be processed as normal; irrespective of this property.
      * <p>
-     * This is intended to be used so that test clients can wait on the server
-     * Thread to end.
+     * This is intended to be used so that test clients can wait on the server Thread to end.
      * <p>
      * Default is false.
      *
-     * @return if true, the Server will close after the message processing is
-     *         complete.
+     * @return if true, the Server will close after the message processing is complete.
      */
     public boolean getIsCloseAfterNextResponse() {
         return isCloseAfterNextResponse;
     }
 
     /**
-     * Forces the Server to close down after processing the next message
-     * received (regardless of <u>any</u> other conditions). The next message
-     * will first be processed as normal; irrespective of this property.
+     * Forces the Server to close down after processing the next message received (regardless of <u>any</u> other conditions). The next message will first be processed as normal; irrespective of this property.
      * <p>
-     * This is intended to be used so that test clients can wait on the server
-     * Thread to end.
+     * This is intended to be used so that test clients can wait on the server Thread to end.
      * <p>
      * Default is false.
      *
      * @param isCloseAfterNextResponse
-     *        if true, the Server will close after the message processing is
-     *        complete.
+     *        if true, the Server will close after the message processing is complete.
      */
     public synchronized void setIsCloseAfterNextResponse(boolean isCloseAfterNextResponse) {
         this.isCloseAfterNextResponse = isCloseAfterNextResponse;
     }
 
     /**
-     * If any message, other that this one, is the next message to be received,
-     * record it as an {@link MockTCPServer#setAssertionError(AssertionError)
-     * assertion error}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
      *
      * @return ignore if null.
      */
@@ -342,13 +340,10 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received,
-     * record it as an {@link MockTCPServer#setAssertionError(AssertionError)
-     * assertion error}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
      *
      * @param expectedMessage
-     *        a Regular Expression that describes what the next received
-     *        message will be.
+     *        a Regular Expression that describes what the next received message will be.
      */
 
     public synchronized void setExpectedMessage(final String expectedMessage) {
@@ -356,13 +351,10 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received,
-     * record it as an {@link MockTCPServer#setAssertionError(AssertionError)
-     * assertion error}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
      *
      * @param expectedMessage
-     *        a Regular Expression that describes what the next received
-     *        message will be.
+     *        a Regular Expression that describes what the next received message will be.
      */
     public synchronized void setExpectedMessage(final StringBuffer expectedMessage) {
         setExpectedMessage(expectedMessage.toString());
