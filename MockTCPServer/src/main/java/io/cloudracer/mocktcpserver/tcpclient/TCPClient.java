@@ -279,7 +279,7 @@ public class TCPClient implements Closeable {
     /**
      * The ACK (i.e. Acknowledged) response to expect from the {@link TCPClient#getHostName() Server}.
      * 
-     * @param nak
+     * @param ack
      *        the ACK response to expect.
      */
     public void setACK(byte[] ack) {

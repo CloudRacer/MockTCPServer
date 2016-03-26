@@ -29,7 +29,7 @@ public class DataStream implements Closeable {
     /**
      * Default constructor.
      * <p>
-     * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT} and a default {@link Logger#getLogger(Class) log4j root logger} of the Class name.
+     * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT} and a default {@link LogManager#getLogger(Class) log4j root logger} of the Class name.
      */
     public DataStream() {
         setRootLoggerName(getClssName());
@@ -38,7 +38,8 @@ public class DataStream implements Closeable {
     /**
      * Specify a log4j root logger.
      *
-     * @param rootLoggerName log4j root logger
+     * @param rootLoggerName
+     *        log4j root logger
      */
     public DataStream(final String rootLoggerName) {
         setRootLoggerName(rootLoggerName);
@@ -47,7 +48,8 @@ public class DataStream implements Closeable {
     /**
      * Specify a {@link DataStream#getTailMaximumLength() maximum length of the stream tail}.
      *
-     * @param tailMaximumLength tail length.
+     * @param tailMaximumLength
+     *        tail length.
      */
     public DataStream(final int tailMaximumLength) {
         setTailMaximumLength(tailMaximumLength);
@@ -56,8 +58,10 @@ public class DataStream implements Closeable {
     /**
      * Specify a {@link DataStream#getRootLoggerName() log4j root logger} and the {@link DataStream#getTailMaximumLength() maximum length of the stream tail}.
      *
-     * @param rootLoggerName log4j root logger.
-     * @param tailMaximumLength tail length.
+     * @param rootLoggerName
+     *        log4j root logger.
+     * @param tailMaximumLength
+     *        tail length.
      */
     public DataStream(final String rootLoggerName, final int tailMaximumLength) {
         setTailMaximumLength(tailMaximumLength);
@@ -67,11 +71,12 @@ public class DataStream implements Closeable {
     /**
      * Write byte to the {@link ByteArrayOutputStream#write(int)}.
      *
-     * @param data written to the {@link ByteArrayOutputStream}.
+     * @param data
+     *        written to the {@link ByteArrayOutputStream}.
      * @return the data written (equal to the data parameter).
      * @throws IOException
+     *         see source documentation
      */
-
     public synchronized int write(final int data) throws IOException {
         getOutput().write(data);
 
@@ -90,6 +95,8 @@ public class DataStream implements Closeable {
 
     /**
      * Delegate of {@link ByteArrayOutputStream#size()}.
+     * 
+     * @return the current size of the stream. see source documentation
      */
     public synchronized int size() {
         return getOutput().size();
@@ -153,7 +160,8 @@ public class DataStream implements Closeable {
     /**
      * {@link ByteArrayOutputStream#close() close} the {@link ByteArrayOutputStream output stream}.
      *
-     * @param output if null, the current {@link ByteArrayOutputStream output stream} is closed before being reinitialised.
+     * @param output
+     *        if null, the current {@link ByteArrayOutputStream output stream} is closed before being reinitialised.
      * @throws IOException
      */
     private void setOutput(final ByteArrayOutputStream output) throws IOException {
@@ -246,7 +254,8 @@ public class DataStream implements Closeable {
     /**
      * Set the log4j {@link Logger#getLogger root logger} name.
      *
-     * @param rootLoggerName the name of the log4j root logger
+     * @param rootLoggerName
+     *        the name of the log4j root logger
      */
     private void setRootLoggerName(String rootLoggerName) {
         this.rootLoggerName = new String(rootLoggerName);
