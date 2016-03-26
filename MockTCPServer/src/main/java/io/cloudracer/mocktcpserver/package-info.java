@@ -1,5 +1,5 @@
 /**
- * MockTCPServer simulates a TCP Server in environments where the *real* server is not available. The *real* TCP Server may still be in development but you need to continue developing the integrations with other systems. Perhaps installing and configuring one or more Enterprise Application in a System Test environment is prohibitively time consuming and/or costly.
+ * MockTCPServer simulates a TCP Server in environments where the <b>real</b> server is not available. The <b>real</b> TCP Server may still be in development but you need to continue developing the integrations with other systems. Perhaps installing and configuring one or more Enterprise Application in a System Test environment is prohibitively time consuming and/or costly.
  * <p>
  * MockTCPServer has a number of features specifically designed for Integration/System testing. No particular Test Framework is preferred or required.
  * <p>
