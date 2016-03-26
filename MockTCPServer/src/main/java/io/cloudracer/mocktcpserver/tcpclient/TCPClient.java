@@ -57,7 +57,7 @@ public class TCPClient implements Closeable {
     }
 
     /**
-     * Specify the machine to communication with and the {@link TCPClient#getPort() port} that the machine is listening on.
+     * Specify the {@link TCPClient#getHostName() machine} to communication with and the {@link TCPClient#getPort() port} that the machine is listening on.
      * 
      * @param hostName
      *        the machine name to communicate with.
