@@ -19,7 +19,7 @@ import io.cloudracer.mocktcpserver.datastream.DataStream;
 /**
  * A TCP Client provided primarily for demonstration purposes, and for use in test suites.
  * <p>
- * Send messages to a specified {@link TCPClient#TCPClient(String, int) host} (or localhost, if unspecified) on a specified {@link TCPClient#getPort() port}. By default the client will wait for a synchronous response from the server but the response can be ignored (i.e. not waited for) for particular {@link TCPClient#send(String, boolean) send} instructions.
+ * Send messages to a specified {@link TCPClient#TCPClient(String, int) host} (or localhost, if unspecified) on a specified {@link TCPClient#getPort() port}. By default the client will wait for a synchronous response from the {@link TCPClient#getHostName() server} but the response can be ignored (i.e. not waited for) for particular {@link TCPClient#send(String, boolean) send} instructions.
  * <p>
  * If a {@link TCPClient#setResponseTerminator(byte[]) response terminator} is specified, the Client will wait for a synchronous response with that terminator, unless the {@link TCPClient#setACK(byte[]) ACK} or {@link TCPClient#setNAK(byte[]) NAK} response is received first. A custom ACK or NAK can be specified.
  *
@@ -46,10 +46,10 @@ public class TCPClient implements Closeable {
     private DataInputStream dataInputStream;
 
     /**
-     * Specify the {@link TCPClient#getPort() port} that the TCP Server is listening on.
+     * Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
      * 
      * @param port
-     *        the port that the TCP Server is listening on.
+     *        the port that the TCP {@link TCPClient#getHostName() server} is listening on.
      * @throws IOException
      */
     public TCPClient(final int port) throws IOException {
@@ -86,10 +86,9 @@ public class TCPClient implements Closeable {
      *
      * @param message
      *        the message to send.
-     * @return the response from server (i.e. the other end of the {@link Socket}).
+     * @return the response from the {@link TCPClient#getHostName() server}.
      * @throws IOException
      * @throws ClassNotFoundException
-     * @see TCPClient#getResponse()
      */
     public DataStream send(final String message) throws IOException, ClassNotFoundException {
         return send(message, true);
@@ -101,8 +100,8 @@ public class TCPClient implements Closeable {
      * @param message
      *        the message to send.
      * @param waitForResponse
-     *        if true, wait for a response from the server, otherwise null is returned.
-     * @return the response from the server (i.e. the other end of the {@link Socket}) or null if waitForResponse is false.
+     *        if true, wait for a response from the {@link TCPClient#getHostName() server}, otherwise null is returned.
+     * @return the response from the {@link TCPClient#getHostName() server} or null if waitForResponse is false.
      * @throws IOException
      * @throws ClassNotFoundException
      */
@@ -116,10 +115,10 @@ public class TCPClient implements Closeable {
      * @param message
      *        the message to send.
      * @param waitForResponse
-     *        if true, wait for a response from the server, otherwise return null.
+     *        if true, wait for a response from the {@link TCPClient#getHostName() server}, otherwise return null.
      * @param responseTerminator
      *        the terminator to wait for on the response. Ignored if null.
-     * @return the response from server (i.e. the other end of the {@link Socket}) or null if waitForResponse is false.
+     * @return the response from {@link TCPClient#getHostName() server} or null if waitForResponse is false.
      * @throws IOException
      * @throws ClassNotFoundException
      */
@@ -148,9 +147,9 @@ public class TCPClient implements Closeable {
     }
 
     /**
-     * Read and return the response message sent by server.
+     * Read and return the response message sent by {@link TCPClient#getHostName() server}.
      *
-     * @return the response from the server (i.e. the other end of the {@link Socket}).
+     * @return the response from the {@link TCPClient#getHostName() server}.
      * @throws IOException
      * @throws TCPClientUnexpectedResponseException
      */
@@ -159,11 +158,11 @@ public class TCPClient implements Closeable {
     }
 
     /**
-     * Read and return the response message sent by server.
+     * Read and return the response message sent by {@link TCPClient#getHostName() server}.
      *
      * @param terminator
      *        the response terminator. If null, only the {@link TCPClient#getACK() ACK} or {@link TCPClient#getNAK() NAK} will be expected and an exception will be throws if neither are received..
-     * @return the response from the server (i.e. the other end of the {@link Socket}).
+     * @return the response from the {@link TCPClient#getHostName() server}.
      * @throws UnsupportedEncodingException
      * @throws IOException
      * @throws TCPClientUnexpectedResponseException
