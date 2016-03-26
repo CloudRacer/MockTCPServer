@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
@@ -17,6 +18,10 @@ import io.cloudracer.mocktcpserver.datastream.DataStream;
 
 /**
  * A TCP Client provided primarily for demonstration purposes, and for use in test suites.
+ * <p>
+ * Send messages to a specified {@link TCPClient#TCPClient(String, int) host} (or localhost, if unspecified) on a specified {@link TCPClient#getPort() port}. By default the client will wait for a synchronous response from the server but the response can be ignored (i.e. not waited for) for particular {@link TCPClient#send(String, boolean) send} instructions.
+ * <p>
+ * If a {@link TCPClient#setResponseTerminator(byte[]) response terminator} is specified, the Client will wait for a synchronous response with that terminator, unless the {@link TCPClient#setACK(byte[]) ACK} or {@link TCPClient#setNAK(byte[]) NAK} response is received first. A custom ACK or NAK can be specified.
  *
  * @author John McDonnell
  */
@@ -24,10 +29,14 @@ public class TCPClient implements Closeable {
 
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
-    public static final byte ACK_DEFAULT = 65;
-    private final byte ACK;
-    public static final byte NAK_DEFAULT = 78;
-    private final byte NAK;
+    public static final byte[] ACK_DEFAULT = { 65 };
+    private byte[] ack = ACK_DEFAULT;
+    public static final byte[] NAK_DEFAULT = { 78 };
+    private byte[] nak = NAK_DEFAULT;
+    public static final byte[] RESPONSE_TERMINATOR_DEFAULT = { 13, 10 };
+    private byte[] responseTerminator = RESPONSE_TERMINATOR_DEFAULT;
+
+    private String hostName = null;
     private int port;
 
     private Socket socket;
@@ -36,24 +45,30 @@ public class TCPClient implements Closeable {
 
     private DataInputStream dataInputStream;
 
-    private byte[] terminatorDefault = new byte[] { 13, 10 };
-
-    public TCPClient(final int port, final byte ACK, final byte NAK) throws IOException {
-        this.ACK = ACK;
-        this.NAK = NAK;
-
+    /**
+     * Specify the {@link TCPClient#getPort() port} that the TCP Server is listening on.
+     * 
+     * @param port
+     *        the port that the TCP Server is listening on.
+     * @throws IOException
+     */
+    public TCPClient(final int port) throws IOException {
         setPort(port);
-        // Open a socket;
-        getSocket();
     }
 
-    public TCPClient(final int port) throws IOException {
-        this.ACK = ACK_DEFAULT;
-        this.NAK = NAK_DEFAULT;
+    /**
+     * Specify the machine to communication with and the {@link TCPClient#getPort() port} that the machine is listening on.
+     * 
+     * @param hostName
+     *        the machine name to communicate with.
+     * @param port
+     *        the port number that the machine (specified by hostName) is listening on.
+     * @throws IOException
+     */
+    public TCPClient(String hostName, final int port) throws IOException {
+        this(port);
 
-        setPort(port);
-        // Open a socket;
-        getSocket();
+        setHostName(hostName);
     }
 
     /**
@@ -86,14 +101,13 @@ public class TCPClient implements Closeable {
      * @param message
      *        the message to send.
      * @param waitForResponse
-     *        if true, wait for a response from the server, otherwise return null.
-     * @return the response from server (i.e. the other end of the {@link Socket}) or null if waitForResponse is false.
+     *        if true, wait for a response from the server, otherwise null is returned.
+     * @return the response from the server (i.e. the other end of the {@link Socket}) or null if waitForResponse is false.
      * @throws IOException
      * @throws ClassNotFoundException
-     * @see TCPClient#getResponse()
      */
     public DataStream send(final String message, final boolean waitForResponse) throws IOException, ClassNotFoundException {
-        return send(message, true, null);
+        return send(message, waitForResponse, getResponseTerminator());
     }
 
     /**
@@ -109,38 +123,61 @@ public class TCPClient implements Closeable {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public DataStream send(final String message, final boolean waitForResponse, final byte[] responseTerminator) throws IOException, ClassNotFoundException {
+    private DataStream send(final String message, final boolean waitForResponse, final byte[] responseTerminator) throws IOException, ClassNotFoundException {
         logger.info(String.format("Sending the message %s.", message));
 
         getDataOutputStream().write(message.getBytes(), 0, message.getBytes().length);
 
         if (waitForResponse) {
-            if (responseTerminator == null) {
-                return getResponse();
-            } else {
-                return getResponse(responseTerminator);
+            try {
+                if (responseTerminator == null) {
+                    return getResponse();
+                } else {
+                    return getResponse(responseTerminator);
+                }
+            } catch (TCPClientUnexpectedResponseException e) {
+                logger.error(e.getMessage(), e);
+
+                close();
+
+                return new DataStream();
             }
         } else {
             return null;
         }
     }
 
-    public DataStream getResponse() throws IOException {
-        return getResponse(getTerminatorDefault());
+    /**
+     * Read and return the response message sent by server.
+     *
+     * @return the response from the server (i.e. the other end of the {@link Socket}).
+     * @throws IOException
+     * @throws TCPClientUnexpectedResponseException
+     */
+    private DataStream getResponse() throws IOException, TCPClientUnexpectedResponseException {
+        return getResponse(getResponseTerminator());
     }
 
     /**
-     * Read and display the response message sent by server application.
+     * Read and return the response message sent by server.
      *
-     * @return the response from server (i.e. the other end of the {@link Socket}).
+     * @param terminator
+     *        the response terminator. If null, only the {@link TCPClient#getACK() ACK} or {@link TCPClient#getNAK() NAK} will be expected and an exception will be throws if neither are received..
+     * @return the response from the server (i.e. the other end of the {@link Socket}).
      * @throws UnsupportedEncodingException
      * @throws IOException
+     * @throws TCPClientUnexpectedResponseException
      * @throws ClassNotFoundException
      */
-    public DataStream getResponse(final byte[] terminator) throws IOException {
+    private DataStream getResponse(final byte[] terminator) throws IOException, TCPClientUnexpectedResponseException {
         setDataInputStream(new DataInputStream(getSocket().getInputStream()));
 
-        final DataStream dataStream = new DataStream(this.getClass().getSimpleName(), terminator.length);
+        final DataStream dataStream;
+        if (terminator == null) {
+            dataStream = new DataStream(this.getClass().getSimpleName());
+        } else {
+            dataStream = new DataStream(this.getClass().getSimpleName(), terminator.length);
+        }
 
         while (dataStream.write(getDataInputStream().read()) != -1) {
             if (isTerminated(dataStream, terminator)) {
@@ -151,25 +188,125 @@ public class TCPClient implements Closeable {
         return dataStream;
     }
 
-    private boolean isTerminated(final DataStream dataStream, final byte[] terminator) {
-        return (isEqualByteArray(dataStream.getTail(), terminator)
-                || (dataStream.size() == 1 && (dataStream.getTail()[0] == ACK || dataStream.getTail()[0] == NAK)));
+    private boolean isTerminated(final DataStream dataStream, final byte[] terminator) throws TCPClientUnexpectedResponseException {
+        boolean terminated;
+        terminated = (isEqualByteArray(dataStream.getTail(), terminator)
+                || (dataStream.size() == getACK().length && isEqualByteArray(dataStream.getOutput().toByteArray(), getACK()))
+                || (dataStream.size() == getNAK().length && isEqualByteArray(dataStream.getOutput().toByteArray(), getNAK())));
+
+        if (terminator == null && !terminated && (dataStream.size() == getACK().length || dataStream.size() == getNAK().length)) {
+            throw new TCPClientUnexpectedResponseException(dataStream);
+        }
+
+        return terminated;
     }
 
     private boolean isEqualByteArray(final byte[] byteByteArrayA, final byte[] byteByteArrayB) {
         return Arrays.equals(byteByteArrayA, byteByteArrayB);
     }
 
-    private byte[] getTerminatorDefault() {
-        return terminatorDefault;
-    }
-
-    private int getPort() {
+    /**
+     * The port that the {@link TCPClient#getHostName() Server} is listening on.
+     * 
+     * @return the port number.
+     */
+    public int getPort() {
         return this.port;
     }
 
+    /**
+     * Set the port that the {@link TCPClient#getHostName() Server} is listening on.
+     * 
+     * @param port
+     *        the port number.
+     */
     private void setPort(final int port) {
         this.port = port;
+    }
+
+    /**
+     * The Machine Name to send messages too.
+     * 
+     * @return the Machine Name of the server to communicate with.
+     * @throws UnknownHostException
+     */
+    public String getHostName() throws UnknownHostException {
+        if (hostName == null) {
+            final InetAddress host = InetAddress.getLocalHost();
+            hostName = host.getHostName();
+        }
+        return hostName;
+    }
+
+    /**
+     * Set the Machine Name to send messages too.
+     * 
+     * @param hostName
+     *        the Machine Name to send messages too.
+     */
+    private void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
+    /**
+     * The NAK (i.e. Not Acknowledged) response to expect from the {@link TCPClient#getHostName() Server}.
+     * 
+     * @return the NAK response to expect.
+     */
+    public byte[] getNAK() {
+        return nak;
+    }
+
+    /**
+     * The NAK (i.e. Not Acknowledged) response to expect from the {@link TCPClient#getHostName() Server}.
+     * 
+     * @param nak
+     *        the NAK response to expect.
+     */
+    public void setNAK(byte[] nak) {
+        this.nak = nak;
+    }
+
+    /**
+     * The ACK (i.e. Acknowledged) response to expect from the {@link TCPClient#getHostName() Server}.
+     * 
+     * @return the ACK response to expect.
+     */
+    public byte[] getACK() {
+        return ack;
+    }
+
+    /**
+     * The ACK (i.e. Acknowledged) response to expect from the {@link TCPClient#getHostName() Server}.
+     * 
+     * @param nak
+     *        the ACK response to expect.
+     */
+    public void setACK(byte[] ack) {
+        this.ack = ack;
+    }
+
+    /**
+     * The response terminator to expect from the {@link TCPClient#getHostName() Server}.
+     * <p>
+     * If null, all responses other than {@link TCPClient#getACK() ACK} or {@link TCPClient#getNAK() NAK} will result in an {@link TCPClientUnexpectedResponseException exception} (assuming responses are being waited for).
+     * 
+     * @return the response terminator.
+     */
+    public byte[] getResponseTerminator() {
+        return responseTerminator;
+    }
+
+    /**
+     * The response terminator to expect from the {@link TCPClient#getHostName() Server}.
+     * <p>
+     * If null, all responses other than {@link TCPClient#getACK() ACK} or {@link TCPClient#getNAK() NAK} will result in an {@link TCPClientUnexpectedResponseException exception} (assuming responses are being waited for).
+     * 
+     * @param responseTerminator
+     *        the response terminator.
+     */
+    public void setResponseTerminator(byte[] responseTerminator) {
+        this.responseTerminator = responseTerminator;
     }
 
     /**
@@ -178,10 +315,9 @@ public class TCPClient implements Closeable {
      * @return an open {@link Socket} to the local machine, on the specified port ({@link TCPClient#getPort()}).
      * @throws IOException
      */
-    public Socket getSocket() throws IOException {
+    private Socket getSocket() throws IOException {
         if (socket == null) {
-            final InetAddress host = InetAddress.getLocalHost();
-            socket = new Socket(host.getHostName(), getPort());
+            socket = new Socket(getHostName(), getPort());
         }
 
         return socket;
