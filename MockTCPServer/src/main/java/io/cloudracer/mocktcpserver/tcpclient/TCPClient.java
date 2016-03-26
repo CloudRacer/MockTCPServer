@@ -82,7 +82,7 @@ public class TCPClient implements Closeable {
     }
 
     /**
-     * Send a message down the socket and wait for a response.
+     * Send a message to the {@link TCPClient#getHostName() server} and wait for a response.
      *
      * @param message
      *        the message to send.
@@ -95,7 +95,7 @@ public class TCPClient implements Closeable {
     }
 
     /**
-     * Send a message down the socket.
+     * Send a message to the {@link TCPClient#getHostName() server} and, <b>optionally</b>, wait for a response.
      *
      * @param message
      *        the message to send.
