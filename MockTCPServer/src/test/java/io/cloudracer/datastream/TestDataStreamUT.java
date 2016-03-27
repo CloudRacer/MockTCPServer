@@ -127,7 +127,7 @@ public class TestDataStreamUT extends AbstractTestTools {
 
         if (dataStream.size() == 0) {
             assertEquals("getTailLength() of returns an unexpected value.", 0, dataStream.size());
-            assertEquals("size() returns an unexpected value.", 0, dataStream.getOutput().size());
+            assertEquals("size() returns an unexpected value.", 0, dataStream.size());
             assertEquals("getTailLength() of returns an unexpected value.", 0, dataStream.getTail().length);
             assertNull("getLastByte() of returns an unexpected value.", dataStream.getLastByte());
         } else if (dataStream.size() > dataStream.getTail().length) {

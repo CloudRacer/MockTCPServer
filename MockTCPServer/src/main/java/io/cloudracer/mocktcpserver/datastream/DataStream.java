@@ -101,7 +101,7 @@ public class DataStream implements Closeable {
         return getOutput().size();
     }
 
-    public synchronized ByteArrayOutputStream getOutput() {
+    private synchronized ByteArrayOutputStream getOutput() {
         if (output == null) {
             output = new ByteArrayOutputStream() {
                 @Override
@@ -114,6 +114,15 @@ public class DataStream implements Closeable {
         }
 
         return output;
+    }
+
+    /**
+     * A new byte array, containing a copy of the DataStream.
+     * 
+     * @return a byte array, containing a copy of the DataStream.
+     */
+    public synchronized byte[] toByteArray() {
+        return getOutput().toByteArray();
     }
 
     /**
