@@ -117,7 +117,7 @@ public class DataStream implements Closeable {
     }
 
     /**
-     * A new byte array, containing a copy of the DataStream.
+     * Delegate of {@link ByteArrayOutputStream#toByteArray()}.
      * 
      * @return a byte array, containing a copy of the DataStream.
      */
