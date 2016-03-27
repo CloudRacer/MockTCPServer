@@ -189,19 +189,15 @@ public class TCPClient implements Closeable {
 
     private boolean isTerminated(final DataStream dataStream, final byte[] terminator) throws TCPClientUnexpectedResponseException {
         boolean terminated;
-        terminated = (isEqualByteArray(dataStream.getTail(), terminator)
-                || (dataStream.size() == getACK().length && isEqualByteArray(dataStream.getOutput().toByteArray(), getACK()))
-                || (dataStream.size() == getNAK().length && isEqualByteArray(dataStream.getOutput().toByteArray(), getNAK())));
+        terminated = (Arrays.equals(dataStream.getTail(), terminator)
+                || (dataStream.size() == getACK().length && Arrays.equals(dataStream.getOutput().toByteArray(), getACK()))
+                || (dataStream.size() == getNAK().length && Arrays.equals(dataStream.getOutput().toByteArray(), getNAK())));
 
         if (terminator == null && !terminated && (dataStream.size() == getACK().length || dataStream.size() == getNAK().length)) {
             throw new TCPClientUnexpectedResponseException(dataStream);
         }
 
         return terminated;
-    }
-
-    private boolean isEqualByteArray(final byte[] byteByteArrayA, final byte[] byteByteArrayB) {
-        return Arrays.equals(byteByteArrayA, byteByteArrayB);
     }
 
     /**
