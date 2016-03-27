@@ -469,7 +469,7 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private DataStream getDataStream() {
         if (dataStream == null) {
-            dataStream = new DataStream(getRootLoggerName(), getTerminator().length);
+            dataStream = new DataStream(getTerminator().length, getRootLoggerName());
         }
 
         return dataStream;

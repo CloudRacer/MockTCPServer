@@ -18,7 +18,7 @@ public class DataStream implements Closeable {
 
     private Logger logger;
 
-    public final static int TAIL_MAXIMUM_LENGTH_DEFAULT = 3;
+    public final static int DEFAULT_TAIL_MAXIMUM_LENGTH = 3;
 
     private ByteArrayOutputStream output;
     private Deque<Byte> tailQueue = null;
@@ -29,10 +29,9 @@ public class DataStream implements Closeable {
     /**
      * Default constructor.
      * <p>
-     * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT} and a default {@link LogManager#getLogger(Class) log4j root logger} of the Class name.
+     * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#DEFAULT_TAIL_MAXIMUM_LENGTH} and a default {@link LogManager#getLogger(Class) log4j root logger} of the Class name.
      */
     public DataStream() {
-        setRootLoggerName(getClssName());
     }
 
     /**
@@ -63,7 +62,7 @@ public class DataStream implements Closeable {
      * @param tailMaximumLength
      *        tail length.
      */
-    public DataStream(final String rootLoggerName, final int tailMaximumLength) {
+    public DataStream(final int tailMaximumLength, final String rootLoggerName) {
         setTailMaximumLength(tailMaximumLength);
         setRootLoggerName(rootLoggerName);
     }
@@ -176,11 +175,11 @@ public class DataStream implements Closeable {
     /**
      * The length of the tail.
      *
-     * @return the length of the tail. Default of {@link DataStream#TAIL_MAXIMUM_LENGTH_DEFAULT}.
+     * @return the length of the tail. Default of {@link DataStream#DEFAULT_TAIL_MAXIMUM_LENGTH}.
      */
     public int getTailMaximumLength() {
         if (tailMaximumLength == null) {
-            tailMaximumLength = TAIL_MAXIMUM_LENGTH_DEFAULT;
+            tailMaximumLength = DEFAULT_TAIL_MAXIMUM_LENGTH;
         }
 
         return tailMaximumLength;
@@ -248,6 +247,10 @@ public class DataStream implements Closeable {
      * @return String the log4j root logger name
      */
     private String getRootLoggerName() {
+        if (rootLoggerName == null) {
+            rootLoggerName = getClssName();
+        }
+
         return (new String(rootLoggerName));
     }
 

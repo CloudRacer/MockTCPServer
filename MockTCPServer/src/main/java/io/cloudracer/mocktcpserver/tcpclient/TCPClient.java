@@ -29,10 +29,10 @@ public class TCPClient implements Closeable {
 
     private Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
-    public static final byte[] ACK_DEFAULT = { 65 };
-    private byte[] ack = ACK_DEFAULT;
-    public static final byte[] NAK_DEFAULT = { 78 };
-    private byte[] nak = NAK_DEFAULT;
+    public static final byte[] DEFAULT_ACK = { 65 };
+    private byte[] ack;
+    public static final byte[] DEFAULT_NAK = { 78 };
+    private byte[] nak;
     public static final byte[] RESPONSE_TERMINATOR_DEFAULT = { 13, 10 };
     private byte[] responseTerminator = RESPONSE_TERMINATOR_DEFAULT;
 
@@ -175,7 +175,7 @@ public class TCPClient implements Closeable {
         if (terminator == null) {
             dataStream = new DataStream(this.getClass().getSimpleName());
         } else {
-            dataStream = new DataStream(this.getClass().getSimpleName(), terminator.length);
+            dataStream = new DataStream(terminator.length, this.getClass().getSimpleName());
         }
 
         while (dataStream.write(getDataInputStream().read()) != -1) {
@@ -253,6 +253,10 @@ public class TCPClient implements Closeable {
      * @return the NAK response to expect.
      */
     public byte[] getNAK() {
+        if (nak == null) {
+            nak = DEFAULT_NAK;
+        }
+
         return nak;
     }
 
@@ -272,6 +276,10 @@ public class TCPClient implements Closeable {
      * @return the ACK response to expect.
      */
     public byte[] getACK() {
+        if (ack == null) {
+            ack = DEFAULT_ACK;
+        }
+
         return ack;
     }
 
