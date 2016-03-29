@@ -425,18 +425,20 @@ public class MockTCPServer extends Thread implements Closeable {
         IOUtils.closeQuietly(this.socket);
         this.logger.info("Closed the socket.");
 
+        final long maximumTimeToWait = 10000;
         try {
+
             if (!super.isAlive()) {
-                this.logger.trace(String.format("Server Thread \"%s\" is not alive.", super.getName()));
+                this.logger.trace(String.format("Server Thread(%s) alive: \"%s\".", super.getName(), super.isAlive()));
             }
             if (super.isInterrupted()) {
-                this.logger.trace(String.format("Server Thread \"%s\" is not interrupted.", super.getName()));
+                this.logger.trace(String.format("Server Thread(%s) interrupted: \"%s\".", super.getName(), super.isInterrupted()));
             }
             super.interrupt();
-            // Wait for the server thread to close.
-            super.join();
+            // Wait a maximum of 10 seconds for the server thread to close.
+            super.join(maximumTimeToWait);
         } catch (final InterruptedException e) {
-            // Do nothing
+            this.logger.error(String.format("Server failed to close \"%s\" after %d milliseconds.", super.getName(), maximumTimeToWait));
         }
 
         this.logger.info("Closed.");
