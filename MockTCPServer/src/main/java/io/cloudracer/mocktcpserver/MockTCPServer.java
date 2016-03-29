@@ -29,6 +29,10 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private final Logger logger = LogManager.getLogger(getRootLoggerName());
 
+    private enum Status {
+        OPEN, CLOSING, CLOSED
+    }
+
     private final static int DEFAULT_PORT = 6789;
     private final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
     private final static byte[] DEFAULT_ACK = { 65 };
@@ -54,7 +58,7 @@ public class MockTCPServer extends Thread implements Closeable {
     private boolean isCloseAfterNextResponse = false;
     private int messagesReceivedCount = 0;
 
-    private boolean isClosed = false;
+    private Status status = Status.OPEN;
 
     /**
      * Start the server on the {@link MockTCPServer#DEFAULT_PORT default} port.
@@ -92,7 +96,7 @@ public class MockTCPServer extends Thread implements Closeable {
     @Override
     public void run() {
         try {
-            while (!isClosed() && (getSocket() != null)) {
+            while ((getStatus() == Status.OPEN) && (getSocket() != null)) {
                 try {
                     setDataStream(null);
                     while ((getDataStream().write(getInputStream().read())) != -1) {
@@ -143,7 +147,9 @@ public class MockTCPServer extends Thread implements Closeable {
         } catch (final Exception e) {
             handleException(e);
         } finally {
-            setClosed(true);
+            setStatus(Status.CLOSING);
+
+            close();
         }
     }
 
@@ -244,7 +250,7 @@ public class MockTCPServer extends Thread implements Closeable {
         this.logger.debug(String.format("Sent the response: %s.", new String(response)));
 
         if (getIsCloseAfterNextResponse()) {
-            setClosed(true);
+            setStatus(Status.CLOSED);
         }
     }
 
@@ -403,47 +409,49 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     @Override
     public synchronized void close() {
-        if (!isClosed()) {
-            this.logger.info("Closing...");
+        this.logger.info("Closing...");
 
-            setClosed(true);
-            try {
-                if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
-                    getConnectionSocket().shutdownInput();
-                }
-                if ((getConnectionSocket() != null) && !getConnectionSocket().isOutputShutdown()) {
-                    getConnectionSocket().shutdownOutput();
-                }
-            } catch (final Exception e) {
-                handleException(e);
+        if (getStatus() != Status.CLOSING) {
+            setStatus(Status.CLOSED);
+        }
+        try {
+            if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
+                getConnectionSocket().shutdownInput();
             }
-            this.logger.info("Closing input stream...");
-            IOUtils.closeQuietly(this.inputStream);
-            this.logger.info("Closed input stream.");
-            this.logger.info("Closing output stream...");
-            IOUtils.closeQuietly(this.outputStream);
-            this.logger.info("Closed output stream.");
-            this.logger.info("Closing the socket...");
-            IOUtils.closeQuietly(this.socket);
-            this.logger.info("Closed the socket.");
+            if ((getConnectionSocket() != null) && !getConnectionSocket().isOutputShutdown()) {
+                getConnectionSocket().shutdownOutput();
+            }
+        } catch (final Exception e) {
+            handleException(e);
+        }
+        this.logger.info("Closing input stream...");
+        IOUtils.closeQuietly(this.inputStream);
+        this.logger.info("Closed input stream.");
+        this.logger.info("Closing output stream...");
+        IOUtils.closeQuietly(this.outputStream);
+        this.logger.info("Closed output stream.");
+        this.logger.info("Closing the socket...");
+        IOUtils.closeQuietly(this.socket);
+        this.logger.info("Closed the socket.");
 
+        if (getStatus() != Status.CLOSING) {
             try {
                 final long maximumTimeToWait = 10000;
                 super.join(maximumTimeToWait);
             } catch (final InterruptedException e) {
                 // Do nothing
             }
-
-            this.logger.info("Closed.");
         }
+
+        this.logger.info("Closed.");
     }
 
-    private boolean isClosed() {
-        return this.isClosed;
+    private Status getStatus() {
+        return this.status;
     }
 
-    private synchronized void setClosed(final boolean isClosed) {
-        this.isClosed = isClosed;
+    private synchronized void setStatus(final Status status) {
+        this.status = status;
     }
 
     private int getPort() {
