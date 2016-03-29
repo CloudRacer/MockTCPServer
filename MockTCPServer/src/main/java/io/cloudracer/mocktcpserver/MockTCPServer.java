@@ -82,7 +82,8 @@ public class MockTCPServer extends Thread implements Closeable {
          * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
          */
         try {
-            TimeUnit.MILLISECONDS.sleep(20);
+            final long sleepDuration = 20;
+            TimeUnit.MILLISECONDS.sleep(sleepDuration);
         } catch (final InterruptedException e) {
             // Do nothing.
         }
@@ -142,7 +143,7 @@ public class MockTCPServer extends Thread implements Closeable {
         } catch (final Exception e) {
             handleException(e);
         } finally {
-            close();
+            setClosed(true);
         }
     }
 
@@ -402,46 +403,39 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     @Override
     public synchronized void close() {
-        this.logger.info("Closing...");
+        if (!isClosed()) {
+            this.logger.info("Closing...");
 
-        setClosed(true);
-        try {
-            if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
-                getConnectionSocket().shutdownInput();
+            setClosed(true);
+            try {
+                if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
+                    getConnectionSocket().shutdownInput();
+                }
+                if ((getConnectionSocket() != null) && !getConnectionSocket().isOutputShutdown()) {
+                    getConnectionSocket().shutdownOutput();
+                }
+            } catch (final Exception e) {
+                handleException(e);
             }
-            if ((getConnectionSocket() != null) && !getConnectionSocket().isOutputShutdown()) {
-                getConnectionSocket().shutdownOutput();
+            this.logger.info("Closing input stream...");
+            IOUtils.closeQuietly(this.inputStream);
+            this.logger.info("Closed input stream.");
+            this.logger.info("Closing output stream...");
+            IOUtils.closeQuietly(this.outputStream);
+            this.logger.info("Closed output stream.");
+            this.logger.info("Closing the socket...");
+            IOUtils.closeQuietly(this.socket);
+            this.logger.info("Closed the socket.");
+
+            try {
+                final long maximumTimeToWait = 10000;
+                super.join(maximumTimeToWait);
+            } catch (final InterruptedException e) {
+                // Do nothing
             }
-        } catch (final Exception e) {
-            handleException(e);
+
+            this.logger.info("Closed.");
         }
-        this.logger.info("Closing input stream...");
-        IOUtils.closeQuietly(this.inputStream);
-        this.logger.info("Closed input stream.");
-        this.logger.info("Closing output stream...");
-        IOUtils.closeQuietly(this.outputStream);
-        this.logger.info("Closed output stream.");
-        this.logger.info("Closing the socket...");
-        IOUtils.closeQuietly(this.socket);
-        this.logger.info("Closed the socket.");
-
-        final long maximumTimeToWait = 10000;
-        try {
-
-            if (!super.isAlive()) {
-                this.logger.trace(String.format("Server Thread(%s) alive: \"%s\".", super.getName(), super.isAlive()));
-            }
-            if (super.isInterrupted()) {
-                this.logger.trace(String.format("Server Thread(%s) interrupted: \"%s\".", super.getName(), super.isInterrupted()));
-            }
-            super.interrupt();
-            // Wait a maximum of 10 seconds for the server thread to close.
-            super.join(maximumTimeToWait);
-        } catch (final InterruptedException e) {
-            this.logger.error(String.format("Server failed to close \"%s\" after %d milliseconds.", super.getName(), maximumTimeToWait));
-        }
-
-        this.logger.info("Closed.");
     }
 
     private boolean isClosed() {
