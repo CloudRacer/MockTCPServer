@@ -414,6 +414,33 @@ public class MockTCPServer extends Thread implements Closeable {
         if (getStatus() != Status.CLOSING) {
             setStatus(Status.CLOSED);
         }
+
+        closeStreams();
+
+        while (super.isAlive() && (getStatus() != Status.CLOSING)) {
+            final long maximumTimeToWait = 10000;
+
+            try {
+                super.join(maximumTimeToWait);
+            } catch (final InterruptedException e) {
+                // Do nothing.
+            }
+
+            // Intermittently, the server fails to close. Retry it indefinitely until it does close; an improvement of blocking forever with no feedback.
+            if (super.isAlive()) {
+                this.logger.error(String.format("Failed to close the Server(%s) in %d milliseconds. Trying again to shurdown the Server...", super.getName(), maximumTimeToWait));
+                if (!super.isInterrupted()) {
+                    this.logger.trace(String.format("Interrupting the Server Thread(%s)...", super.getName()));
+
+                    closeStreams();
+                }
+            }
+        }
+
+        this.logger.info("Closed.");
+    }
+
+    private void closeStreams() {
         try {
             if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
                 getConnectionSocket().shutdownInput();
@@ -424,27 +451,12 @@ public class MockTCPServer extends Thread implements Closeable {
         } catch (final Exception e) {
             handleException(e);
         }
-        this.logger.info("Closing input stream...");
-        IOUtils.closeQuietly(this.inputStream);
-        this.logger.info("Closed input stream.");
-        this.logger.info("Closing output stream...");
-        IOUtils.closeQuietly(this.outputStream);
-        this.logger.info("Closed output stream.");
+        setInputStream(null);
+        setOutputStream(null);
+        // Do not set the ServerSocket to null; just close the Stream.
         this.logger.info("Closing the socket...");
         IOUtils.closeQuietly(this.socket);
         this.logger.info("Closed the socket.");
-
-        try {
-            if (getStatus() != Status.CLOSING) {
-                final long maximumTimeToWait = 10000;
-                super.join(maximumTimeToWait);
-            }
-        } catch (final InterruptedException e) {
-            // Do nothing
-        }
-
-        this.logger.info("Closed.");
-
     }
 
     private Status getStatus() {
@@ -486,16 +498,16 @@ public class MockTCPServer extends Thread implements Closeable {
         return this.socket;
     }
 
+    private void setSocket(final ServerSocket socket) {
+        this.socket = socket;
+    }
+
     private Socket getConnectionSocket() {
         return this.connectionSocket;
     }
 
     private void setConnectionSocket(final Socket connectionSocket) {
         this.connectionSocket = connectionSocket;
-    }
-
-    private void setSocket(final ServerSocket socket) {
-        this.socket = socket;
     }
 
     private DataStream getDataStream() {
@@ -519,6 +531,10 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setInputStream(final BufferedReader inputStream) {
+        this.logger.info("Closing input stream...");
+        IOUtils.closeQuietly(this.inputStream);
+        this.logger.info("Closed input stream.");
+
         this.inputStream = inputStream;
     }
 
