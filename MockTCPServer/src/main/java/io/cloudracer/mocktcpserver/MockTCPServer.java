@@ -405,7 +405,6 @@ public class MockTCPServer extends Thread implements Closeable {
         this.logger.info("Closing...");
 
         setClosed(true);
-        super.interrupt();
         try {
             if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
                 getConnectionSocket().shutdownInput();
@@ -427,14 +426,14 @@ public class MockTCPServer extends Thread implements Closeable {
         this.logger.info("Closed the socket.");
 
         try {
-            // Wait for the server thread to close.
             if (!super.isAlive()) {
                 this.logger.trace(String.format("Server Thread \"%s\" is not alive.", super.getName()));
             }
             if (!super.isInterrupted()) {
                 this.logger.trace(String.format("Server Thread \"%s\" is not interrupted.", super.getName()));
             }
-            // super.interrupt();
+            super.interrupt();
+            // Wait for the server thread to close.
             super.join();
         } catch (final InterruptedException e) {
             // Do nothing
