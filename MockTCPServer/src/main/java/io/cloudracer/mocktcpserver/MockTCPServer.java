@@ -1,7 +1,5 @@
 package io.cloudracer.mocktcpserver;
 
-import static org.junit.Assert.assertThat;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.DataOutputStream;
@@ -17,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Assert;
 
 import io.cloudracer.mocktcpserver.datastream.DataStream;
 import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
@@ -28,12 +27,12 @@ import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
  */
 public class MockTCPServer extends Thread implements Closeable {
 
-    private Logger logger = LogManager.getLogger(getRootLoggerName());
+    private final Logger logger = LogManager.getLogger(getRootLoggerName());
 
-    public final static int DEFAULT_PORT = 6789;
-    public final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
-    public final static byte[] DEFAULT_ACK = { 65 };
-    public final static byte[] DEFAULT_NAK = { 78 };
+    private final static int DEFAULT_PORT = 6789;
+    private final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
+    private final static byte[] DEFAULT_ACK = { 65 };
+    private final static byte[] DEFAULT_NAK = { 78 };
 
     private byte[] terminator = null;
     private byte[] ack = null;
@@ -59,21 +58,21 @@ public class MockTCPServer extends Thread implements Closeable {
 
     /**
      * Start the server on the {@link MockTCPServer#DEFAULT_PORT default} port.
-     * 
+     *
      * This constructor is the equivalent of passing the {@link MockTCPServer#DEFAULT_PORT default} port to the other {@link MockTCPServer#MockTCPServer(int) constructor}.
      */
     public MockTCPServer() {
-        this(DEFAULT_PORT);
+        this(MockTCPServer.DEFAULT_PORT);
     }
 
     /**
      * Start the server on the specified port.
-     * 
+     *
      * @param port
      *        the TCP Server will listen on this port.
      */
     public MockTCPServer(final int port) {
-        logger.info("Starting...");
+        this.logger.info("Starting...");
 
         super.setName(String.format("%s-%d", getThreadName(), port));
 
@@ -84,7 +83,7 @@ public class MockTCPServer extends Thread implements Closeable {
          */
         try {
             TimeUnit.MILLISECONDS.sleep(20);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // Do nothing.
         }
     }
@@ -107,17 +106,17 @@ public class MockTCPServer extends Thread implements Closeable {
                         setAssertionError(null);
                         try {
                             if (getExpectedMessage() != null) {
-                                assertThat("Unexpected message from the AM Host Client.", getDataStream(), getExpectedMessage());
+                                Assert.assertThat("Unexpected message from the AM Host Client.", getDataStream(), getExpectedMessage());
                             }
-                        } catch (AssertionError e) {
+                        } catch (final AssertionError e) {
                             setAssertionError(e);
                         }
                         onMessage(getDataStream());
                         // If the stream has not ended and a response is required, send one.
-                        if (getDataStream().getLastByte() != -1 && !getIsAlwaysNoResponse()) {
+                        if ((getDataStream().getLastByte() != -1) && !getIsAlwaysNoResponse()) {
                             byte[] response = null;
 
-                            if (getAssertionError() == null && !getIsAlwaysNAKResponse()) {
+                            if ((getAssertionError() == null) && !getIsAlwaysNAKResponse()) {
                                 response = getACK();
                             } else {
                                 response = getNAK();
@@ -128,40 +127,40 @@ public class MockTCPServer extends Thread implements Closeable {
                             afterResponse(response);
                         }
                     }
-                } catch (SocketException e) {
+                } catch (final SocketException e) {
                     handleException(e);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     handleException(e);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     handleException(e);
                 }
             }
-        } catch (SocketException e) {
+        } catch (final SocketException e) {
             handleException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             handleException(e);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             handleException(e);
         } finally {
             close();
         }
     }
 
-    private void handleException(Exception e) {
+    private void handleException(final Exception e) {
         if (e.getMessage().toLowerCase().equals("socket closed")) {
-            logger.warn(e.getMessage());
+            this.logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("socket input is shutdown")) {
-            logger.warn(e.getMessage());
+            this.logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("socket output is shutdown")) {
-            logger.warn(e.getMessage());
+            this.logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("socket is closed")) {
-            logger.warn(e.getMessage());
+            this.logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("stream closed")) {
-            logger.warn(e.getMessage());
+            this.logger.warn(e.getMessage());
         } else if (e.getMessage().toLowerCase().equals("connection reset")) {
-            logger.warn(e.getMessage());
+            this.logger.warn(e.getMessage());
         } else {
-            logger.error(e.getMessage(), e);
+            this.logger.error(e.getMessage(), e);
         }
     }
 
@@ -171,11 +170,11 @@ public class MockTCPServer extends Thread implements Closeable {
      * @return the terminator.
      */
     public byte[] getTerminator() {
-        if (terminator == null) {
-            terminator = DEFAULT_TERMINATOR;
+        if (this.terminator == null) {
+            this.terminator = MockTCPServer.DEFAULT_TERMINATOR;
         }
 
-        return terminator;
+        return this.terminator;
     }
 
     /**
@@ -184,7 +183,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param terminator
      *        the terminator.
      */
-    public synchronized void setTerminator(byte[] terminator) {
+    public synchronized void setTerminator(final byte[] terminator) {
         this.terminator = terminator;
     }
 
@@ -195,10 +194,10 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     public byte[] getACK() {
         if (this.ack == null) {
-            this.ack = DEFAULT_ACK;
+            this.ack = MockTCPServer.DEFAULT_ACK;
         }
 
-        return ack;
+        return this.ack;
     }
 
     /**
@@ -207,7 +206,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param ack
      *        positive acknowledgement
      */
-    public synchronized void setACK(byte[] ack) {
+    public synchronized void setACK(final byte[] ack) {
         this.ack = ack;
     }
 
@@ -218,10 +217,10 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     public byte[] getNAK() {
         if (this.nak == null) {
-            this.nak = DEFAULT_NAK;
+            this.nak = MockTCPServer.DEFAULT_NAK;
         }
 
-        return nak;
+        return this.nak;
     }
 
     /**
@@ -230,7 +229,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param nak
      *        negative acknowledgement
      */
-    public synchronized void setNAK(byte[] nak) {
+    public synchronized void setNAK(final byte[] nak) {
         this.nak = nak;
     }
 
@@ -241,7 +240,7 @@ public class MockTCPServer extends Thread implements Closeable {
      *        the response that has been sent.
      */
     public synchronized void afterResponse(final byte[] response) {
-        logger.debug(String.format("Sent the response: %s.", new String(response)));
+        this.logger.debug(String.format("Sent the response: %s.", new String(response)));
 
         if (getIsCloseAfterNextResponse()) {
             setClosed(true);
@@ -255,7 +254,7 @@ public class MockTCPServer extends Thread implements Closeable {
      *        the message received.
      */
     public void onMessage(final DataStream message) {
-        logger.info(String.format("Received: %s.", message.toString()));
+        this.logger.info(String.format("Received: %s.", message.toString()));
     }
 
     /**
@@ -273,7 +272,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param assertionError
      *        a recorded error.
      */
-    private void setAssertionError(AssertionError assertionError) {
+    private void setAssertionError(final AssertionError assertionError) {
         this.assertionError = assertionError;
     }
 
@@ -304,10 +303,21 @@ public class MockTCPServer extends Thread implements Closeable {
         this.setIsAlwaysNAKResponse = isAlwaysNAKResponse;
     }
 
+    /**
+     * The server <b>never</b> return a response, when true.
+     *
+     * @return true when the server will <b>never</b> return a response. Default is false.
+     */
     public boolean getIsAlwaysNoResponse() {
-        return setIsAlwaysNoResponse;
+        return this.setIsAlwaysNoResponse;
     }
 
+    /**
+     * The server <b>never</b> return a response, when true.
+     *
+     * @param isAlwaysNoResponse
+     *        true when the server will <b>never</b> return a response. Default is false.
+     */
     public synchronized void setIsAlwaysNoResponse(final boolean isAlwaysNoResponse) {
         this.setIsAlwaysNoResponse = isAlwaysNoResponse;
     }
@@ -319,10 +329,10 @@ public class MockTCPServer extends Thread implements Closeable {
      * <p>
      * Default is false.
      *
-     * @return if true, the Server will close after the message processing is complete.
+     * @return if true, the Server will close after the message processing is complete. Default is false.
      */
     public boolean getIsCloseAfterNextResponse() {
-        return isCloseAfterNextResponse;
+        return this.isCloseAfterNextResponse;
     }
 
     /**
@@ -333,9 +343,9 @@ public class MockTCPServer extends Thread implements Closeable {
      * Default is false.
      *
      * @param isCloseAfterNextResponse
-     *        if true, the Server will close after the message processing is complete.
+     *        if true, the Server will close after the message processing is complete. Default is false.
      */
-    public synchronized void setIsCloseAfterNextResponse(boolean isCloseAfterNextResponse) {
+    public synchronized void setIsCloseAfterNextResponse(final boolean isCloseAfterNextResponse) {
         this.isCloseAfterNextResponse = isCloseAfterNextResponse;
     }
 
@@ -345,7 +355,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @return ignore if null.
      */
     public DataStreamRegexMatcher getExpectedMessage() {
-        return expectedMessage;
+        return this.expectedMessage;
     }
 
     /**
@@ -369,10 +379,20 @@ public class MockTCPServer extends Thread implements Closeable {
         setExpectedMessage(expectedMessage.toString());
     }
 
+    /**
+     * The number of messages received by the server since the server was started.
+     *
+     * @return The number of messages received by the server since the server was started. Default is 0.
+     */
     public int getMessagesReceivedCount() {
-        return messagesReceivedCount;
+        return this.messagesReceivedCount;
     }
 
+    /**
+     * Add one to the number of messages received by the server since the server was started.
+     *
+     * see {@link MockTCPServer#getMessagesReceivedCount()}
+     */
     private void incrementMessagesReceivedCount() {
         this.messagesReceivedCount++;
     }
@@ -382,53 +402,53 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     @Override
     public synchronized void close() {
-        logger.info("Closing...");
+        this.logger.info("Closing...");
 
         setClosed(true);
         super.interrupt();
         try {
-            if (getConnectionSocket() != null && !getConnectionSocket().isInputShutdown()) {
+            if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
                 getConnectionSocket().shutdownInput();
             }
-            if (getConnectionSocket() != null && !getConnectionSocket().isOutputShutdown()) {
+            if ((getConnectionSocket() != null) && !getConnectionSocket().isOutputShutdown()) {
                 getConnectionSocket().shutdownOutput();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             handleException(e);
         }
-        logger.info("Closing input stream...");
-        IOUtils.closeQuietly(inputStream);
-        logger.info("Closed input stream.");
-        logger.info("Closing output stream...");
-        IOUtils.closeQuietly(outputStream);
-        logger.info("Closed output stream.");
-        logger.info("Closing the socket...");
-        IOUtils.closeQuietly(socket);
-        logger.info("Closed the socket.");
+        this.logger.info("Closing input stream...");
+        IOUtils.closeQuietly(this.inputStream);
+        this.logger.info("Closed input stream.");
+        this.logger.info("Closing output stream...");
+        IOUtils.closeQuietly(this.outputStream);
+        this.logger.info("Closed output stream.");
+        this.logger.info("Closing the socket...");
+        IOUtils.closeQuietly(this.socket);
+        this.logger.info("Closed the socket.");
 
         try {
             // Wait for the server thread to close.
             super.join();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // Do nothing
         }
 
-        logger.info("Closed.");
+        this.logger.info("Closed.");
     }
 
     private boolean isClosed() {
-        return isClosed;
+        return this.isClosed;
     }
 
-    private synchronized void setClosed(boolean isClosed) {
+    private synchronized void setClosed(final boolean isClosed) {
         this.isClosed = isClosed;
     }
 
     private int getPort() {
-        return port;
+        return this.port;
     }
 
-    private void setPort(int port) {
+    private void setPort(final int port) {
         this.port = port;
     }
 
@@ -441,64 +461,64 @@ public class MockTCPServer extends Thread implements Closeable {
      * @throws IOException
      */
     private ServerSocket getSocket() throws IOException {
-        if (socket == null) {
-            logger.info(String.format("Opening a socket on port %d...", getPort()));
+        if (this.socket == null) {
+            this.logger.info(String.format("Opening a socket on port %d...", getPort()));
             setSocket(new ServerSocket(getPort()));
-            logger.info("Waiting for a connection...");
-            setConnectionSocket(socket.accept());
-            logger.info(String.format("Accepted a connection."));
+            this.logger.info("Waiting for a connection...");
+            setConnectionSocket(this.socket.accept());
+            this.logger.info(String.format("Accepted a connection."));
             setInputStream(new BufferedReader(new InputStreamReader(getConnectionSocket().getInputStream())));
             setOutputStream(new DataOutputStream(getConnectionSocket().getOutputStream()));
-            logger.info("Ready to receive input.");
+            this.logger.info("Ready to receive input.");
         }
 
-        return socket;
+        return this.socket;
     }
 
     private Socket getConnectionSocket() {
-        return connectionSocket;
+        return this.connectionSocket;
     }
 
-    private void setConnectionSocket(Socket connectionSocket) {
+    private void setConnectionSocket(final Socket connectionSocket) {
         this.connectionSocket = connectionSocket;
     }
 
-    private void setSocket(ServerSocket socket) {
+    private void setSocket(final ServerSocket socket) {
         this.socket = socket;
     }
 
     private DataStream getDataStream() {
-        if (dataStream == null) {
-            dataStream = new DataStream(getTerminator().length, getRootLoggerName());
+        if (this.dataStream == null) {
+            this.dataStream = new DataStream(getTerminator().length, getRootLoggerName());
         }
 
-        return dataStream;
+        return this.dataStream;
     }
 
-    private void setDataStream(DataStream dataStream) {
-        logger.debug("Closing the DataStream...");
+    private void setDataStream(final DataStream dataStream) {
+        this.logger.debug("Closing the DataStream...");
         IOUtils.closeQuietly(this.dataStream);
-        logger.debug("Closed the DataStream.");
+        this.logger.debug("Closed the DataStream.");
 
         this.dataStream = dataStream;
     }
 
     private BufferedReader getInputStream() {
-        return inputStream;
+        return this.inputStream;
     }
 
-    private void setInputStream(BufferedReader inputStream) {
+    private void setInputStream(final BufferedReader inputStream) {
         this.inputStream = inputStream;
     }
 
     private DataOutputStream getOutputStream() {
-        return outputStream;
+        return this.outputStream;
     }
 
-    private void setOutputStream(DataOutputStream outputStream) {
-        logger.info("Closing the output stream...");
+    private void setOutputStream(final DataOutputStream outputStream) {
+        this.logger.info("Closing the output stream...");
         IOUtils.closeQuietly(this.outputStream);
-        logger.info("Closed the output stream.");
+        this.logger.info("Closed the output stream.");
 
         this.outputStream = outputStream;
     }
