@@ -434,16 +434,17 @@ public class MockTCPServer extends Thread implements Closeable {
         IOUtils.closeQuietly(this.socket);
         this.logger.info("Closed the socket.");
 
-        if (getStatus() != Status.CLOSING) {
-            try {
+        try {
+            if (getStatus() != Status.CLOSING) {
                 final long maximumTimeToWait = 10000;
                 super.join(maximumTimeToWait);
-            } catch (final InterruptedException e) {
-                // Do nothing
             }
+        } catch (final InterruptedException e) {
+            // Do nothing
         }
 
         this.logger.info("Closed.");
+
     }
 
     private Status getStatus() {
