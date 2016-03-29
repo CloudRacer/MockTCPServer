@@ -429,7 +429,7 @@ public class MockTCPServer extends Thread implements Closeable {
             if (!super.isAlive()) {
                 this.logger.trace(String.format("Server Thread \"%s\" is not alive.", super.getName()));
             }
-            if (!super.isInterrupted()) {
+            if (super.isInterrupted()) {
                 this.logger.trace(String.format("Server Thread \"%s\" is not interrupted.", super.getName()));
             }
             super.interrupt();
