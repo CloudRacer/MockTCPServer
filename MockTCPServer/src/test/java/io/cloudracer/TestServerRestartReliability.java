@@ -22,7 +22,8 @@ public class TestServerRestartReliability extends AbstractTestTools {
     @Override
     @Before
     public void setUp() throws IOException {
-        super.setUp();
+        getServer();
+        getClient();
     }
 
     @Override
@@ -38,6 +39,7 @@ public class TestServerRestartReliability extends AbstractTestTools {
      */
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
     public void serverRestart() throws Exception {
+        resetLogMonitor();
 
         for (int i = 0; i < TestServerRestartReliability.TOTAL_SERVER_RESTARTS; i++) {
             this.logger.info(String.format("Restart itteration: %d", i));
