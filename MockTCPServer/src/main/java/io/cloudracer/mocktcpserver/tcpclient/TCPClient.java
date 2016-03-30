@@ -162,7 +162,7 @@ public class TCPClient implements Closeable {
      * @throws IOException
      * @throws TCPClientUnexpectedResponseException
      */
-    private DataStream getResponse() throws IOException, TCPClientUnexpectedResponseException {
+    public DataStream getResponse() throws IOException, TCPClientUnexpectedResponseException {
         return getResponse(getResponseTerminator());
     }
 
