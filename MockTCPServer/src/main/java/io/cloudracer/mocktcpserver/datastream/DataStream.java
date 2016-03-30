@@ -31,8 +31,7 @@ public class DataStream implements Closeable {
      * <p>
      * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#DEFAULT_TAIL_MAXIMUM_LENGTH} and a default {@link LogManager#getLogger(Class) log4j root logger} of the Class name.
      */
-    public DataStream() {
-    }
+    public DataStream() {}
 
     /**
      * Specify a log4j root logger.
@@ -94,7 +93,7 @@ public class DataStream implements Closeable {
 
     /**
      * Delegate of {@link ByteArrayOutputStream#size()}.
-     * 
+     *
      * @return the current size of the stream. see source documentation
      */
     public synchronized int size() {
@@ -102,10 +101,10 @@ public class DataStream implements Closeable {
     }
 
     private synchronized ByteArrayOutputStream getOutput() {
-        if (output == null) {
-            output = new ByteArrayOutputStream() {
+        if (this.output == null) {
+            this.output = new ByteArrayOutputStream() {
                 @Override
-                public synchronized void write(int b) {
+                public synchronized void write(final int b) {
                     super.write(b);
                     setLastByte((byte) b);
                     addToTailList();
@@ -113,12 +112,12 @@ public class DataStream implements Closeable {
             };
         }
 
-        return output;
+        return this.output;
     }
 
     /**
      * Delegate of {@link ByteArrayOutputStream#toByteArray()}.
-     * 
+     *
      * @return a byte array, containing a copy of the DataStream.
      */
     public synchronized byte[] toByteArray() {
@@ -142,13 +141,13 @@ public class DataStream implements Closeable {
             inputStream = new PipedInputStream(getOutput().size());
             final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
 
-            Thread copy = new Thread(new Runnable() {
+            final Thread copy = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         getOutput().writeTo(outputStream);
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
+                    } catch (final IOException e) {
+                        DataStream.this.logger.error(e.getMessage(), e);
                     }
                 }
             });
@@ -156,8 +155,8 @@ public class DataStream implements Closeable {
             copy.start();
             try {
                 copy.join();
-            } catch (InterruptedException e) {
-                logger.error(e.getCause(), e);
+            } catch (final InterruptedException e) {
+                this.logger.error(e.getCause(), e);
             }
         }
 
@@ -173,7 +172,7 @@ public class DataStream implements Closeable {
      * @throws IOException
      */
     private void setOutput(final ByteArrayOutputStream output) throws IOException {
-        if (output == null && this.output != null) {
+        if ((output == null) && (this.output != null)) {
             IOUtils.closeQuietly(this.output);
         }
 
@@ -187,11 +186,11 @@ public class DataStream implements Closeable {
      * @return the length of the tail. Default of {@link DataStream#DEFAULT_TAIL_MAXIMUM_LENGTH}.
      */
     public int getTailMaximumLength() {
-        if (tailMaximumLength == null) {
-            tailMaximumLength = DEFAULT_TAIL_MAXIMUM_LENGTH;
+        if (this.tailMaximumLength == null) {
+            this.tailMaximumLength = DataStream.DEFAULT_TAIL_MAXIMUM_LENGTH;
         }
 
-        return tailMaximumLength;
+        return this.tailMaximumLength;
     }
 
     private void setTailMaximumLength(final int tailLength) {
@@ -204,11 +203,11 @@ public class DataStream implements Closeable {
      * @return the {@link Bytes} that represent the tail of the DataStrean.
      */
     private Deque<Byte> getTailQueue() {
-        if (tailQueue == null) {
-            tailQueue = new ArrayDeque<Byte>(getTailMaximumLength());
+        if (this.tailQueue == null) {
+            this.tailQueue = new ArrayDeque<Byte>(getTailMaximumLength());
         }
 
-        return tailQueue;
+        return this.tailQueue;
     }
 
     /**
@@ -220,7 +219,7 @@ public class DataStream implements Closeable {
         // Convert the list to an array.
         final byte[] tail = new byte[getTailQueue().size()];
         int i = 0;
-        for (Iterator<Byte> iterator = getTailQueue().iterator(); iterator.hasNext();) {
+        for (final Iterator<Byte> iterator = getTailQueue().iterator(); iterator.hasNext();) {
             final Byte nextByte = iterator.next();
             tail[i] = nextByte;
 
@@ -243,7 +242,7 @@ public class DataStream implements Closeable {
      * @return the first byte in the stream.
      */
     public Byte getLastByte() {
-        return lastByte;
+        return this.lastByte;
     }
 
     private void setLastByte(final byte lastByte) {
@@ -256,11 +255,11 @@ public class DataStream implements Closeable {
      * @return String the log4j root logger name
      */
     private String getRootLoggerName() {
-        if (rootLoggerName == null) {
-            rootLoggerName = getClssName();
+        if (this.rootLoggerName == null) {
+            this.rootLoggerName = getClssName();
         }
 
-        return (new String(rootLoggerName));
+        return (new String(this.rootLoggerName));
     }
 
     /**
@@ -269,17 +268,17 @@ public class DataStream implements Closeable {
      * @param rootLoggerName
      *        the name of the log4j root logger
      */
-    private void setRootLoggerName(String rootLoggerName) {
+    private void setRootLoggerName(final String rootLoggerName) {
         this.rootLoggerName = new String(rootLoggerName);
-        logger = LogManager.getLogger(String.format("%s.%s", this.rootLoggerName, getClssName()));
+        this.logger = LogManager.getLogger(String.format("%s.%s", this.rootLoggerName, getClssName()));
     }
 
     private Logger getLogger() {
-        if (logger == null) {
-            logger = LogManager.getLogger(String.format("%s.%s", getRootLoggerName(), getClssName()));
+        if (this.logger == null) {
+            this.logger = LogManager.getLogger(String.format("%s.%s", getRootLoggerName(), getClssName()));
         }
 
-        return logger;
+        return this.logger;
     }
 
     private String getThreadName() {
@@ -288,7 +287,7 @@ public class DataStream implements Closeable {
 
         String name = null;
 
-        if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() > 0) {
+        if ((this.getClass().getSimpleName() != null) && (this.getClass().getSimpleName().length() > 0)) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
@@ -315,7 +314,7 @@ public class DataStream implements Closeable {
 
         String name = null;
 
-        if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() != 0) {
+        if ((this.getClass().getSimpleName() != null) && (this.getClass().getSimpleName().length() != 0)) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
@@ -339,7 +338,7 @@ public class DataStream implements Closeable {
 
         try {
             returnValue = getOutput().toString("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             getLogger().error(e.getMessage(), e);
         }
 

@@ -13,12 +13,12 @@ public class DataStreamRegexMatcher extends TypeSafeMatcher<DataStream> {
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText("matches regular expression=`" + regex + "`");
+        description.appendText("matches regular expression=`" + this.regex + "`");
     }
 
     @Override
     public boolean matchesSafely(final DataStream data) {
-        return data.toString().matches(regex);
+        return data.toString().matches(this.regex);
     }
 
     // matcher method you can call on this matcher class
