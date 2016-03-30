@@ -81,6 +81,16 @@ public class TCPClient implements Closeable {
     }
 
     /**
+     * Connect to the {@link TCPClient#getHostName() Server}.
+     *
+     * @throws IOException
+     */
+    public void connect() throws IOException {
+        // Connect to the Server.
+        getSocket();
+    }
+
+    /**
      * Send a message to the {@link TCPClient#getHostName() server} and wait for a response.
      *
      * @param message
