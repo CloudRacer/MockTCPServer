@@ -92,6 +92,13 @@ public class DataStream implements Closeable {
     }
 
     /**
+     * Delegate of {@link ByteArrayOutputStream#reset()}.
+     */
+    public void reset() {
+        getOutput().reset();
+    }
+
+    /**
      * Delegate of {@link ByteArrayOutputStream#size()}.
      *
      * @return the current size of the stream. see source documentation
