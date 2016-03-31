@@ -3,6 +3,7 @@ package io.cloudracer.mocktcpserver.datastream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -14,10 +15,18 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Provide functionality for the handling of an {@link OutputStream}.
+ *
+ * @author John McDonnell
+ */
 public class DataStream implements Closeable {
 
     private Logger logger;
 
+    /**
+     * By default, the DataStream will maintain a {@link DataStream#getTail() tail} with this {@link DataStream#getTailMaximumLength() maximum length}.
+     */
     public final static int DEFAULT_TAIL_MAXIMUM_LENGTH = 3;
 
     private ByteArrayOutputStream output;
@@ -36,8 +45,7 @@ public class DataStream implements Closeable {
     /**
      * Specify a log4j root logger.
      *
-     * @param rootLoggerName
-     *        log4j root logger
+     * @param rootLoggerName log4j root logger.
      */
     public DataStream(final String rootLoggerName) {
         setRootLoggerName(rootLoggerName);
@@ -46,8 +54,7 @@ public class DataStream implements Closeable {
     /**
      * Specify a {@link DataStream#getTailMaximumLength() maximum length of the stream tail}.
      *
-     * @param tailMaximumLength
-     *        tail length.
+     * @param tailMaximumLength tail length.
      */
     public DataStream(final int tailMaximumLength) {
         setTailMaximumLength(tailMaximumLength);
@@ -56,10 +63,8 @@ public class DataStream implements Closeable {
     /**
      * Specify a {@link DataStream#getRootLoggerName() log4j root logger} and the {@link DataStream#getTailMaximumLength() maximum length of the stream tail}.
      *
-     * @param rootLoggerName
-     *        log4j root logger.
-     * @param tailMaximumLength
-     *        tail length.
+     * @param rootLoggerName log4j root logger.
+     * @param tailMaximumLength tail length.
      */
     public DataStream(final int tailMaximumLength, final String rootLoggerName) {
         setTailMaximumLength(tailMaximumLength);
@@ -69,11 +74,9 @@ public class DataStream implements Closeable {
     /**
      * Write byte to the {@link ByteArrayOutputStream#write(int)}.
      *
-     * @param data
-     *        written to the {@link ByteArrayOutputStream}.
+     * @param data written to the {@link ByteArrayOutputStream}.
      * @return the data written (equal to the data parameter).
-     * @throws IOException
-     *         see source documentation
+     * @throws IOException see source documentation
      */
     public synchronized int write(final int data) throws IOException {
         getOutput().write(data);
@@ -84,7 +87,7 @@ public class DataStream implements Closeable {
     /**
      * {@link PipedOutputStream#close() close} the {@link PipedOutputStream output stream}.
      *
-     * @throws IOException
+     * @throws IOException see source documentation
      */
     @Override
     public void close() throws IOException {
@@ -101,7 +104,7 @@ public class DataStream implements Closeable {
     /**
      * Delegate of {@link ByteArrayOutputStream#size()}.
      *
-     * @return the current size of the stream. see source documentation
+     * @return see source documentation
      */
     public synchronized int size() {
         return getOutput().size();
@@ -125,7 +128,7 @@ public class DataStream implements Closeable {
     /**
      * Delegate of {@link ByteArrayOutputStream#toByteArray()}.
      *
-     * @return a byte array, containing a copy of the DataStream.
+     * @return see source documentation.
      */
     public synchronized byte[] toByteArray() {
         return getOutput().toByteArray();
@@ -137,7 +140,7 @@ public class DataStream implements Closeable {
      * The stream is copied without making one or more intermediary copies of the content (i.e. it is memory efficient).
      *
      * @return {@link PipedInputStream input stream} populated with all available data.
-     * @throws IOException
+     * @throws IOException see source documentation.
      */
     public PipedInputStream toInputStream() throws IOException {
         PipedInputStream inputStream = null;
@@ -174,9 +177,8 @@ public class DataStream implements Closeable {
     /**
      * {@link ByteArrayOutputStream#close() close} the {@link ByteArrayOutputStream output stream}.
      *
-     * @param output
-     *        if null, the current {@link ByteArrayOutputStream output stream} is closed before being reinitialised.
-     * @throws IOException
+     * @param output if null, the current {@link ByteArrayOutputStream output stream} is closed before being reinitialised.
+     * @throws IOException see source documentation.
      */
     private void setOutput(final ByteArrayOutputStream output) throws IOException {
         if ((output == null) && (this.output != null)) {
