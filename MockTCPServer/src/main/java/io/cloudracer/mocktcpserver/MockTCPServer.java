@@ -416,7 +416,7 @@ public class MockTCPServer extends Thread implements Closeable {
 
             // Intermittently, the server fails to close. Retry it indefinitely until it does close; an improvement of blocking forever with no feedback.
             if (super.isAlive()) {
-                this.logger.error(String.format("Failed to close the Server(%s) in %d milliseconds. Trying again to shurdown the Server...", super.getName(), maximumTimeToWait));
+                this.logger.warn(String.format("Failed to close the Server(%s) in %d milliseconds. Trying again to shutdown the Server...", super.getName(), maximumTimeToWait));
                 if (!super.isInterrupted()) {
                     this.logger.trace(String.format("Interrupting the Server Thread(%s)...", super.getName()));
 
