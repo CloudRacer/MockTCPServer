@@ -12,38 +12,51 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
-import io.cloudracer.TestConstants;
 import io.cloudracer.mocktcpserver.datastream.DataStream;
 
+/**
+ * Stream consistency, robustness and performance.
+ */
 public class TestDataStreamUT extends AbstractTestTools {
 
+    @Override
     @Before
     public void setUp() {
-        resetLogMonitor();
+        this.resetLogMonitor();
     }
 
+    /**
+     * Write to the stream - fundamental functionality.
+     *
+     * @throws IOException see source documentation.
+     */
     @Test
     public void dataStream() throws IOException {
-        DataStream dataStream = new DataStream(this.getClass().getSimpleName());
+        final DataStream dataStream = new DataStream(this.getClass().getSimpleName());
 
-        writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
+        this.writeStringToStream(WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
         dataStream.close();
 
-        checkLogMonitorForUnexpectedMessages();
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
+    /**
+     * Large data write.
+     *
+     * @throws IOException see source documentation.
+     */
     @Test
     public void dataStream10MB() throws IOException {
         final int numberOfBytesToWrite = 10240000; // 10Mb
         final byte testCharacter = 65; // 65 = A.
         final byte testTail[] = new byte[] { 66, 67, 68 }; // 66 = B, 67 = C, 68
                                                            // = D.
-        int totalLength = numberOfBytesToWrite + testTail.length;
-        byte testStream[] = new byte[totalLength];
+        final int totalLength = numberOfBytesToWrite + testTail.length;
+        final byte testStream[] = new byte[totalLength];
 
-        DataStream dataStream = new DataStream(this.getClass().getSimpleName());
-        checkDataStreamInternalConsistency(dataStream);
+        final DataStream dataStream = new DataStream(this.getClass().getSimpleName());
+        this.checkDataStreamInternalConsistency(dataStream);
 
         // Write the test data to the stream.
         for (int i = 0; i < numberOfBytesToWrite; i++) {
@@ -53,7 +66,7 @@ public class TestDataStreamUT extends AbstractTestTools {
             dataStream.write(testCharacter);
         }
 
-        checkDataStreamInternalConsistency(dataStream, new String(Arrays.copyOf(testStream, testStream.length - testTail.length), "UTF-8"));
+        this.checkDataStreamInternalConsistency(dataStream, new String(Arrays.copyOf(testStream, testStream.length - testTail.length), "UTF-8"));
 
         // Write the test tail to the stream.
         for (int i = 0; i < testTail.length; i++) {
@@ -62,23 +75,28 @@ public class TestDataStreamUT extends AbstractTestTools {
         // Create add the tail data to the test array.
         System.arraycopy(testTail, 0, testStream, testStream.length - testTail.length, testTail.length);
         final String testString = new String(testStream, "UTF-8");
-        checkDataStreamInternalConsistency(dataStream, testString);
+        this.checkDataStreamInternalConsistency(dataStream, testString);
 
         dataStream.close();
 
-        checkLogMonitorForUnexpectedMessages();
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
+    /**
+     * Write with a customised {@link DataStream#getTailMaximumLength() maximum tail length}.
+     *
+     * @throws IOException see source documentation.
+     */
     @Test
     public void dataStreamWithCustomTailLength() throws IOException {
         final int maximumTailLength = 10;
-        DataStream dataStream = new DataStream(maximumTailLength);
+        final DataStream dataStream = new DataStream(maximumTailLength);
 
-        writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
+        this.writeStringToStream(WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
-        checkDataStreamInternalConsistency(dataStream, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
+        this.checkDataStreamInternalConsistency(dataStream, WELLFORMED_XML_WITH_VALID_TERMINATOR);
 
-        checkLogMonitorForUnexpectedMessages();
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     private void writeStringToStream(final String data, final DataStream dataStream) throws IOException {
@@ -87,22 +105,21 @@ public class TestDataStreamUT extends AbstractTestTools {
 
         for (int i = 0; i < dataBytes.length; i++) {
             dataStream.write(dataBytes[i]);
-            byte[] nextByte = new byte[] { dataBytes[i] };
+            final byte[] nextByte = new byte[] { dataBytes[i] };
             dataWritten.append(new String(nextByte, "UTF-8"));
 
-            checkDataStreamInternalConsistency(dataStream, dataWritten.toString());
+            this.checkDataStreamInternalConsistency(dataStream, dataWritten.toString());
         }
     }
 
     private void checkDataStreamInternalConsistency(final DataStream dataStream) throws IOException {
-        checkDataStreamInternalConsistency(dataStream, null);
+        this.checkDataStreamInternalConsistency(dataStream, null);
     }
 
     /**
      * Conduct a series of checks that must always pass on <b>every</b> {@link DataStream} at <b>any</b> time.
      *
-     * @param dataStream
-     *        the {@link DataStream} to check.
+     * @param dataStream the {@link DataStream} to check.
      * @throws IOException
      */
     private void checkDataStreamInternalConsistency(final DataStream dataStream, final String data) throws IOException {
@@ -116,7 +133,7 @@ public class TestDataStreamUT extends AbstractTestTools {
         assertArrayEquals("Input stream of unexpected value.", input, dataStream.toString().getBytes());
 
         // toString() conversion; the converted size equals the DataStrem size.
-        byte[] expectedString = dataStream.toString().getBytes();
+        final byte[] expectedString = dataStream.toString().getBytes();
         assertEquals("toString() conversion of unexpected size.", dataStream.size(), expectedString.length);
         assertArrayEquals("toString() compared to toInputStream().", input, expectedString);
 
