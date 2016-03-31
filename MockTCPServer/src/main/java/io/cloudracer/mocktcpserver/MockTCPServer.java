@@ -72,8 +72,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * Start the server on the specified port.
      *
-     * @param port
-     *        the TCP Server will listen on this port.
+     * @param port the TCP Server will listen on this port.
      */
     public MockTCPServer(final int port) {
         this.logger.info("Starting...");
@@ -187,8 +186,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * The server will read the stream until these characters are encountered.
      *
-     * @param terminator
-     *        the terminator.
+     * @param terminator the terminator.
      */
     public synchronized void setTerminator(final byte[] terminator) {
         this.terminator = terminator;
@@ -210,8 +208,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * The <b>positive</b> acknowledgement response.
      *
-     * @param ack
-     *        positive acknowledgement
+     * @param ack positive acknowledgement
      */
     public synchronized void setACK(final byte[] ack) {
         this.ack = ack;
@@ -233,8 +230,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * The <b>negative</b> acknowledgement response.
      *
-     * @param nak
-     *        negative acknowledgement
+     * @param nak negative acknowledgement
      */
     public synchronized void setNAK(final byte[] nak) {
         this.nak = nak;
@@ -243,8 +239,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * A server callback when a message has been processed, and a response has been sent to the client.
      *
-     * @param response
-     *        the response that has been sent.
+     * @param response the response that has been sent.
      */
     public synchronized void afterResponse(final byte[] response) {
         this.logger.debug(String.format("Sent the response: %s.", new String(response)));
@@ -257,8 +252,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * A server callback when a message is received.
      *
-     * @param message
-     *        the message received.
+     * @param message the message received.
      */
     public void onMessage(final DataStream message) {
         this.logger.info(String.format("Received: %s.", message.toString()));
@@ -276,8 +270,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * An error will be recorded if a message other than that which is {@link MockTCPServer#getAssertionError() expected} is received.
      *
-     * @param assertionError
-     *        a recorded error.
+     * @param assertionError a recorded error.
      */
     private void setAssertionError(final AssertionError assertionError) {
         this.assertionError = assertionError;
@@ -303,8 +296,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * <p>
      * Default is false.
      *
-     * @param isAlwaysNAKResponse
-     *        if true, the Servers next response will always be a NAK.
+     * @param isAlwaysNAKResponse if true, the Servers next response will always be a NAK.
      */
     public synchronized void setIsAlwaysNAKResponse(final boolean isAlwaysNAKResponse) {
         this.setIsAlwaysNAKResponse = isAlwaysNAKResponse;
@@ -322,8 +314,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * The server <b>never</b> return a response, when true.
      *
-     * @param isAlwaysNoResponse
-     *        true when the server will <b>never</b> return a response. Default is false.
+     * @param isAlwaysNoResponse true when the server will <b>never</b> return a response. Default is false.
      */
     public synchronized void setIsAlwaysNoResponse(final boolean isAlwaysNoResponse) {
         this.setIsAlwaysNoResponse = isAlwaysNoResponse;
@@ -349,8 +340,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * <p>
      * Default is false.
      *
-     * @param isCloseAfterNextResponse
-     *        if true, the Server will close after the message processing is complete. Default is false.
+     * @param isCloseAfterNextResponse if true, the Server will close after the message processing is complete. Default is false.
      */
     public synchronized void setIsCloseAfterNextResponse(final boolean isCloseAfterNextResponse) {
         this.isCloseAfterNextResponse = isCloseAfterNextResponse;
@@ -368,8 +358,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
      *
-     * @param expectedMessage
-     *        a Regular Expression that describes what the next received message will be.
+     * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
 
     public synchronized void setExpectedMessage(final String expectedMessage) {
@@ -379,8 +368,7 @@ public class MockTCPServer extends Thread implements Closeable {
     /**
      * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
      *
-     * @param expectedMessage
-     *        a Regular Expression that describes what the next received message will be.
+     * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
     public synchronized void setExpectedMessage(final StringBuffer expectedMessage) {
         setExpectedMessage(expectedMessage.toString());
