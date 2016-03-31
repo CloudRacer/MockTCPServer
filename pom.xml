@@ -5,7 +5,7 @@
 
     <groupId>io.cloudracer</groupId>
     <artifactId>MockTCPServer-root</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>Mock TCP Server</name>
     <description>Simulate a TCP Server that is not available in a CI or testing environment.</description>
