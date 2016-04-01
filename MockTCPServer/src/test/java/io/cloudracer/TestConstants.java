@@ -7,8 +7,8 @@ abstract class TestConstants {
 
     protected final static int CLIENT_PORT = 6000;
     protected final static int MOCK_SERVER_PORT = 6789;
-    protected final static String ACK = "A";
-    protected final static String NAK = "N";
+    protected final static byte[] ACK = { 65 }; // Default ACK.
+    protected final static byte[] NAK = { 78 }; // Default NAK.
     protected final static long SERVER_CLEANUP_WAIT_DURATION = 10000;
 
     protected final static String HLM_RECVQTAB_QUEUE_NAME = "HLM_RECV";

@@ -27,7 +27,7 @@ import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
  */
 public class MockTCPServer extends Thread implements Closeable {
 
-    private final Logger logger = LogManager.getLogger(getRootLoggerName());
+    private final Logger logger = LogManager.getLogger(this.getRootLoggerName());
 
     private enum Status {
         OPEN, CLOSING, CLOSED
@@ -61,9 +61,7 @@ public class MockTCPServer extends Thread implements Closeable {
     private Status status = Status.OPEN;
 
     /**
-     * Start the server on the {@link MockTCPServer#DEFAULT_PORT default} port.
-     *
-     * This constructor is the equivalent of passing the {@link MockTCPServer#DEFAULT_PORT default} port to the other {@link MockTCPServer#MockTCPServer(int) constructor}.
+     * Start the server on the {@link MockTCPServer#DEFAULT_PORT default} port. This constructor is the equivalent of passing the {@link MockTCPServer#DEFAULT_PORT default} port to the other {@link MockTCPServer#MockTCPServer(int) constructor}.
      */
     public MockTCPServer() {
         this(MockTCPServer.DEFAULT_PORT);
@@ -77,10 +75,10 @@ public class MockTCPServer extends Thread implements Closeable {
     public MockTCPServer(final int port) {
         this.logger.info("Starting...");
 
-        super.setName(String.format("%s-%d", getThreadName(), port));
+        super.setName(String.format("%s-%d", this.getThreadName(), port));
 
-        setPort(port);
-        start();
+        this.setPort(port);
+        this.start();
         /*
          * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
          */
@@ -95,60 +93,60 @@ public class MockTCPServer extends Thread implements Closeable {
     @Override
     public void run() {
         try {
-            while ((getStatus() == Status.OPEN) && (getSocket() != null)) {
+            while ((this.getStatus() == Status.OPEN) && (this.getSocket() != null)) {
                 try {
-                    setDataStream(null);
-                    while ((getDataStream().write(getInputStream().read())) != -1) {
-                        if (Arrays.equals(getDataStream().getTail(), getTerminator())) {
-                            incrementMessagesReceivedCount();
+                    this.setDataStream(null);
+                    while ((this.getDataStream().write(this.getInputStream().read())) != -1) {
+                        if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
+                            this.incrementMessagesReceivedCount();
 
                             break;
                         }
                     }
                     // Ignore null in order allow a probing ping e.g. paping.exe
-                    if (getDataStream().size() > 0) {
-                        setAssertionError(null);
+                    if (this.getDataStream().size() > 0) {
+                        this.setAssertionError(null);
                         try {
-                            if (getExpectedMessage() != null) {
-                                Assert.assertThat("Unexpected message from the AM Host Client.", getDataStream(), getExpectedMessage());
+                            if (this.getExpectedMessage() != null) {
+                                Assert.assertThat("Unexpected message from the AM Host Client.", this.getDataStream(), this.getExpectedMessage());
                             }
                         } catch (final AssertionError e) {
-                            setAssertionError(e);
+                            this.setAssertionError(e);
                         }
-                        onMessage(getDataStream());
+                        this.onMessage(this.getDataStream());
                         // If the stream has not ended and a response is required, send one.
-                        if ((getDataStream().getLastByte() != -1) && !getIsAlwaysNoResponse()) {
+                        if ((this.getDataStream().getLastByte() != -1) && !this.getIsAlwaysNoResponse()) {
                             byte[] response = null;
 
-                            if ((getAssertionError() == null) && !getIsAlwaysNAKResponse()) {
-                                response = getACK();
+                            if ((this.getAssertionError() == null) && !this.getIsAlwaysNAKResponse()) {
+                                response = this.getACK();
                             } else {
-                                response = getNAK();
+                                response = this.getNAK();
                             }
 
-                            getOutputStream().write(response);
+                            this.getOutputStream().write(response);
 
-                            afterResponse(response);
+                            this.afterResponse(response);
                         }
                     }
                 } catch (final SocketException e) {
-                    handleException(e);
+                    this.handleException(e);
                 } catch (final IOException e) {
-                    handleException(e);
+                    this.handleException(e);
                 } catch (final Exception e) {
-                    handleException(e);
+                    this.handleException(e);
                 }
             }
         } catch (final SocketException e) {
-            handleException(e);
+            this.handleException(e);
         } catch (final IOException e) {
-            handleException(e);
+            this.handleException(e);
         } catch (final Exception e) {
-            handleException(e);
+            this.handleException(e);
         } finally {
-            setStatus(Status.CLOSING);
+            this.setStatus(Status.CLOSING);
 
-            close();
+            this.close();
         }
     }
 
@@ -244,8 +242,8 @@ public class MockTCPServer extends Thread implements Closeable {
     public synchronized void afterResponse(final byte[] response) {
         this.logger.debug(String.format("Sent the response: %s.", new String(response)));
 
-        if (getIsCloseAfterNextResponse()) {
-            setStatus(Status.CLOSED);
+        if (this.getIsCloseAfterNextResponse()) {
+            this.setStatus(Status.CLOSED);
         }
     }
 
@@ -371,7 +369,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
     public synchronized void setExpectedMessage(final StringBuffer expectedMessage) {
-        setExpectedMessage(expectedMessage.toString());
+        this.setExpectedMessage(expectedMessage.toString());
     }
 
     /**
@@ -384,9 +382,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * Add one to the number of messages received by the server since the server was started.
-     *
-     * see {@link MockTCPServer#getMessagesReceivedCount()}
+     * Add one to the number of messages received by the server since the server was started. see {@link MockTCPServer#getMessagesReceivedCount()}
      */
     private void incrementMessagesReceivedCount() {
         this.messagesReceivedCount++;
@@ -399,13 +395,13 @@ public class MockTCPServer extends Thread implements Closeable {
     public synchronized void close() {
         this.logger.info("Closing...");
 
-        if (getStatus() != Status.CLOSING) {
-            setStatus(Status.CLOSED);
+        if (this.getStatus() != Status.CLOSING) {
+            this.setStatus(Status.CLOSED);
         }
 
-        closeStreams();
+        this.closeStreams();
 
-        while (super.isAlive() && (getStatus() != Status.CLOSING)) {
+        while (super.isAlive() && (this.getStatus() != Status.CLOSING)) {
             final long maximumTimeToWait = 10000;
 
             try {
@@ -420,7 +416,7 @@ public class MockTCPServer extends Thread implements Closeable {
                 if (!super.isInterrupted()) {
                     this.logger.trace(String.format("Interrupting the Server Thread(%s)...", super.getName()));
 
-                    closeStreams();
+                    this.closeStreams();
                 }
             }
         }
@@ -430,17 +426,17 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void closeStreams() {
         try {
-            if ((getConnectionSocket() != null) && !getConnectionSocket().isInputShutdown()) {
-                getConnectionSocket().shutdownInput();
+            if ((this.getConnectionSocket() != null) && !this.getConnectionSocket().isInputShutdown()) {
+                this.getConnectionSocket().shutdownInput();
             }
-            if ((getConnectionSocket() != null) && !getConnectionSocket().isOutputShutdown()) {
-                getConnectionSocket().shutdownOutput();
+            if ((this.getConnectionSocket() != null) && !this.getConnectionSocket().isOutputShutdown()) {
+                this.getConnectionSocket().shutdownOutput();
             }
         } catch (final Exception e) {
-            handleException(e);
+            this.handleException(e);
         }
-        setInputStream(null);
-        setOutputStream(null);
+        this.setInputStream(null);
+        this.setOutputStream(null);
         // Do not set the ServerSocket to null; just close the Stream.
         this.logger.info("Closing the socket...");
         IOUtils.closeQuietly(this.socket);
@@ -472,14 +468,14 @@ public class MockTCPServer extends Thread implements Closeable {
      * @throws IOException
      */
     private ServerSocket getSocket() throws IOException {
-        if (this.socket == null) {
-            this.logger.info(String.format("Opening a socket on port %d...", getPort()));
-            setSocket(new ServerSocket(getPort()));
+        if ((this.socket == null) || this.socket.isClosed()) {
+            this.logger.info(String.format("Opening a socket on port %d...", this.getPort()));
+            this.setSocket(new ServerSocket(this.getPort()));
             this.logger.info("Waiting for a connection...");
-            setConnectionSocket(this.socket.accept());
+            this.setConnectionSocket(this.socket.accept());
             this.logger.info(String.format("Accepted a connection."));
-            setInputStream(new BufferedReader(new InputStreamReader(getConnectionSocket().getInputStream())));
-            setOutputStream(new DataOutputStream(getConnectionSocket().getOutputStream()));
+            this.setInputStream(new BufferedReader(new InputStreamReader(this.getConnectionSocket().getInputStream())));
+            this.setOutputStream(new DataOutputStream(this.getConnectionSocket().getOutputStream()));
             this.logger.info("Ready to receive input.");
         }
 
@@ -500,7 +496,7 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private DataStream getDataStream() {
         if (this.dataStream == null) {
-            this.dataStream = new DataStream(getTerminator().length, getRootLoggerName());
+            this.dataStream = new DataStream(this.getTerminator().length, this.getRootLoggerName());
         }
 
         return this.dataStream;
@@ -544,7 +540,7 @@ public class MockTCPServer extends Thread implements Closeable {
      * @return a root logger name.
      */
     public String getRootLoggerName() {
-        return getThreadName().replaceAll("-", ".");
+        return this.getThreadName().replaceAll("-", ".");
     }
 
     /**
