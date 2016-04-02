@@ -103,8 +103,12 @@ public class MockTCPServer extends Thread implements Closeable {
                             break;
                         }
                     }
-                    // Ignore null in order allow a probing ping e.g. paping.exe
-                    if (this.getDataStream().size() > 0) {
+
+                    if (this.getDataStream().getLastByte() == -1) {
+                        // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
+                        closeStreams();
+                    } else if (this.getDataStream().size() > 0) {
+                        // Ignore null in order allow a probing ping e.g. paping.exe
                         this.setAssertionError(null);
                         try {
                             if (this.getExpectedMessage() != null) {
