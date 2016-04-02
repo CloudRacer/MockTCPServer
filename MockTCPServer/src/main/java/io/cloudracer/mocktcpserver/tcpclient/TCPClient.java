@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -325,6 +326,16 @@ public class TCPClient implements Closeable {
             this.setDataInputStream(null);
             this.setDataOutputStream(null);
             IOUtils.closeQuietly(this.socket);
+            /*
+             * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
+             */
+            try {
+                final long sleepDuration = 20;
+                TimeUnit.MILLISECONDS.sleep(sleepDuration);
+            } catch (final InterruptedException e) {
+                // Do nothing.
+            }
+
         }
 
         this.socket = socket;

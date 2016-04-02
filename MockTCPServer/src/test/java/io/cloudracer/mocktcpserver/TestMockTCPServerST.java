@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +22,8 @@ import io.cloudracer.AbstractTestTools;
  * @author John McDonnell
  */
 public class TestMockTCPServerST extends AbstractTestTools {
+
+    private final static Logger logger = LogManager.getLogger();
 
     private static final int TIMEOUT = 10000;
 
@@ -63,6 +67,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
         // Set the custom terminator.
         this.getServer().setTerminator(customTerminator);
 
+        // Send a message with an incorrect terminator (i.e. the default, that we just changed) and wait for the response.
         final Thread waitForResponse = new Thread("WaitForResponse") {
             @Override
             public void run() {
@@ -77,6 +82,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
         };
         waitForResponse.start();
 
+        // Wait to confirm that the response is not received as the Client Thread is still alive.
         final int timeout = 5000; // 5 seconds.
         waitForResponse.join(timeout);
         assertTrue(waitForResponse.isAlive());
@@ -86,7 +92,10 @@ public class TestMockTCPServerST extends AbstractTestTools {
         waitForResponse.join(timeout);
         assertFalse(waitForResponse.isAlive());
 
+        // Send a message with the correct terminator (i.e. the custom on we set at the start of this method) and wait for the response.
         assertArrayEquals(ACK, this.getClient().send(message).toByteArray());
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
@@ -102,6 +111,8 @@ public class TestMockTCPServerST extends AbstractTestTools {
         this.getServer().setIsAlwaysNAKResponse(true);
 
         assertArrayEquals(NAK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
@@ -122,6 +133,8 @@ public class TestMockTCPServerST extends AbstractTestTools {
         this.getServer().join(timeout);
 
         assertFalse(this.getServer().isAlive());
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
@@ -150,6 +163,8 @@ public class TestMockTCPServerST extends AbstractTestTools {
         final int timeout = 5000; // 5 seconds.
         waitForResponse.join(timeout);
         assertTrue(waitForResponse.isAlive());
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
@@ -163,6 +178,8 @@ public class TestMockTCPServerST extends AbstractTestTools {
         assertArrayEquals(ACK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
         assertNull(this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR, false));
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
@@ -187,5 +204,26 @@ public class TestMockTCPServerST extends AbstractTestTools {
         assertNull(this.getServer().getAssertionError());
         assertArrayEquals(NAK, this.getClient().send(invalidMessage).toByteArray());
         assertNotNull(this.getServer().getAssertionError());
+
+        this.checkLogMonitorForUnexpectedMessages();
+    }
+
+    /**
+     * Server accepts another connection after a disconnect, repeatedly disconnecting and then reconnecting.
+     * 
+     * @throws IOException
+     */
+    @Test(timeout = TEST_TIMEOUT_5_MINUTE)
+    public void reconnect() throws IOException {
+        final int totalReconnects = 10;
+
+        for (int i = 1; i <= totalReconnects; i++) {
+            logger.info(String.format("Reconnect %d/%d", i, totalReconnects));
+
+            getClient().connect();
+            getClient().close();
+        }
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 }
