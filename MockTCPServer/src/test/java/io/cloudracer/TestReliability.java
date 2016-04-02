@@ -9,11 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Start and stop the Client and Server, in a tight, without sending a message {@link TestServerRestartReliability#TOTAL_SERVER_RESTARTS many} times.
+ * Start and stop the Client and Server, in a tight, without sending a message {@link TestReliability#TOTAL_SERVER_RESTARTS many} times.
  *
  * @author John McDonnell
  */
-public class TestServerRestartReliability extends AbstractTestTools {
+public class TestReliability extends AbstractTestTools {
 
     private final Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
@@ -33,7 +33,7 @@ public class TestServerRestartReliability extends AbstractTestTools {
     }
 
     /**
-     * Start and stop the Client and Server, in a tight, without sending a message {@link TestServerRestartReliability#TOTAL_SERVER_RESTARTS many} times.
+     * Start and stop the Client and Server, in a tight, without sending a message {@link TestReliability#TOTAL_SERVER_RESTARTS many} times.
      *
      * @throws Exception
      */
@@ -41,7 +41,7 @@ public class TestServerRestartReliability extends AbstractTestTools {
     public void serverRestart() throws Exception {
         resetLogMonitor();
 
-        for (int i = 0; i < TestServerRestartReliability.TOTAL_SERVER_RESTARTS; i++) {
+        for (int i = 0; i < TestReliability.TOTAL_SERVER_RESTARTS; i++) {
             this.logger.info(String.format("Restart itteration: %d", i));
 
             cleanUp();
@@ -49,5 +49,24 @@ public class TestServerRestartReliability extends AbstractTestTools {
         }
 
         checkLogMonitorForUnexpectedMessages();
+    }
+
+    /**
+     * Server accepts another connection after a disconnect, repeatedly disconnecting and then reconnecting.
+     * 
+     * @throws IOException
+     */
+    @Test(timeout = TEST_TIMEOUT_5_MINUTE)
+    public void clientReconnect() throws IOException {
+        final int totalReconnects = 10;
+
+        for (int i = 1; i <= totalReconnects; i++) {
+            logger.info(String.format("Reconnect %d/%d", i, totalReconnects));
+
+            getClient().connect();
+            getClient().close();
+        }
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 }
