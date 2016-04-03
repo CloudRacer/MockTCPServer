@@ -75,6 +75,9 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <verbose>true</verbose>
+                    <fork>true</fork>
+                    <compilerVersion>${maven.compiler.target.version}</compilerVersion>
                 </configuration>
             </plugin>
 
@@ -103,8 +106,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <!-- Ensures that each test is entirely isolated from
-                        the preceding test. Without this, test results achieved in Eclipse can differ
+                    <!-- Ensures that each test is entirely isolated from 
+                        the preceding test. Without this, test results achieved in Eclipse can differ 
                         from those received in Maven. -->
                     <forkCount>${surefire.forkCount}</forkCount>
                     <reuseForks>${surefire.reuseForks}</reuseForks>
