@@ -49,7 +49,7 @@ This is the most basic demonstration of the MockTCPServer. The message `Hello Wo
  */
 @Test(timeout = TIMEOUT)
 public void ack() throws ClassNotFoundException, IOException {
-    assertArrayEquals("A".getBytes(), this.getClient().send("Hello World\r\n\n").toByteArray());
+    assertArrayEquals("A".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
 }
 ```
 ### Custom Message Terminator
@@ -69,9 +69,9 @@ public void docTest() throws ClassNotFoundException, IOException, InterruptedExc
     final String message = String.format("%s%s", "Hello World", new String(customTerminator));
     
     // Set the custom terminator.
-    this.getServer().setTerminator(customTerminator);
+    this.server.setTerminator(customTerminator);
     
     // Send a message with the correct terminator (i.e. the custom on we set at the start of this method) and wait for the response.
-    assertArrayEquals("A".getBytes(), this.getClient().send(message).toByteArray());
+    assertArrayEquals("A".getBytes(), this.client.send(message).toByteArray());
 }
 ```
