@@ -139,7 +139,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
      * @throws InterruptedException see source documentation.
      */
     @Test(timeout = TIMEOUT)
-    public void forceAlwaysNoResponse() throws InterruptedException {
+    public void forceNoResponse() throws InterruptedException {
         this.getServer().setIsAlwaysNoResponse(true);
 
         final Thread waitForResponse = new Thread("WaitForResponse") {
