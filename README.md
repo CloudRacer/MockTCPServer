@@ -89,7 +89,7 @@ Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```tr
 public void forceNAK() throws ClassNotFoundException, IOException {
     this.server.setIsAlwaysNAKResponse(true);
 
-    assertArrayEquals(NAK, this.client.send("Hello World\r\n\n").toByteArray());
+    assertArrayEquals("N".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
 }
 ```
 ### Force No Response
@@ -122,5 +122,29 @@ public void forceNoResponse() throws InterruptedException {
     final int timeout = 5000; // 5 seconds.
     waitForResponse.join(timeout);
     assertTrue(waitForResponse.isAlive());
+}
+```
+### Force Close After the Next Response
+
+Pass ```true``` to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsCloseAfterNextResponse(boolean)" target="_blank">setIsCloseAfterNextResponse()</a> method, to instruct the server to close down after it responds to the next message it is sent.
+```javascript
+/**
+ * Having set the Server to close after the next response, wait for the Server {@link Thread} to die after sending one message.
+ *
+ * @throws ClassNotFoundException see source documentation.
+ * @throws IOException see source documentation.
+ * @throws InterruptedException see source documentation.
+ */
+@Test
+public void forceCloseAfterNextResponse() throws ClassNotFoundException, IOException, InterruptedException {
+    this.server.setIsCloseAfterNextResponse(true);
+
+    assertArrayEquals("A".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
+
+    // Wait for the MockTCPServer to Thread to die.
+    final int timeout = 5000; // 5 seconds.
+    this.server.join(timeout);
+
+    assertFalse(this.server.isAlive());
 }
 ```
