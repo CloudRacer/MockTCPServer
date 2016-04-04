@@ -48,7 +48,7 @@ public class DataStream implements Closeable {
      * @param rootLoggerName log4j root logger.
      */
     public DataStream(final String rootLoggerName) {
-        setRootLoggerName(rootLoggerName);
+        this.setRootLoggerName(rootLoggerName);
     }
 
     /**
@@ -57,7 +57,7 @@ public class DataStream implements Closeable {
      * @param tailMaximumLength tail length.
      */
     public DataStream(final int tailMaximumLength) {
-        setTailMaximumLength(tailMaximumLength);
+        this.setTailMaximumLength(tailMaximumLength);
     }
 
     /**
@@ -67,8 +67,8 @@ public class DataStream implements Closeable {
      * @param tailMaximumLength tail length.
      */
     public DataStream(final int tailMaximumLength, final String rootLoggerName) {
-        setTailMaximumLength(tailMaximumLength);
-        setRootLoggerName(rootLoggerName);
+        this.setTailMaximumLength(tailMaximumLength);
+        this.setRootLoggerName(rootLoggerName);
     }
 
     /**
@@ -79,7 +79,7 @@ public class DataStream implements Closeable {
      * @throws IOException see source documentation
      */
     public synchronized int write(final int data) throws IOException {
-        getOutput().write(data);
+        this.getOutput().write(data);
 
         return data;
     }
@@ -91,14 +91,14 @@ public class DataStream implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        setOutput(null);
+        this.setOutput(null);
     }
 
     /**
      * Delegate of {@link ByteArrayOutputStream#reset()}.
      */
     public void reset() {
-        getOutput().reset();
+        this.getOutput().reset();
     }
 
     /**
@@ -107,7 +107,7 @@ public class DataStream implements Closeable {
      * @return see source documentation
      */
     public synchronized int size() {
-        return getOutput().size();
+        return this.getOutput().size();
     }
 
     private synchronized ByteArrayOutputStream getOutput() {
@@ -116,8 +116,8 @@ public class DataStream implements Closeable {
                 @Override
                 public synchronized void write(final int b) {
                     super.write(b);
-                    setLastByte((byte) b);
-                    addToTailList();
+                    DataStream.this.setLastByte((byte) b);
+                    DataStream.this.addToTailList();
                 }
             };
         }
@@ -131,7 +131,7 @@ public class DataStream implements Closeable {
      * @return see source documentation.
      */
     public synchronized byte[] toByteArray() {
-        return getOutput().toByteArray();
+        return this.getOutput().toByteArray();
     }
 
     /**
@@ -145,23 +145,23 @@ public class DataStream implements Closeable {
     public PipedInputStream toInputStream() throws IOException {
         PipedInputStream inputStream = null;
 
-        if (getOutput().size() == 0) {
+        if (this.getOutput().size() == 0) {
             inputStream = new PipedInputStream();
         } else {
-            inputStream = new PipedInputStream(getOutput().size());
+            inputStream = new PipedInputStream(this.getOutput().size());
             final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
 
             final Thread copy = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        getOutput().writeTo(outputStream);
+                        DataStream.this.getOutput().writeTo(outputStream);
                     } catch (final IOException e) {
                         DataStream.this.logger.error(e.getMessage(), e);
                     }
                 }
             });
-            copy.setName(String.format("%s-InputStream-Creator", getThreadName()));
+            copy.setName(String.format("%s-InputStream-Creator", this.getThreadName()));
             copy.start();
             try {
                 copy.join();
@@ -181,7 +181,7 @@ public class DataStream implements Closeable {
      * @throws IOException see source documentation.
      */
     private void setOutput(final ByteArrayOutputStream output) throws IOException {
-        if ((output == null) && (this.output != null)) {
+        if (output == null && this.output != null) {
             IOUtils.closeQuietly(this.output);
         }
 
@@ -213,7 +213,7 @@ public class DataStream implements Closeable {
      */
     private Deque<Byte> getTailQueue() {
         if (this.tailQueue == null) {
-            this.tailQueue = new ArrayDeque<Byte>(getTailMaximumLength());
+            this.tailQueue = new ArrayDeque<Byte>(this.getTailMaximumLength());
         }
 
         return this.tailQueue;
@@ -226,9 +226,9 @@ public class DataStream implements Closeable {
      */
     public byte[] getTail() {
         // Convert the list to an array.
-        final byte[] tail = new byte[getTailQueue().size()];
+        final byte[] tail = new byte[this.getTailQueue().size()];
         int i = 0;
-        for (final Iterator<Byte> iterator = getTailQueue().iterator(); iterator.hasNext();) {
+        for (final Iterator<Byte> iterator = this.getTailQueue().iterator(); iterator.hasNext();) {
             final Byte nextByte = iterator.next();
             tail[i] = nextByte;
 
@@ -239,9 +239,9 @@ public class DataStream implements Closeable {
     }
 
     private void addToTailList() {
-        getTailQueue().addLast(getLastByte());
-        if (getTailQueue().size() > getTailMaximumLength()) {
-            getTailQueue().removeFirst();
+        this.getTailQueue().addLast(this.getLastByte());
+        if (this.getTailQueue().size() > this.getTailMaximumLength()) {
+            this.getTailQueue().removeFirst();
         }
     }
 
@@ -265,26 +265,26 @@ public class DataStream implements Closeable {
      */
     private String getRootLoggerName() {
         if (this.rootLoggerName == null) {
-            this.rootLoggerName = getClssName();
+            this.rootLoggerName = this.getClssName();
         }
 
-        return (new String(this.rootLoggerName));
+        return new String(this.rootLoggerName);
     }
 
     /**
      * Set the log4j {@link Logger#getLogger root logger} name.
      *
      * @param rootLoggerName
-     *        the name of the log4j root logger
+     *            the name of the log4j root logger
      */
     private void setRootLoggerName(final String rootLoggerName) {
         this.rootLoggerName = new String(rootLoggerName);
-        this.logger = LogManager.getLogger(String.format("%s.%s", this.rootLoggerName, getClssName()));
+        this.logger = LogManager.getLogger(String.format("%s.%s", this.rootLoggerName, this.getClssName()));
     }
 
     private Logger getLogger() {
         if (this.logger == null) {
-            this.logger = LogManager.getLogger(String.format("%s.%s", getRootLoggerName(), getClssName()));
+            this.logger = LogManager.getLogger(String.format("%s.%s", this.getRootLoggerName(), this.getClssName()));
         }
 
         return this.logger;
@@ -296,7 +296,7 @@ public class DataStream implements Closeable {
 
         String name = null;
 
-        if ((this.getClass().getSimpleName() != null) && (this.getClass().getSimpleName().length() > 0)) {
+        if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() > 0) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
@@ -323,7 +323,7 @@ public class DataStream implements Closeable {
 
         String name = null;
 
-        if ((this.getClass().getSimpleName() != null) && (this.getClass().getSimpleName().length() != 0)) {
+        if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() != 0) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
@@ -346,9 +346,9 @@ public class DataStream implements Closeable {
         String returnValue = null;
 
         try {
-            returnValue = getOutput().toString("UTF-8");
+            returnValue = this.getOutput().toString("UTF-8");
         } catch (final UnsupportedEncodingException e) {
-            getLogger().error(e.getMessage(), e);
+            this.getLogger().error(e.getMessage(), e);
         }
 
         return returnValue;

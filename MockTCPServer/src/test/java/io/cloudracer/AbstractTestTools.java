@@ -75,7 +75,7 @@ public abstract class AbstractTestTools extends TestConstants {
     }
 
     protected void setClient(TCPClient client) throws IOException {
-        if ((client == null) && (this.client != null)) {
+        if (client == null && this.client != null) {
             this.client.close();
         }
 
@@ -91,7 +91,7 @@ public abstract class AbstractTestTools extends TestConstants {
     }
 
     protected void setServer(MockTCPServer server) {
-        if ((server == null) && (this.server != null)) {
+        if (server == null && this.server != null) {
             this.server.close();
         }
 

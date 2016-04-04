@@ -22,8 +22,8 @@ public class TestReliability extends AbstractTestTools {
     @Override
     @Before
     public void setUp() throws IOException {
-        getServer();
-        getClient();
+        this.getServer();
+        this.getClient();
     }
 
     @Override
@@ -39,21 +39,21 @@ public class TestReliability extends AbstractTestTools {
      */
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
     public void serverRestart() throws Exception {
-        resetLogMonitor();
+        this.resetLogMonitor();
 
         for (int i = 0; i < TestReliability.TOTAL_SERVER_RESTARTS; i++) {
             this.logger.info(String.format("Restart itteration: %d", i));
 
-            cleanUp();
-            setUp();
+            this.cleanUp();
+            this.setUp();
         }
 
-        checkLogMonitorForUnexpectedMessages();
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
      * Server accepts another connection after a disconnect, repeatedly disconnecting and then reconnecting.
-     * 
+     *
      * @throws IOException
      */
     @Test(timeout = TEST_TIMEOUT_5_MINUTE)
@@ -61,10 +61,10 @@ public class TestReliability extends AbstractTestTools {
         final int totalReconnects = 10;
 
         for (int i = 1; i <= totalReconnects; i++) {
-            logger.info(String.format("Reconnect %d/%d", i, totalReconnects));
+            this.logger.info(String.format("Reconnect %d/%d", i, totalReconnects));
 
-            getClient().connect();
-            getClient().close();
+            this.getClient().connect();
+            this.getClient().close();
         }
 
         this.checkLogMonitorForUnexpectedMessages();

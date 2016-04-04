@@ -189,11 +189,11 @@ public class TCPClient implements Closeable {
 
     private boolean isTerminated(final DataStream dataStream, final byte[] terminator) throws TCPClientUnexpectedResponseException {
         boolean terminated;
-        terminated = (Arrays.equals(dataStream.getTail(), terminator)
-                || ((dataStream.size() == this.getACK().length) && Arrays.equals(dataStream.toByteArray(), this.getACK()))
-                || ((dataStream.size() == this.getNAK().length) && Arrays.equals(dataStream.toByteArray(), this.getNAK())));
+        terminated = Arrays.equals(dataStream.getTail(), terminator)
+                || dataStream.size() == this.getACK().length && Arrays.equals(dataStream.toByteArray(), this.getACK())
+                || dataStream.size() == this.getNAK().length && Arrays.equals(dataStream.toByteArray(), this.getNAK());
 
-        if ((terminator == null) && !terminated && ((dataStream.size() == this.getACK().length) || (dataStream.size() == this.getNAK().length))) {
+        if (terminator == null && !terminated && (dataStream.size() == this.getACK().length || dataStream.size() == this.getNAK().length)) {
             throw new TCPClientUnexpectedResponseException(dataStream);
         }
 
@@ -322,7 +322,7 @@ public class TCPClient implements Closeable {
     }
 
     private void setSocket(final Socket socket) throws IOException {
-        if ((socket == null) && (this.socket != null)) {
+        if (socket == null && this.socket != null) {
             this.setDataInputStream(null);
             this.setDataOutputStream(null);
             IOUtils.closeQuietly(this.socket);
@@ -335,7 +335,6 @@ public class TCPClient implements Closeable {
             } catch (final InterruptedException e) {
                 // Do nothing.
             }
-
         }
 
         this.socket = socket;
@@ -343,15 +342,15 @@ public class TCPClient implements Closeable {
 
     private DataOutputStream getDataOutputStream() throws IOException {
         if (this.dataOutputStream == null) {
-            setDataOutputStream(new DataOutputStream(getSocket().getOutputStream()));
+            this.setDataOutputStream(new DataOutputStream(this.getSocket().getOutputStream()));
         }
 
         return this.dataOutputStream;
     }
 
     private void setDataOutputStream(final DataOutputStream dataOutputStream) throws IOException {
-        if ((dataOutputStream == null) && (this.dataOutputStream != null)) {
-            IOUtils.closeQuietly(getDataOutputStream());
+        if (dataOutputStream == null && this.dataOutputStream != null) {
+            IOUtils.closeQuietly(this.getDataOutputStream());
         }
 
         this.dataOutputStream = dataOutputStream;
@@ -359,15 +358,15 @@ public class TCPClient implements Closeable {
 
     private DataInputStream getDataInputStream() throws IOException {
         if (this.dataInputStream == null) {
-            setDataInputStream(new DataInputStream(getSocket().getInputStream()));
+            this.setDataInputStream(new DataInputStream(this.getSocket().getInputStream()));
         }
 
         return this.dataInputStream;
     }
 
     private void setDataInputStream(final DataInputStream dataInputStream) throws IOException {
-        if ((dataInputStream == null) && (this.dataInputStream != null)) {
-            IOUtils.closeQuietly(getDataInputStream());
+        if (dataInputStream == null && this.dataInputStream != null) {
+            IOUtils.closeQuietly(this.getDataInputStream());
         }
 
         this.dataInputStream = dataInputStream;
