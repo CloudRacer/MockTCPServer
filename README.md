@@ -75,3 +75,52 @@ public void docTest() throws ClassNotFoundException, IOException, InterruptedExc
     assertArrayEquals("A".getBytes(), this.client.send(message).toByteArray());
 }
 ```
+### Force NAK
+
+Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNAKResponse(boolean)" target="_blank">setIsAlwaysNAKResponse()</a> method.
+```javascript
+/**
+ * Having set the Server to always return a NAK, the Server returns the expected NAK when an ACK would normally be expected.
+ *
+ * @throws ClassNotFoundException see source documentation.
+ * @throws IOException see source documentation.
+ */
+@Test
+public void forceNAK() throws ClassNotFoundException, IOException {
+    this.server.setIsAlwaysNAKResponse(true);
+
+    assertArrayEquals(NAK, this.client.send("Hello World\r\n\n").toByteArray());
+}
+```
+### Force No Response
+
+Force the MockTCPServer to **never** return a response when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNoResponse(boolean)" target="_blank">setIsAlwaysNoResponse()</a> method.
+```javascript
+/**
+ * Having set the Server to never respond, wait for the Server {@link Thread} to die. If the server has not responded after 5 seconds, assume that it never will.
+ *
+ * @throws InterruptedException see source documentation.
+ */
+@Test
+public void forceAlwaysNoResponse() throws InterruptedException {
+    this.server.setIsAlwaysNoResponse(true);
+
+        final Thread waitForResponse = new Thread("WaitForResponse") {
+            @Override
+            public void run() {
+                try {
+                    TestMockTCPServerST.this.client.send("Hello World\r\n\n");
+                } catch (final ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        waitForResponse.start();
+
+        final int timeout = 5000; // 5 seconds.
+        waitForResponse.join(timeout);
+        assertTrue(waitForResponse.isAlive());
+}
+```
