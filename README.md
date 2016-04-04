@@ -77,7 +77,7 @@ public void docTest() throws ClassNotFoundException, IOException, InterruptedExc
 ```
 ### Force NAK
 
-Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNAKResponse(boolean)" target="_blank">setIsAlwaysNAKResponse()</a> method.
+Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```true``` is passed to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNAKResponse(boolean)" target="_blank">setIsAlwaysNAKResponse()</a> method.
 ```javascript
 /**
  * Having set the Server to always return a NAK, the Server returns the expected NAK when an ACK would normally be expected.
@@ -89,12 +89,12 @@ Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```tr
 public void forceNAK() throws ClassNotFoundException, IOException {
     this.server.setIsAlwaysNAKResponse(true);
 
-    assertArrayEquals(NAK, this.client.send("Hello World\r\n\n").toByteArray());
+    assertArrayEquals("N".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
 }
 ```
 ### Force No Response
 
-Force the MockTCPServer to **never** return a response when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNoResponse(boolean)" target="_blank">setIsAlwaysNoResponse()</a> method.
+Force the MockTCPServer to **never** return a response when ```true``` is passed to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNoResponse(boolean)" target="_blank">setIsAlwaysNoResponse()</a> method.
 ```javascript
 /**
  * Having set the Server to never respond, wait for the Server {@link Thread} to die. If the server has not responded after 5 seconds, assume that it never will.
@@ -102,25 +102,69 @@ Force the MockTCPServer to **never** return a response when ```true``` is passed
  * @throws InterruptedException see source documentation.
  */
 @Test
-public void forceAlwaysNoResponse() throws InterruptedException {
+public void forceNoResponse() throws InterruptedException {
     this.server.setIsAlwaysNoResponse(true);
 
-        final Thread waitForResponse = new Thread("WaitForResponse") {
-            @Override
-            public void run() {
-                try {
-                    TestMockTCPServerST.this.client.send("Hello World\r\n\n");
-                } catch (final ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
+    final Thread waitForResponse = new Thread("WaitForResponse") {
+        @Override
+        public void run() {
+            try {
+                TestMockTCPServerST.this.client.send("Hello World\r\n\n");
+            } catch (final ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (final IOException e) {
+                e.printStackTrace();
             }
-        };
-        waitForResponse.start();
+        }
+    };
+    waitForResponse.start();
 
-        final int timeout = 5000; // 5 seconds.
-        waitForResponse.join(timeout);
-        assertTrue(waitForResponse.isAlive());
+    final int timeout = 5000; // 5 seconds.
+    waitForResponse.join(timeout);
+    assertTrue(waitForResponse.isAlive());
+}
+```
+### Force Close After the Next Response
+
+Pass ```true``` to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsCloseAfterNextResponse(boolean)" target="_blank">setIsCloseAfterNextResponse()</a> method, to instruct the server to close down after it responds to the next message it is sent.
+```javascript
+/**
+ * Having set the Server to close after the next response, wait for the Server {@link Thread} to die after sending one message.
+ *
+ * @throws ClassNotFoundException see source documentation.
+ * @throws IOException see source documentation.
+ * @throws InterruptedException see source documentation.
+ */
+@Test
+public void forceCloseAfterNextResponse() throws ClassNotFoundException, IOException, InterruptedException {
+    this.server.setIsCloseAfterNextResponse(true);
+
+    assertArrayEquals("A".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
+
+    // Wait for the MockTCPServer to Thread to die.
+    final int timeout = 5000; // 5 seconds.
+    this.server.join(timeout);
+
+    assertFalse(this.server.isAlive());
+}
+```
+### Expect a Specific Message
+
+The MockTCPServer can be instructed to expect **only** messages that match the Regular Expression passed to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setExpectedMessage(java.lang.String)" target="_blank">setExpectedMessage()</a> method. MockTCPServer will respond with a <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#getNAK()" target="_blank">NAK</a>, and records and <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#getAssertionError()" target="_blank">Assertion Error</a>, if it receives a message that does not mathch the Regular Expression, and <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#getACK()" target="_blank">ACK</a> if it does.
+```javascript
+/**
+ * Having set the Server to expect only messages that match a specified Regular Expression, ensure that a NAK is returned for messages that do not match and an ACK for messages that do match.
+ *
+ * @throws ClassNotFoundException see source documentation.
+ * @throws IOException see source documentation.
+ */
+@Test
+public void expectSpecificMessage() throws ClassNotFoundException, IOException {
+    this.server.setExpectedMessage("Hello.*\r\n\n");
+
+    assertArrayEquals("A".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
+    assertNull(this.server.getAssertionError());
+    assertArrayEquals("N".getBytes(), this.client.send("Invalid\r\n\n").toByteArray());
+    assertNotNull(this.server.getAssertionError());
 }
 ```
