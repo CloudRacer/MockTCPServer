@@ -87,8 +87,40 @@ Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```tr
  */
 @Test
 public void forceNAK() throws ClassNotFoundException, IOException {
-    this.getServer().setIsAlwaysNAKResponse(true);
+    this.server.setIsAlwaysNAKResponse(true);
 
-    assertArrayEquals(NAK, this.client.send(Hello World\r\n\n).toByteArray());
+    assertArrayEquals(NAK, this.client.send("Hello World\r\n\n").toByteArray());
+}
+```
+### Force No Response
+
+Force the MockTCPServer to **never** return a response when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNoResponse(boolean)" target="_blank">setIsAlwaysNoResponse()</a> method.
+```javascript
+/**
+ * Having set the Server to never respond, wait for the Server {@link Thread} to die. If the server has not responded after 5 seconds, assume that it never will.
+ *
+ * @throws InterruptedException see source documentation.
+ */
+@Test
+public void forceAlwaysNoResponse() throws InterruptedException {
+    this.server.setIsAlwaysNoResponse(true);
+
+        final Thread waitForResponse = new Thread("WaitForResponse") {
+            @Override
+            public void run() {
+                try {
+                    TestMockTCPServerST.this.client.send("Hello World\r\n\n");
+                } catch (final ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        waitForResponse.start();
+
+        final int timeout = 5000; // 5 seconds.
+        waitForResponse.join(timeout);
+        assertTrue(waitForResponse.isAlive());
 }
 ```
