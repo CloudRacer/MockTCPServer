@@ -102,25 +102,25 @@ Force the MockTCPServer to **never** return a response when ```true``` is passed
  * @throws InterruptedException see source documentation.
  */
 @Test
-public void forceAlwaysNoResponse() throws InterruptedException {
+public void forceNoResponse() throws InterruptedException {
     this.server.setIsAlwaysNoResponse(true);
 
-        final Thread waitForResponse = new Thread("WaitForResponse") {
-            @Override
-            public void run() {
-                try {
-                    TestMockTCPServerST.this.client.send("Hello World\r\n\n");
-                } catch (final ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
+    final Thread waitForResponse = new Thread("WaitForResponse") {
+        @Override
+        public void run() {
+            try {
+                TestMockTCPServerST.this.client.send("Hello World\r\n\n");
+            } catch (final ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (final IOException e) {
+                e.printStackTrace();
             }
-        };
-        waitForResponse.start();
+        }
+    };
+    waitForResponse.start();
 
-        final int timeout = 5000; // 5 seconds.
-        waitForResponse.join(timeout);
-        assertTrue(waitForResponse.isAlive());
+    final int timeout = 5000; // 5 seconds.
+    waitForResponse.join(timeout);
+    assertTrue(waitForResponse.isAlive());
 }
 ```
