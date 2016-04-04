@@ -148,3 +148,23 @@ public void forceCloseAfterNextResponse() throws ClassNotFoundException, IOExcep
     assertFalse(this.server.isAlive());
 }
 ```
+### Expect a Specific Message
+
+The MockTCPServer can be instructed to expect **only** messages that match the Regular Expression passed to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setExpectedMessage(java.lang.String)" target="_blank">setExpectedMessage()</a> method. MockTCPServer will respond with a <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#getNAK()" target="_blank">NAK</a>, and records and <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#getAssertionError()" target="_blank">Assertion Error</a>, if it receives a message that does not mathch the Regular Expression, and <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#getACK()" target="_blank">ACK</a> if it does.
+```javascript
+/**
+ * Having set the Server to expect only messages that match a specified Regular Expression, ensure that a NAK is returned for messages that do not match and an ACK for messages that do match.
+ *
+ * @throws ClassNotFoundException see source documentation.
+ * @throws IOException see source documentation.
+ */
+@Test
+public void expectSpecificMessage() throws ClassNotFoundException, IOException {
+    this.server.setExpectedMessage("Hello.*\r\n\n");
+
+    assertArrayEquals("A".getBytes(), this.client.send("Hello World\r\n\n").toByteArray());
+    assertNull(this.server.getAssertionError());
+    assertArrayEquals("N".getBytes(), this.client.send("Invalid\r\n\n").toByteArray());
+    assertNotNull(this.server.getAssertionError());
+}
+```
