@@ -358,7 +358,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error} and respond with a {@link MockTCPServer#getNAK() NAK}.
      *
      * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
@@ -368,7 +368,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error} and respond with a {@link MockTCPServer#getNAK() NAK}.
      *
      * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
