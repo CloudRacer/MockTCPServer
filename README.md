@@ -77,7 +77,7 @@ public void docTest() throws ClassNotFoundException, IOException, InterruptedExc
 ```
 ### Force NAK
 
-Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNAKResponse(boolean)" target="_blank">setIsAlwaysNAKResponse()</a> method.
+Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```true``` is passed to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNAKResponse(boolean)" target="_blank">setIsAlwaysNAKResponse()</a> method.
 ```javascript
 /**
  * Having set the Server to always return a NAK, the Server returns the expected NAK when an ACK would normally be expected.
@@ -94,7 +94,7 @@ public void forceNAK() throws ClassNotFoundException, IOException {
 ```
 ### Force No Response
 
-Force the MockTCPServer to **never** return a response when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNoResponse(boolean)" target="_blank">setIsAlwaysNoResponse()</a> method.
+Force the MockTCPServer to **never** return a response when ```true``` is passed to the <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNoResponse(boolean)" target="_blank">setIsAlwaysNoResponse()</a> method.
 ```javascript
 /**
  * Having set the Server to never respond, wait for the Server {@link Thread} to die. If the server has not responded after 5 seconds, assume that it never will.
