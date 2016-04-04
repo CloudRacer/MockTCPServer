@@ -75,3 +75,20 @@ public void docTest() throws ClassNotFoundException, IOException, InterruptedExc
     assertArrayEquals("A".getBytes(), this.client.send(message).toByteArray());
 }
 ```
+### Force NAK
+
+Force the MockTCPServer to **always** return a NAK (not acknowledged) when ```true``` is passed to the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setIsAlwaysNAKResponse(boolean)" target="_blank">setIsAlwaysNAKResponse()</a> method.
+```javascript
+/**
+ * Having set the Server to always return a NAK, the Server returns the expected NAK when an ACK would normally be expected.
+ *
+ * @throws ClassNotFoundException see source documentation.
+ * @throws IOException see source documentation.
+ */
+@Test
+public void forceNAK() throws ClassNotFoundException, IOException {
+    this.getServer().setIsAlwaysNAKResponse(true);
+
+    assertArrayEquals(NAK, this.client.send(Hello World\r\n\n).toByteArray());
+}
+```
