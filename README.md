@@ -37,7 +37,7 @@ public void cleanUp() throws IOException {
 ```
 All the following code snippets are written with the assumption that the Before and After routines above are in place.
 
-* A Simple Message
+### A Simple Message
 
 This is the most basic demonstration of the MockTCPServer. The message `Hello World\r\n\n` is sent and the Acknowledgement `A` is returned, as expected.
 ```javascript
@@ -52,7 +52,7 @@ public void ack() throws ClassNotFoundException, IOException {
     assertArrayEquals("A".getBytes(), this.getClient().send("Hello World\r\n\n").toByteArray());
 }
 ```
-* Custom Message Terminator
+### Custom Message Terminator
 
 Specify a different message terminator using the MockTCPServer <a href="http://www.cloudracer.org/mocktcpserver/docs/api/latest/io/cloudracer/mocktcpserver/MockTCPServer.html#setTerminator(byte[])" target="_blank">setTerminator()</a> method.
 ```javascript
