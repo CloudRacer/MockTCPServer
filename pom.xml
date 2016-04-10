@@ -5,7 +5,7 @@
 
     <groupId>io.cloudracer</groupId>
     <artifactId>MockTCPServer-root</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <packaging>pom</packaging>
     <name>Mock TCP Server</name>
     <description>Simulate a TCP Server that is not available in a CI or testing environment.</description>
@@ -50,6 +50,7 @@
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.3</nexus-staging-maven-plugin.version>
+        <commons-configuration.commons-configuration2>2.0</commons-configuration.commons-configuration2>
     </properties>
 
     <!-- Sonatype Nexus Repository -->
@@ -166,8 +167,8 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--http://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin 
-                    This plugin's configuration is used to store Eclipse m2e settings only. It 
+                <!--http://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin
+                    This plugin's configuration is used to store Eclipse m2e settings only. It
                     has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -239,6 +240,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-configuration2</artifactId>
+                <version>${commons-configuration.commons-configuration2}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

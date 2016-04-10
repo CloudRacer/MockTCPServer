@@ -68,7 +68,7 @@ public abstract class AbstractTestTools extends TestConstants {
 
     protected TCPClient getClient() throws IOException {
         if (this.client == null) {
-            this.client = new TCPClient(TestConstants.MOCK_SERVER_PORT);
+            this.client = new TCPClient();
         }
 
         return this.client;

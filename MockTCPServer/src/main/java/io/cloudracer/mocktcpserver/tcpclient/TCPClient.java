@@ -11,11 +11,13 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.cloudracer.mocktcpserver.datastream.DataStream;
+import io.cloudracer.properties.ConfigurationSettings;
 
 /**
  * A TCP Client provided primarily for demonstration purposes, and for use in test suites.
@@ -30,6 +32,8 @@ public class TCPClient implements Closeable {
 
     private final Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
+    private final ConfigurationSettings configurationSettings = new ConfigurationSettings();
+
     private static final byte[] DEFAULT_ACK = { 65 };
     private byte[] ack;
     private static final byte[] DEFAULT_NAK = { 78 };
@@ -38,7 +42,7 @@ public class TCPClient implements Closeable {
     private byte[] responseTerminator = TCPClient.DEFAULT_RESPONSE_TERMINATOR;
 
     private String hostName = null;
-    private int port;
+    private Integer port = null;
 
     private Socket socket;
 
@@ -47,12 +51,23 @@ public class TCPClient implements Closeable {
     private DataInputStream dataInputStream;
 
     /**
-     * Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
-     *
-     * @param port the port that the TCP {@link TCPClient#getHostName() server} is listening on.
+     * Use the default port. Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
      */
-    public TCPClient(final int port) {
-        this.setPort(port);
+    public TCPClient() {
+        this(null);
+    }
+
+    /**
+     * Use the specified port. Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
+     *
+     * @param port the port that the TCP {@link TCPClient#getHostName() server} is listening on. If null, the default port will be used.
+     */
+    public TCPClient(final Integer port) {
+        if (port == null) {
+            this.getPort();
+        } else {
+            this.setPort(port);
+        }
     }
 
     /**
@@ -206,13 +221,21 @@ public class TCPClient implements Closeable {
      * @return the port number.
      */
     public int getPort() {
+        if (this.port == null) {
+            try {
+                this.port = this.configurationSettings.getPort();
+            } catch (final ConfigurationException e) {
+                this.logger.error(e.getMessage(), e);
+            }
+        }
+
         return this.port;
     }
 
     /**
      * Set the port that the {@link TCPClient#getHostName() Server} is listening on.
      *
-     * @param port the port number.
+     * @param port the port number. If null, the default port will be used.
      */
     private void setPort(final int port) {
         this.port = port;
@@ -311,11 +334,16 @@ public class TCPClient implements Closeable {
      * Open a Socket, if not already open.
      *
      * @return an open {@link Socket} to the local machine, on the specified port ({@link TCPClient#getPort()}).
+     * @throws UnknownHostException
      * @throws IOException
      */
     private Socket getSocket() throws IOException {
         if (this.socket == null) {
-            this.socket = new Socket(this.getHostName(), this.getPort());
+            try {
+                this.socket = new Socket(this.getHostName(), this.getPort());
+            } catch (final IOException e) {
+                throw new IOException(String.format("Unable to connect to the Server \"%s\" on the port %d.", this.getHostName(), this.getPort()), e);
+            }
         }
 
         return this.socket;

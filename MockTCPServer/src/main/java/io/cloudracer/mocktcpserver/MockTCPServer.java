@@ -11,6 +11,7 @@ import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +20,7 @@ import org.junit.Assert;
 
 import io.cloudracer.mocktcpserver.datastream.DataStream;
 import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
+import io.cloudracer.properties.ConfigurationSettings;
 
 /**
  * A TCP Server that is designed to simulate success <b>and</b> failure conditions in System/Integration test environments.
@@ -33,7 +35,6 @@ public class MockTCPServer extends Thread implements Closeable {
         OPEN, CLOSING, CLOSED
     }
 
-    private final static int DEFAULT_PORT = 6789;
     private final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
     private final static byte[] DEFAULT_ACK = { 65 };
     private final static byte[] DEFAULT_NAK = { 78 };
@@ -59,25 +60,30 @@ public class MockTCPServer extends Thread implements Closeable {
     private int messagesReceivedCount = 0;
 
     private Status status = Status.OPEN;
+    private final ConfigurationSettings configurationSettings = new ConfigurationSettings();
 
     /**
-     * Start the server on the {@link MockTCPServer#DEFAULT_PORT default} port. This constructor is the equivalent of passing the {@link MockTCPServer#DEFAULT_PORT default} port to the other {@link MockTCPServer#MockTCPServer(int) constructor}.
+     * Start the server on the default port. This constructor is the equivalent of passing null to the constructor {@link MockTCPServer#MockTCPServer(Integer)}.
      */
     public MockTCPServer() {
-        this(MockTCPServer.DEFAULT_PORT);
+        this(null);
     }
 
     /**
      * Start the server on the specified port.
      *
-     * @param port the TCP Server will listen on this port.
+     * @param port the TCP Server will listen on this port. If null, the default port will be used.
      */
-    public MockTCPServer(final int port) {
+    public MockTCPServer(final Integer port) {
         this.logger.info("Starting...");
 
-        super.setName(String.format("%s-%d", this.getThreadName(), port));
+        if (port == null) {
+            // Use the default/configured port number.
+            this.getPort();
+        }
 
-        this.setPort(port);
+        super.setName(String.format("%s-%d", this.getThreadName(), this.getPort()));
+
         this.start();
         /*
          * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
@@ -456,11 +462,13 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private int getPort() {
-        return this.port;
-    }
+        try {
+            this.port = this.configurationSettings.getPort();
+        } catch (final ConfigurationException e) {
+            this.logger.error(e.getMessage(), e);
+        }
 
-    private void setPort(final int port) {
-        this.port = port;
+        return this.port;
     }
 
     /**
@@ -470,8 +478,9 @@ public class MockTCPServer extends Thread implements Closeable {
      *
      * @return a new ServerSocket.
      * @throws IOException
+     * @throws ConfigurationException
      */
-    private ServerSocket getSocket() throws IOException {
+    private ServerSocket getSocket() throws IOException, ConfigurationException {
         if (this.socket == null || this.socket.isClosed()) {
             this.logger.info(String.format("Opening a socket on port %d...", this.getPort()));
             this.setSocket(new ServerSocket(this.getPort()));
