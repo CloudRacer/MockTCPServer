@@ -1,11 +1,11 @@
 package io.cloudracer.properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +17,7 @@ public class TestServerConfigurationSettingsST {
 
     private ConfigurationSettings server;
 
-    private static final String MOCKTCPSERVER_XML_FULL_PATH = "file:/C:/src/MockTCPServer/MockTCPServer/MockTCPServer/target/classes/mocktcpserver.xml";
+    private static final String MOCKTCPSERVER_XML_FULL_PATH_SUFFIX = "/MockTCPServer/MockTCPServer/target/classes/mocktcpserver.xml";
     private static final int MOCKTCPSERVER_XML_PORT = 6789;
     private static final int MOCKTCPSERVER_XML_NEW_PORT = 1111;
 
@@ -39,7 +39,7 @@ public class TestServerConfigurationSettingsST {
 
     @Test
     public void locateConfigurationFile() throws MalformedURLException {
-        assertEquals(new URL(MOCKTCPSERVER_XML_FULL_PATH), this.server.getFileName());
+        assertTrue(this.server.getFileName().getFile().endsWith(MOCKTCPSERVER_XML_FULL_PATH_SUFFIX));
     }
 
     @Test
