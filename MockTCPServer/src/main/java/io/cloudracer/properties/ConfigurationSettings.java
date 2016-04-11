@@ -133,7 +133,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
     private void save() {
         try {
             // Create the destination folder, if it does not already exist.
-            FileUtils.forceMkdir(this.getDefaultFile());
+            FileUtils.forceMkdir(this.getDefaultFile().getParentFile());
         } catch (final IOException e) {
             this.getLog().error(e.getMessage(), e);
         } finally {
