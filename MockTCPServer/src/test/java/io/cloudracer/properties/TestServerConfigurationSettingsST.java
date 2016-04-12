@@ -3,58 +3,60 @@ package io.cloudracer.properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class TestServerConfigurationSettingsST {
+import io.cloudracer.AbstractTestTools;
 
-    private ConfigurationSettings server;
+public class TestServerConfigurationSettingsST extends AbstractTestTools {
 
-    private static final String MOCKTCPSERVER_XML_FULL_PATH_SUFFIX = "/MockTCPServer/MockTCPServer/target/classes/mocktcpserver.xml";
-    private static final int MOCKTCPSERVER_XML_PORT = 6789;
-    private static final int MOCKTCPSERVER_XML_NEW_PORT = 1111;
+    @BeforeClass
+    public static void setupClass() throws IOException {
+        recreateTargetConfigurationFile();
+
+        initialiseSystemProperties();
+    }
 
     @Before
     public void setup() throws IOException {
-        // Start without a file.
-        final File propertiesDirectory = new File("configuration");
-
-        FileUtils.deleteDirectory(propertiesDirectory);
-
-        this.server = new ConfigurationSettings();
+        deleteConfigurationFolder();
     }
 
+    @Override
     @After
-    public void cleanUp() throws IOException, ConfigurationException {
-        // Reset the property values.
-        this.server.setPort(MOCKTCPSERVER_XML_PORT);
+    public void cleanUp() throws IOException {
+        deleteConfigurationFolder();
     }
 
+    /**
+     * By default, the resource file is used as the configuration file.
+     *
+     * @throws MalformedURLException
+     */
     @Test
-    public void locateConfigurationFile() throws MalformedURLException {
-        assertTrue(this.server.getFileName().getFile().endsWith(MOCKTCPSERVER_XML_FULL_PATH_SUFFIX));
+    public void locateConfigurationFile() {
+        assertTrue(this.getConfigurationSettings().getFileName().getFile().endsWith(MOCKTCPSERVER_XML_FULL_RESOURCE_PATH_SUFFIX));
     }
 
     @Test
     public void retrieveProperties() throws ConfigurationException {
-        assertEquals(MOCKTCPSERVER_XML_PORT, this.server.getPort());
+        assertEquals(MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
     }
 
     @Test
     public void setPropertyValue() throws ConfigurationException {
-        assertEquals(MOCKTCPSERVER_XML_PORT, this.server.getPort());
+        assertEquals(MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
 
-        this.server.setPort(MOCKTCPSERVER_XML_NEW_PORT);
-        assertEquals(MOCKTCPSERVER_XML_NEW_PORT, this.server.getPort());
+        this.getConfigurationSettings().setPort(MOCK_SERVER_NEW_PORT);
+        assertEquals(MOCK_SERVER_NEW_PORT, this.getConfigurationSettings().getPort());
 
-        this.server.setPort(MOCKTCPSERVER_XML_PORT);
-        assertEquals(MOCKTCPSERVER_XML_PORT, this.server.getPort());
+        this.getConfigurationSettings().setPort(MOCK_SERVER_PORT);
+        assertEquals(MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
     }
 }

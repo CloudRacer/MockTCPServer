@@ -15,6 +15,7 @@ import org.apache.commons.configuration2.io.FileLocator;
 import org.apache.commons.configuration2.io.FileLocatorUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,6 +64,9 @@ public class ConfigurationSettings extends AbstractConfiguration {
                     .create();
 
             this.propertiesFile = FileLocatorUtils.locate(fileLocator);
+
+            // Ensure that the ConfigurationBuilder is now initialised as that may force a re-initialisation of this FileLocator.
+            this.getConfigurationBuilder();
         }
 
         return this.propertiesFile;
@@ -118,7 +122,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
             this.configurationBuilder.setAutoSave(true);
 
             // If the file has not yet been written to the disk, as this is the first execution or the file has been deleted (deletion is a legitimate way to "reset to factory settings"), write it now.
-            if (!this.getDefaultFile().exists()) {
+            if (this.isConfigurationInitialisationEnabled() && !this.getDefaultFile().exists()) {
                 // Reinitialise in order to pick up the newly created file;
                 this.propertiesFile = null;
                 this.save();
@@ -128,6 +132,12 @@ public class ConfigurationSettings extends AbstractConfiguration {
         }
 
         return this.configurationBuilder;
+    }
+
+    private boolean isConfigurationInitialisationEnabled() {
+        final String configurationinitialisationDisabledPropertyName = "mocktcpserver.configuration.initialisation.enabled";
+
+        return BooleanUtils.toBoolean(System.getProperties().getProperty(configurationinitialisationDisabledPropertyName, BooleanUtils.toStringTrueFalse(Boolean.FALSE)));
     }
 
     private void save() {
