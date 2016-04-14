@@ -20,22 +20,31 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * A {@link FILENAME resource file} is used as a default configuration file. If the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is set with a value of true, the {@link #FILENAME resource file} will be written to the {@link #DEFAULT_FILENAME default location}. This behaviour allow for self-configuration and the ability to "reset to factory settings" if the operator deletes the {@link #getFileName() Configuration File} and restarts MockTCPServer.
+ *
+ * @author John McDonnell
+ */
 public class ConfigurationSettings extends AbstractConfiguration {
 
     private Logger logger;
 
     /**
-     * The name of the resource file that is the default configuration file. This file is written to the file system to initialise the configuration, if the file cannot be located.
+     * A System Property that, when set with a value of "true", will result in the <b>default</b> configuration file (stored as a {@link #FILENAME resource file}) being written to disk i.e self-initialised (an existing file will not be overwritten). Once on disk, the configuration file can be modified as required.
+     */
+    public final static String CONFIGURATION_INITIALISATION_ENABLED = "mocktcpserver.configuration.initialisation.enabled";
+    /**
+     * The name of the resource file that is the default configuration file. If the file cannot be located and the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is true, this file can be written to the {@link #DEFAULT_FILENAME default location} on file system to initialise the configuration.
      */
     public final static String FILENAME = "mocktcpserver.xml";
     /**
-     * The location of the default {@link ConfigurationSettings#FILENAME resource file}. This folder name is relative to the runtime working folder.
+     * The location of the default {@link #FILENAME resource file}. This folder name is relative to the runtime working folder.
      */
     public final static String FILENAME_PATH = "configuration";
     /**
      * The default location, and name, of the configuration file on the file system.
      * <p>
-     * The default configuration file is held as a {@link ConfigurationSettings#FILENAME resource file}.
+     * The default configuration file is held as a {@link #FILENAME resource file}.
      */
     public final static String DEFAULT_FILENAME = String.format("%s%s%s", FILENAME_PATH, File.separatorChar, FILENAME);
     private final static String PORT_PROPERTY_NAME = "server.port";
@@ -43,18 +52,35 @@ public class ConfigurationSettings extends AbstractConfiguration {
     private URL propertiesFile;
     private FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
 
+    /**
+     * The port the MockTCPServer will listen to, as read from the {@link #getFileName() configuration file} (from the property name defined as {@link #PORT_PROPERTY_NAME}).
+     *
+     * @return the port the MockTCPServer will listen to.
+     * @throws ConfigurationException see source documentation.
+     * @see #isConfigurationInitialisationEnabled()
+     */
     public int getPort() throws ConfigurationException {
         return this.getConfigurationBuilder().getConfiguration().getInt(PORT_PROPERTY_NAME);
     }
 
+    /**
+     * Set the port the MockTCPServer will listen to, the port number will be written to the {@link #getFileName() configuration file} (to the property name defined as {@link #PORT_PROPERTY_NAME}).
+     *
+     * @param port the port the MockTCPServer will listen to.
+     * @throws ConfigurationException see source documentation.
+     * @see #isConfigurationInitialisationEnabled()
+     */
     public void setPort(int port) throws ConfigurationException {
         this.getConfigurationBuilder().getConfiguration().setProperty(PORT_PROPERTY_NAME, port);
     }
 
     /**
      * The file {@link URL} can be absolute or relative to the working folder. The configuration file is located using a {@link FileLocatorUtils#DEFAULT_LOCATION_STRATEGY strategy} that uses a number of techniques to determine the file location.
+     * <p>
+     * If no file is found, the {@link #FILENAME resource file} is used.
      *
      * @return the configuration file {@link URL}.
+     * @see {@link #FILENAME resource file}
      */
     public URL getFileName() {
         if (this.propertiesFile == null) {
@@ -82,30 +108,55 @@ public class ConfigurationSettings extends AbstractConfiguration {
         throw new NotImplementedException("TODO", new UnsupportedOperationException());
     }
 
+    /**
+     * <b>NOT IMPLEMENTED</b>
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     protected void clearPropertyDirect(String arg0) {
         // TODO Auto-generated method stub
         throw new NotImplementedException("TODO", new UnsupportedOperationException());
     }
 
+    /**
+     * <b>NOT IMPLEMENTED</b>
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     protected boolean containsKeyInternal(String arg0) {
         // TODO Auto-generated method stub
         throw new NotImplementedException("TODO", new UnsupportedOperationException());
     }
 
+    /**
+     * <b>NOT IMPLEMENTED</b>
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     protected Iterator<String> getKeysInternal() {
         // TODO Auto-generated method stub
         throw new NotImplementedException("TODO", new UnsupportedOperationException());
     }
 
+    /**
+     * <b>NOT IMPLEMENTED</b>
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     protected Object getPropertyInternal(String arg0) {
         // TODO Auto-generated method stub
         throw new NotImplementedException("TODO", new UnsupportedOperationException());
     }
 
+    /**
+     * <b>NOT IMPLEMENTED</b>
+     * <p>
+     * {@inheritDoc}
+     */
     @Override
     protected boolean isEmptyInternal() {
         // TODO Auto-generated method stub
@@ -134,10 +185,14 @@ public class ConfigurationSettings extends AbstractConfiguration {
         return this.configurationBuilder;
     }
 
-    private boolean isConfigurationInitialisationEnabled() {
-        final String configurationinitialisationDisabledPropertyName = "mocktcpserver.configuration.initialisation.enabled";
-
-        return BooleanUtils.toBoolean(System.getProperties().getProperty(configurationinitialisationDisabledPropertyName, BooleanUtils.toStringTrueFalse(Boolean.FALSE)));
+    /**
+     * Returns the value of the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property}.
+     *
+     * @return the value of the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property}. If the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is not found, false is returned.
+     * @see #CONFIGURATION_INITIALISATION_ENABLED
+     */
+    public boolean isConfigurationInitialisationEnabled() {
+        return BooleanUtils.toBoolean(System.getProperties().getProperty(CONFIGURATION_INITIALISATION_ENABLED, BooleanUtils.toStringTrueFalse(Boolean.FALSE)));
     }
 
     private void save() {
