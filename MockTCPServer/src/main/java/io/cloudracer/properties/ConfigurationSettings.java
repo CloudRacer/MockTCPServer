@@ -87,7 +87,6 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * If no file is found, the {@link #FILENAME resource file} is used.
      *
      * @return the configuration file {@link URL}.
-     * @see {@link #FILENAME resource file}
      */
     public URL getFileName() {
         if (this.propertiesFile == null) {

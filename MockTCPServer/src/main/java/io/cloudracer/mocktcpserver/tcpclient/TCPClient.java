@@ -75,7 +75,7 @@ public class TCPClient implements Closeable {
      *
      * @param hostName the machine name to communicate with.
      * @param port the port number that the machine (specified by hostName) is listening on.
-     * @throws IOException
+     * @throws IOException see source documentation.
      */
     public TCPClient(final String hostName, final int port) throws IOException {
         this(port);
@@ -86,7 +86,7 @@ public class TCPClient implements Closeable {
     /**
      * Close the socket (if it is open) and any open data streams.
      *
-     * @throws IOException
+     * @throws IOException see source documentation.
      */
     @Override
     public void close() throws IOException {
@@ -96,7 +96,7 @@ public class TCPClient implements Closeable {
     /**
      * Connect to the {@link TCPClient#getHostName() Server}.
      *
-     * @throws IOException
+     * @throws IOException see source documentation.
      */
     public void connect() throws IOException {
         // Connect to the Server.
@@ -108,8 +108,8 @@ public class TCPClient implements Closeable {
      *
      * @param message the message to send.
      * @return the response from the {@link TCPClient#getHostName() server}.
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException see source documentation.
+     * @throws ClassNotFoundException see source documentation.
      */
     public DataStream send(final String message) throws IOException, ClassNotFoundException {
         return this.send(message, true);
@@ -121,8 +121,8 @@ public class TCPClient implements Closeable {
      * @param message the message to send.
      * @param waitForResponse if true, wait for a response from the {@link TCPClient#getHostName() server}, otherwise null is returned.
      * @return the response from the {@link TCPClient#getHostName() server} or null if waitForResponse is false.
-     * @throws IOException
-     * @throws ClassNotFoundException
+     * @throws IOException see source documentation.
+     * @throws ClassNotFoundException see source documentation.
      */
     public DataStream send(final String message, final boolean waitForResponse) throws IOException, ClassNotFoundException {
         return this.send(message, waitForResponse, this.getResponseTerminator());
@@ -166,8 +166,8 @@ public class TCPClient implements Closeable {
      * Read and return the response message sent by {@link TCPClient#getHostName() server}.
      *
      * @return the response from the {@link TCPClient#getHostName() server}.
-     * @throws IOException
-     * @throws TCPClientUnexpectedResponseException
+     * @throws IOException see source documentation.
+     * @throws TCPClientUnexpectedResponseException see source documentation.
      */
     public DataStream getResponse() throws IOException, TCPClientUnexpectedResponseException {
         return this.getResponse(this.getResponseTerminator());
@@ -245,7 +245,7 @@ public class TCPClient implements Closeable {
      * The Machine Name to send messages too.
      *
      * @return the Machine Name of the server to communicate with.
-     * @throws UnknownHostException
+     * @throws UnknownHostException see source documentation.
      */
     public String getHostName() throws UnknownHostException {
         if (this.hostName == null) {
