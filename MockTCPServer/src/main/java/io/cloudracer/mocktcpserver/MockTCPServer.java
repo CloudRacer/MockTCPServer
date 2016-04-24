@@ -53,7 +53,7 @@ public class MockTCPServer extends Thread implements Closeable {
     private DataStream dataStream;
     private Socket connectionSocket;
 
-    private int port;
+    private Integer port;
     private boolean setIsAlwaysNAKResponse = false;
     private boolean setIsAlwaysNoResponse = false;
     private boolean isCloseAfterNextResponse = false;
@@ -61,6 +61,27 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private Status status = Status.OPEN;
     private final ConfigurationSettings configurationSettings = new ConfigurationSettings();
+
+    /**
+     * This allows an operator to start a stand-alone MockTCPServer. The <code>startup.sh(cmd)</code> file can be used to start the server on a command-line.
+     * <p>
+     * <b>Note</b>: currently, there is no packaged bundle to include all the dependencies and scripts.
+     *
+     * @param args an alternative port number can be passed as the first (and only) parameter.
+     */
+    public static void main(String[] args) {
+        final MockTCPServer mockTCPServer;
+        if (args != null && args.length > 0) {
+            final int port = Integer.parseInt(args[0]);
+            mockTCPServer = new MockTCPServer(port);
+        } else {
+            mockTCPServer = new MockTCPServer();
+        }
+
+        mockTCPServer.start();
+
+        mockTCPServer.close();
+    }
 
     /**
      * Start the server on the default port. This constructor is the equivalent of passing null to the constructor {@link MockTCPServer#MockTCPServer(Integer)}.
@@ -77,9 +98,8 @@ public class MockTCPServer extends Thread implements Closeable {
     public MockTCPServer(final Integer port) {
         this.logger.info("Starting...");
 
-        if (port == null) {
-            // Use the default/configured port number.
-            this.getPort();
+        if (port != null) {
+            this.setPort(port);
         }
 
         super.setName(String.format("%s-%d", this.getThreadName(), this.getPort()));
@@ -463,12 +483,18 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private int getPort() {
         try {
-            this.port = this.configurationSettings.getPort();
+            if (this.port == null) {
+                this.port = this.configurationSettings.getPort();
+            }
         } catch (final ConfigurationException e) {
             this.logger.error(e.getMessage(), e);
         }
 
         return this.port;
+    }
+
+    private void setPort(int port) {
+        this.port = port;
     }
 
     /**

@@ -4,15 +4,22 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.io.ClasspathLocationStrategy;
+import org.apache.commons.configuration2.io.CombinedLocationStrategy;
+import org.apache.commons.configuration2.io.FileLocationStrategy;
 import org.apache.commons.configuration2.io.FileLocator;
 import org.apache.commons.configuration2.io.FileLocatorUtils;
+import org.apache.commons.configuration2.io.FileSystemLocationStrategy;
+import org.apache.commons.configuration2.io.ProvidedURLLocationStrategy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -84,10 +91,23 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     public URL getFileName() {
         if (this.propertiesFile == null) {
-            final FileLocator fileLocator = FileLocatorUtils.fileLocator()
+            final List<FileLocationStrategy> subs = Arrays.asList(
+                    new ProvidedURLLocationStrategy(),
+                    new FileSystemLocationStrategy(),
+                    new ClasspathLocationStrategy());
+            final FileLocationStrategy strategy = new CombinedLocationStrategy(subs);
+
+            FileLocator fileLocator = FileLocatorUtils.fileLocator()
                     .basePath(this.getDefaultFile().getParent())
                     .fileName(this.getDefaultFile().getName())
                     .create();
+
+            if (!new File(FileLocatorUtils.locate(fileLocator).getFile()).exists()) {
+                fileLocator = FileLocatorUtils.fileLocator()
+                        .fileName(this.getDefaultFile().getName())
+                        .locationStrategy(strategy)
+                        .create();
+            }
 
             this.propertiesFile = FileLocatorUtils.locate(fileLocator);
 
@@ -168,7 +188,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
             final Parameters params = new Parameters();
             this.configurationBuilder = new FileBasedConfigurationBuilder<XMLConfiguration>(XMLConfiguration.class)
                     .configure(params.xml()
-                            .setFileName(this.getFileName().getFile())
+                            .setURL(this.getFileName())
                             .setValidating(false));
             this.configurationBuilder.setAutoSave(true);
 

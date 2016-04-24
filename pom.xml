@@ -51,6 +51,7 @@
         <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.3</nexus-staging-maven-plugin.version>
         <commons-configuration.commons-configuration2>2.0</commons-configuration.commons-configuration2>
+        <org.apache.maven.plugins.maven-jar-plugin.version>2.4</org.apache.maven.plugins.maven-jar-plugin.version>
     </properties>
 
     <!-- Sonatype Nexus Repository -->
@@ -245,6 +246,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-configuration2</artifactId>
                 <version>${commons-configuration.commons-configuration2}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${org.apache.maven.plugins.maven-jar-plugin.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
