@@ -10,7 +10,14 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,17 +77,38 @@ public class MockTCPServer extends Thread implements Closeable {
      * @param args an alternative port number can be passed as the first (and only) parameter.
      */
     public static void main(String[] args) {
-        final MockTCPServer mockTCPServer;
-        if (args != null && args.length > 0) {
-            final int port = Integer.parseInt(args[0]);
-            mockTCPServer = new MockTCPServer(port);
-        } else {
-            mockTCPServer = new MockTCPServer();
+        final Logger logger = LogManager.getLogger();
+
+        try {
+            CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
+            // Version information only.
+            if (commandLine.hasOption("version")) {
+                printVersion();
+            } else if (commandLine.hasOption("help")) {
+                printHelp();
+            } else {
+                final MockTCPServer mockTCPServer;
+                if (commandLine.hasOption("port")) {
+                    final int port = Integer.parseInt(commandLine.getOptionValue("port"));
+                    mockTCPServer = new MockTCPServer(port);
+                } else {
+                    mockTCPServer = new MockTCPServer();
+                }
+
+                try {
+                    mockTCPServer.join();
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage(), e);
+                } finally {
+                    if (mockTCPServer != null) {
+                        mockTCPServer.close();
+                    }
+                }
+            }
+        } catch (ParseException e1) {
+            System.out.println(String.format("Invalid command line: %s", e1.getMessage()));
+            printHelp();
         }
-
-        mockTCPServer.start();
-
-        mockTCPServer.close();
     }
 
     /**
@@ -571,6 +599,41 @@ public class MockTCPServer extends Thread implements Closeable {
         this.logger.info("Closed the output stream.");
 
         this.outputStream = outputStream;
+    }
+
+    private static void printVersion() {
+        String version = new java.io.File(MockTCPServer.class.getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .getPath())
+                        .getName();
+
+        Pattern pattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
+        Matcher matcher = pattern.matcher(version);
+        if (matcher.find()) {
+            System.out.println(matcher.group(0));
+        } else {
+            System.out.println("Version number cannot be identified.");
+        }
+    }
+
+    private static void printHelp() {
+        // automatically generate the help statement
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("MockTCPServer", getCommandLineOptions());
+    }
+
+    private static Options getCommandLineOptions() {
+        // create the Options
+        final Options options = new Options();
+
+        options.addOption("p", "port", false, "use this port instead of the default one, or the one specified in the configuration file.");
+        options.getOption("port").setArgs(1);
+        options.addOption("h", "help", false, "print these usage instructions and exit.");
+        options.addOption("?", "help", false, "print these usage instructions and exit.");
+        options.addOption("v", "version", false, "print product version and exit.");
+
+        return options;
     }
 
     /**
