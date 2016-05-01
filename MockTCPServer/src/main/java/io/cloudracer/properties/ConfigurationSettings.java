@@ -28,7 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A {@link FILENAME resource file} is used as a default configuration file. If the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is set with a value of true, the {@link #FILENAME resource file} will be written to the {@link #DEFAULT_FILENAME default location}. This behaviour allow for self-configuration and the ability to "reset to factory settings" if the operator deletes the {@link #getFileName() Configuration File} and restarts MockTCPServer.
+ * A {@link ConfigurationSettings#FILENAME resource file} is used as a default configuration file. If the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is set with a value of true, the {@link #FILENAME resource file} will be written to the {@link #DEFAULT_FILENAME default location}. This behaviour allow for self-configuration and the ability to "reset to factory settings" if the operator deletes the {@link #getFileName() Configuration File} and restarts MockTCPServer.
  *
  * @author John McDonnell
  */

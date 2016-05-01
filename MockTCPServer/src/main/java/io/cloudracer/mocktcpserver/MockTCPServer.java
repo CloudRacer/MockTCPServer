@@ -80,7 +80,7 @@ public class MockTCPServer extends Thread implements Closeable {
         final Logger logger = LogManager.getLogger();
 
         try {
-            CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
+            final CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
             // Version information only.
             if (commandLine.hasOption("version")) {
                 printVersion();
@@ -95,9 +95,19 @@ public class MockTCPServer extends Thread implements Closeable {
                     mockTCPServer = new MockTCPServer();
                 }
 
+                // When the Operating System interrupts the thread (kill or CTRL-C), stop the server.
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    @Override
+                    public void run() {
+                        logger.info("Operating System interrupt detected.");
+
+                        mockTCPServer.close();
+                    }
+                });
+
                 try {
                     mockTCPServer.join();
-                } catch (InterruptedException e) {
+                } catch (final InterruptedException e) {
                     logger.error(e.getMessage(), e);
                 } finally {
                     if (mockTCPServer != null) {
@@ -105,7 +115,7 @@ public class MockTCPServer extends Thread implements Closeable {
                     }
                 }
             }
-        } catch (ParseException e1) {
+        } catch (final ParseException e1) {
             System.out.println(String.format("Invalid command line: %s", e1.getMessage()));
             printHelp();
         }
@@ -602,14 +612,14 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private static void printVersion() {
-        String version = new java.io.File(MockTCPServer.class.getProtectionDomain()
+        final String version = new java.io.File(MockTCPServer.class.getProtectionDomain()
                 .getCodeSource()
                 .getLocation()
                 .getPath())
                         .getName();
 
-        Pattern pattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
-        Matcher matcher = pattern.matcher(version);
+        final Pattern pattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
+        final Matcher matcher = pattern.matcher(version);
         if (matcher.find()) {
             System.out.println(matcher.group(0));
         } else {
@@ -619,7 +629,7 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private static void printHelp() {
         // automatically generate the help statement
-        HelpFormatter formatter = new HelpFormatter();
+        final HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("MockTCPServer", getCommandLineOptions());
     }
 
