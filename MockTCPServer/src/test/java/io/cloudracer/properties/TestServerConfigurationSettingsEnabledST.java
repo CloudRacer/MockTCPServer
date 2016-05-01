@@ -23,7 +23,7 @@ public class TestServerConfigurationSettingsEnabledST extends AbstractTestTools 
 
     @BeforeClass
     public static void setupClass() throws IOException {
-        recreateTargetConfigurationFile();
+        resetConfiguration();
 
         System.getProperties().put(CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME, CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_VALUE_TRUE);
 

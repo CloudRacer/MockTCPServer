@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,20 +19,25 @@ public class TestServerConfigurationSettingsST extends AbstractTestTools {
 
     @BeforeClass
     public static void setupClass() throws IOException {
-        recreateTargetConfigurationFile();
+        backupConfigurationFile();
 
         initialiseSystemProperties();
     }
 
+    @AfterClass
+    public static void cleanupClass() throws IOException {
+        resetConfiguration();
+    }
+
     @Before
     public void setup() throws IOException {
-        deleteConfigurationFolder();
+        resetConfiguration();
     }
 
     @Override
     @After
     public void cleanUp() throws IOException {
-        deleteConfigurationFolder();
+        resetConfiguration();
     }
 
     /**

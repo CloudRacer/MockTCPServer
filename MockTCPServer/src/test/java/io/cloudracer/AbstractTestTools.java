@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +42,9 @@ import io.cloudracer.properties.ConfigurationSettings;
 public abstract class AbstractTestTools extends TestConstants {
 
     private final static Logger logger = LogManager.getLogger();
+
+    private final static File propertiesSourceFile = new File(MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME);
+    private final static File propertiesBackupFile = new File(String.format("%s%s%s-backup.%s", propertiesSourceFile.getParent(), File.separatorChar, FilenameUtils.getBaseName(propertiesSourceFile.getName()), FilenameUtils.getExtension(propertiesSourceFile.getName())));
 
     private TCPClient client;
     private MockTCPServer server;
@@ -119,22 +123,21 @@ public abstract class AbstractTestTools extends TestConstants {
         FileUtils.deleteDirectory(propertiesDirectory);
     }
 
-    protected static void recreateTargetConfigurationFile() throws IOException {
-        final File propertiesTargetFile = new File(MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME);
-
-        FileUtils.forceDelete(propertiesTargetFile);
-
-        while (!propertiesTargetFile.exists()) {
-            try {
-                final int sleepDuration = 500;
-
-                AbstractTestTools.logger.debug(String.format("Sleeping for %d milliseconds before checking again for the existence of the file \"%s\".", sleepDuration, MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME));
-
-                TimeUnit.MILLISECONDS.sleep(sleepDuration);
-            } catch (final InterruptedException e) {
-                // Do nothing.
-            }
+    protected static void backupConfigurationFile() throws IOException {
+        if (propertiesSourceFile.exists()) {
+            FileUtils.copyFile(propertiesSourceFile, propertiesBackupFile);
         }
+    }
+
+    private static void restoreConfigurationFile() throws IOException {
+        if (propertiesBackupFile.exists()) {
+            FileUtils.copyFile(propertiesBackupFile, propertiesSourceFile);
+        }
+    }
+
+    protected static void resetConfiguration() throws IOException {
+        restoreConfigurationFile();
+        deleteConfigurationFolder();
     }
 
     protected void setServer(MockTCPServer server) {
