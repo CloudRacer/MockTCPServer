@@ -76,6 +76,9 @@
                 <version>1.4.4</version>
                 <executions>
                     <execution>
+                        <configuration>
+                            <filename>${project.build.finalName}.standalone.jar</filename>
+                        </configuration>
                         <goals>
                             <goal>one-jar</goal>
                         </goals>
