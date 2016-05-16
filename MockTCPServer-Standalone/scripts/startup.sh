@@ -70,4 +70,4 @@ echo LOG_FILE:$LOG_FILE
 
 cd "$SOURCE_FOLDER"
 
-java -jar "$SCRIPT_FOLDER/MockTCPServer-1.3.0.one-jar.jar" $1 | tee $LOG_FILE
+java -jar "$SCRIPT_FOLDER/../target/MockTCPServer-Standalone-1.3.0.jar" $1 | tee $LOG_FILE
