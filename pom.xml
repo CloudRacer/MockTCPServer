@@ -45,12 +45,11 @@
         <org.apache.maven-assembly-plugin.version>2.4.1</org.apache.maven-assembly-plugin.version>
         <commons-io.commons-io.version>2.4</commons-io.commons-io.version>
         <maven-surefire-plugin.version>2.19</maven-surefire-plugin.version>
-        <nexus-staging-maven-plugin.version>1.6.3</nexus-staging-maven-plugin.version>
+        <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
         <maven-antrun-plugin.version>1.4</maven-antrun-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
-        <nexus-staging-maven-plugin.version>1.6.3</nexus-staging-maven-plugin.version>
         <commons-configuration.commons-configuration2.version>2.0</commons-configuration.commons-configuration2.version>
         <org.apache.maven.plugins.maven-jar-plugin.version>2.4</org.apache.maven.plugins.maven-jar-plugin.version>
         <org.apache.maven.plugins.maven-eclipse-plugin.version>2.9</org.apache.maven.plugins.maven-eclipse-plugin.version>
@@ -226,7 +225,7 @@
             <dependency>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
+                <version>${nexus-staging-maven-plugin.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -277,11 +276,6 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>${commons-beanutils.commons-beanutils.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${org.apache.maven.plugins.maven-jar-plugin.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
