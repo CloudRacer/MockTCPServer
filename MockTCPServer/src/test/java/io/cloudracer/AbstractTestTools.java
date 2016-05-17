@@ -1,20 +1,3 @@
-/**
-================================================================================
-
-   Project: Procter and Gamble - Skelmersdale.
-
-   $HeadURL$
-
-   $Author$
-
-   $Revision$
-
-   $Date$
-
-$Log$
-
-============================== (c) Swisslog(UK) Ltd, 2005 ======================
-*/
 package io.cloudracer;
 
 import static org.junit.Assert.assertNull;
