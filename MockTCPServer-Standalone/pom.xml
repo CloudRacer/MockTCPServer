@@ -72,7 +72,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                       <manifest>
-                        <mainClass>io.cloudracer.mocktcpserver.MockTCPServer</mainClass>
+                        <mainClass>io.cloudracer.mocktcpserver.standalone.Bootstrap</mainClass>
                       </manifest>
                     </archive>
                     <finalName>${project.build.finalName}</finalName>
