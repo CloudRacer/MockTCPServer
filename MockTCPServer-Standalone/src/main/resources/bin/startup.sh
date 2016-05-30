@@ -15,7 +15,6 @@ setScriptFilename() {
 
 setScriptFolderName() {
 	SCRIPT_FOLDER="`dirname \"$0\"`";
-	#SCRIPT_FOLDER="`(cd "$BASEDIR"; pwd)`"
 	RESULT=$?
 	if [ $RESULT -ne 0 ]; then
 		echo "ERR: $RESULT: Error encountered while determining the name of the folder containing the current script."
@@ -31,6 +30,23 @@ setScriptFolderName() {
 	return 0
 }
 
+setParentFoldername() {
+	PARENT_FOLDER="`dirname \"$SCRIPT_FOLDER\"`";
+	RESULT=$?
+	if [ $RESULT -ne 0 ]; then
+		echo "ERR: $RESULT: Error encountered while determining the name of the parent of the current script."
+		return $RESULT;
+	fi
+	
+	if [ "$PARENT_FOLDER" = "" ] || [ "$PARENT_FOLDER" = "." ] || [ -z "$PARENT_FOLDER" ]; then
+		PARENT_FOLDER=`pwd`
+	fi
+	
+	echo PARENT_FOLDER:$PARENT_FOLDER.
+	
+	return 0
+}
+
 initialiseEnvironment() {	
 	setScriptFilename
 	RESULT=$?
@@ -39,6 +55,12 @@ initialiseEnvironment() {
 	fi
 	
 	setScriptFolderName
+	RESULT=$?
+	if [ $RESULT -ne 0 ]; then
+		return $RESULT
+	fi
+	
+	setParentFoldername
 	RESULT=$?
 	if [ $RESULT -ne 0 ]; then
 		return $RESULT
@@ -63,11 +85,16 @@ if [ $RESULT -ne 0 ]; then
 	return $RESULT
 fi
 
-LOG_FILE=$SCRIPT_FOLDER/$SCRIPT_FILE.log
+LOG_FOLDER=$PARENT_FOLDER/logs
+LOG_FILE=$LOG_FOLDER/$SCRIPT_FILE.log
 
-echo SOURCE_FOLDER:$SOURCE_FOLDER.
+echo LOG_FOLDER:$LOG_FOLDER.
 echo LOG_FILE:$LOG_FILE
 
-cd "$SOURCE_FOLDER"
+if [ ! -d "$LOG_FOLDER" ]; then
+    mkdir "$LOG_FOLDER"
+fi
 
-java -jar "$SCRIPT_FOLDER/../target/MockTCPServer-Standalone-1.3.0.jar" $1 | tee $LOG_FILE
+pushd "$PARENT_FOLDER"
+
+java -jar "$PARENT_FOLDER/MockTCPServer-Standalone-1.3.0.jar" $1 $2 | tee $LOG_FILE
