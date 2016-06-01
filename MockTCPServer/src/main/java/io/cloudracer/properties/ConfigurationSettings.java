@@ -67,6 +67,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * @see #isConfigurationInitialisationEnabled()
      */
     public int getPort() throws ConfigurationException {
+        // Retrieve the "port" attribute of the "server" element.
         return Integer.parseInt(this.getConfigurationBuilder().getConfiguration().getProperty(PORT_PROPERTY_NAME).toString());
     }
 
