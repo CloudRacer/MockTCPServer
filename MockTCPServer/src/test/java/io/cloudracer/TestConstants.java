@@ -6,9 +6,9 @@ abstract class TestConstants {
     protected static final String CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_VALUE_TRUE = "true";
     protected static final String CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_VALUE_FALSE = "false";
 
-    protected static final String MOCKTCPSERVER_XML_FULL_PATH_SUFFIX = "/MockTCPServer/MockTCPServer/configuration/mocktcpserver.xml";
+    protected static final String MOCKTCPSERVER_XML_FULL_PATH_SUFFIX = "/MockTCPServer/configuration/mocktcpserver.xml";
     protected static final String MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME = "target/classes/mocktcpserver.xml";
-    protected static final String MOCKTCPSERVER_XML_FULL_RESOURCE_PATH_SUFFIX = "/MockTCPServer/MockTCPServer/" + MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME;
+    protected static final String MOCKTCPSERVER_XML_FULL_RESOURCE_PATH_SUFFIX = "/MockTCPServer/" + MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME;
 
     protected static final int TEST_TIMEOUT_5_MINUTE = 300000;
     protected static final int TEST_TIMEOUT_10_MINUTE = TEST_TIMEOUT_5_MINUTE * 2;
