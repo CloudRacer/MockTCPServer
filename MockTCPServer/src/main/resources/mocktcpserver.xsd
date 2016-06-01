@@ -1,0 +1,42 @@
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:o="http://mocktcpserver.cloudracer.io/schemas" targetNamespace="http://mocktcpserver.cloudracer.io/schemas">
+
+    <xs:element name="configuration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="server" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:sequence>
+                            <xs:element name="incoming" minOccurs="0" maxOccurs="unbounded">
+                                <xs:complexType mixed="true">
+                                    <xs:sequence>
+                                        <xs:element name="response" minOccurs="0" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:simpleContent>
+                                                    <xs:extension base="xs:string">
+                                                        <xs:attribute type="xs:string" name="machine" use="required" />
+                                                        <xs:attribute type="xs:short" name="port" use="required" />
+                                                    </xs:extension>
+                                                </xs:simpleContent>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                                <xs:unique name="ResponseUniquePort">
+                                    <xs:selector xpath="o:response" />
+                                    <xs:field xpath="@machine" />
+                                    <xs:field xpath="@port" />
+                                </xs:unique>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:short" name="port" use="optional" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+        <xs:unique name="ServerUniquePort">
+            <xs:selector xpath="o:server" />
+            <xs:field xpath="@port" />
+        </xs:unique>
+    </xs:element>
+
+</xs:schema>
