@@ -54,7 +54,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * The default configuration file is held as a {@link #FILENAME resource file}.
      */
     public final static String DEFAULT_FILENAME = String.format("%s%s%s", FILENAME_PATH, File.separatorChar, FILENAME);
-    private final static String PORT_PROPERTY_NAME = "server.port";
+    private final static String PORT_PROPERTY_NAME = "server[@port]";
 
     private URL propertiesFile;
     private FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
