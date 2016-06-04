@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
+import io.cloudracer.TestConstants;
 import io.cloudracer.mocktcpserver.datastream.DataStream;
 
 /**
@@ -34,7 +35,7 @@ public class TestDataStreamUT extends AbstractTestTools {
     public void dataStream() throws IOException {
         final DataStream dataStream = new DataStream(this.getClass().getSimpleName());
 
-        this.writeStringToStream(WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
+        this.writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
         dataStream.close();
 
@@ -92,9 +93,9 @@ public class TestDataStreamUT extends AbstractTestTools {
         final int maximumTailLength = 10;
         final DataStream dataStream = new DataStream(maximumTailLength);
 
-        this.writeStringToStream(WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
+        this.writeStringToStream(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, dataStream);
 
-        this.checkDataStreamInternalConsistency(dataStream, WELLFORMED_XML_WITH_VALID_TERMINATOR);
+        this.checkDataStreamInternalConsistency(dataStream, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
 
         this.checkLogMonitorForUnexpectedMessages();
     }

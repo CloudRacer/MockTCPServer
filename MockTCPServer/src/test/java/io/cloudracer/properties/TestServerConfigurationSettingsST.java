@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
+import io.cloudracer.TestConstants;
 
 public class TestServerConfigurationSettingsST extends AbstractTestTools {
 
@@ -47,22 +48,22 @@ public class TestServerConfigurationSettingsST extends AbstractTestTools {
      */
     @Test
     public void locateConfigurationFile() {
-        assertTrue(this.getConfigurationSettings().getFileName().getFile().endsWith(MOCKTCPSERVER_XML_FULL_RESOURCE_PATH_SUFFIX));
+        assertTrue(this.getConfigurationSettings().getFileName().getFile().endsWith(TestConstants.MOCKTCPSERVER_XML_FULL_RESOURCE_PATH_SUFFIX));
     }
 
     @Test
     public void retrieveProperties() throws ConfigurationException {
-        assertEquals(MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
+        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
     }
 
     @Test
     public void setPropertyValue() throws ConfigurationException {
-        assertEquals(MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
+        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
 
-        this.getConfigurationSettings().setPort(MOCK_SERVER_NEW_PORT);
-        assertEquals(MOCK_SERVER_NEW_PORT, this.getConfigurationSettings().getPort());
+        this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_NEW_PORT);
+        assertEquals(TestConstants.MOCK_SERVER_NEW_PORT, this.getConfigurationSettings().getPort());
 
-        this.getConfigurationSettings().setPort(MOCK_SERVER_PORT);
-        assertEquals(MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
+        this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_PORT);
+        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
     }
 }

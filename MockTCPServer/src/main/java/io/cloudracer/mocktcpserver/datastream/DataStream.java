@@ -27,20 +27,13 @@ public class DataStream implements Closeable {
     /**
      * By default, the DataStream will maintain a {@link DataStream#getTail() tail} with this {@link DataStream#getTailMaximumLength() maximum length}.
      */
-    public final static int DEFAULT_TAIL_MAXIMUM_LENGTH = 3;
+    public static final int DEFAULT_TAIL_MAXIMUM_LENGTH = 3;
 
     private ByteArrayOutputStream output;
     private Deque<Byte> tailQueue = null;
     private Byte lastByte;
     private Integer tailMaximumLength = null;
     private String rootLoggerName;
-
-    /**
-     * Default constructor.
-     * <p>
-     * Use a default {@link DataStream#getTailMaximumLength() tail length} of {@link DataStream#DEFAULT_TAIL_MAXIMUM_LENGTH} and a default {@link LogManager#getLogger(Class) log4j root logger} of the Class name.
-     */
-    public DataStream() {}
 
     /**
      * Specify a log4j root logger.
@@ -112,7 +105,8 @@ public class DataStream implements Closeable {
 
     private synchronized ByteArrayOutputStream getOutput() {
         if (this.output == null) {
-            this.output = new ByteArrayOutputStream() {
+            // The ByteArrayOutputStream is closed automatically when the class is destroyed.
+            this.output = new ByteArrayOutputStream() { // NOSONAR
                 @Override
                 public synchronized void write(final int b) {
                     super.write(b);
@@ -143,7 +137,7 @@ public class DataStream implements Closeable {
      * @throws IOException see source documentation.
      */
     public PipedInputStream toInputStream() throws IOException {
-        PipedInputStream inputStream = null;
+        PipedInputStream inputStream;
 
         if (this.getOutput().size() == 0) {
             inputStream = new PipedInputStream();
@@ -151,14 +145,11 @@ public class DataStream implements Closeable {
             inputStream = new PipedInputStream(this.getOutput().size());
             final PipedOutputStream outputStream = new PipedOutputStream(inputStream);
 
-            final Thread copy = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        DataStream.this.getOutput().writeTo(outputStream);
-                    } catch (final IOException e) {
-                        DataStream.this.logger.error(e.getMessage(), e);
-                    }
+            final Thread copy = new Thread(() -> {
+                try {
+                    DataStream.this.getOutput().writeTo(outputStream);
+                } catch (final IOException e) {
+                    DataStream.this.logger.error(e.getMessage(), e);
                 }
             });
             copy.setName(String.format("%s-InputStream-Creator", this.getThreadName()));
@@ -167,6 +158,7 @@ public class DataStream implements Closeable {
                 copy.join();
             } catch (final InterruptedException e) {
                 this.logger.error(e.getCause(), e);
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -186,7 +178,6 @@ public class DataStream implements Closeable {
         }
 
         this.output = output;
-
     }
 
     /**
@@ -213,7 +204,7 @@ public class DataStream implements Closeable {
      */
     private Deque<Byte> getTailQueue() {
         if (this.tailQueue == null) {
-            this.tailQueue = new ArrayDeque<Byte>(this.getTailMaximumLength());
+            this.tailQueue = new ArrayDeque<>(this.getTailMaximumLength());
         }
 
         return this.tailQueue;
@@ -294,13 +285,13 @@ public class DataStream implements Closeable {
         final String delimeter = ".";
         final String regEx = "\\.";
 
-        String name = null;
+        String name;
 
         if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() > 0) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
-                final String nameSegments[] = this.getClass().getName().split(regEx);
+                final String[] nameSegments = this.getClass().getName().split(regEx);
 
                 name = String.format("%s-%s", this.getClass().getSuperclass().getSimpleName(),
                         nameSegments[nameSegments.length - 1]);
@@ -321,13 +312,13 @@ public class DataStream implements Closeable {
         final String delimeter = ".";
         final String regEx = "\\.";
 
-        String name = null;
+        String name;
 
         if (this.getClass().getSimpleName() != null && this.getClass().getSimpleName().length() != 0) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
-                final String nameSegments[] = this.getClass().getName().split(regEx);
+                final String[] nameSegments = this.getClass().getName().split(regEx);
 
                 name = nameSegments[nameSegments.length - 1];
             } else {

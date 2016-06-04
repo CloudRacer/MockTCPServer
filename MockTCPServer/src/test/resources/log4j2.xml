@@ -5,6 +5,12 @@
         http://logging.apache.org/log4j/2.x/manual/layouts.html#LocationInformation
     -->
     <Appenders>
+        <Console name="PRINT_VERSION" target="SYSTEM_OUT">
+            <PatternLayout pattern="%m%n" />
+        </Console>
+        <Console name="SYSTEM_TEST_CONSOLE_OUTPUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%m%n" />
+        </Console>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{ISO8601} %-5p [%t] %C(%L) - %m%n" />
         </Console>
@@ -25,5 +31,11 @@
         <Root level="all">
             <AppenderRef ref="ASYNC" />
         </Root>
+        <Logger name="io.cloudracer.mocktcpserver.MockTCPServer$Print" level="all" additivity="false">
+            <appender-ref ref="PRINT_VERSION" level="all" />
+        </Logger>
+        <Logger name="io.cloudracer.mocktcpserver.TestMockTCPServerST" level="all" additivity="false">
+            <appender-ref ref="SYSTEM_TEST_CONSOLE_OUTPUT" level="all" />
+        </Logger>
     </Loggers>
 </Configuration>

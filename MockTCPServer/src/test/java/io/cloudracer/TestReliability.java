@@ -17,7 +17,7 @@ public class TestReliability extends AbstractTestTools {
 
     private final Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
 
-    private final static int TOTAL_SERVER_RESTARTS = 1000;
+    private static final int TOTAL_SERVER_RESTARTS = 1000;
 
     @Override
     @Before
@@ -56,7 +56,7 @@ public class TestReliability extends AbstractTestTools {
      *
      * @throws IOException
      */
-    @Test(timeout = TEST_TIMEOUT_5_MINUTE)
+    @Test(timeout = TestConstants.TEST_TIMEOUT_5_MINUTE)
     public void clientReconnect() throws IOException {
         final int totalReconnects = 10;
 

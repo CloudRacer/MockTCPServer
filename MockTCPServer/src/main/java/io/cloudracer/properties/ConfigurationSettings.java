@@ -21,7 +21,6 @@ import org.apache.commons.configuration2.io.FileLocatorUtils;
 import org.apache.commons.configuration2.io.FileSystemLocationStrategy;
 import org.apache.commons.configuration2.io.ProvidedURLLocationStrategy;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
@@ -34,27 +33,29 @@ import org.apache.logging.log4j.Logger;
  */
 public class ConfigurationSettings extends AbstractConfiguration {
 
+    private static final String UNSUPPORTED = "Unsupported.";
+
     private Logger logger;
 
     /**
      * A System Property that, when set with a value of "true", will result in the <b>default</b> configuration file (stored as a {@link #FILENAME resource file}) being written to disk i.e self-initialised (an existing file will not be overwritten). Once on disk, the configuration file can be modified as required.
      */
-    public final static String CONFIGURATION_INITIALISATION_ENABLED = "mocktcpserver.configuration.initialisation.enabled";
+    public static final String CONFIGURATION_INITIALISATION_ENABLED = "mocktcpserver.configuration.initialisation.enabled";
     /**
      * The name of the resource file that is the default configuration file. If the file cannot be located and the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is true, this file can be written to the {@link #DEFAULT_FILENAME default location} on file system to initialise the configuration.
      */
-    public final static String FILENAME = "mocktcpserver.xml";
+    public static final String FILENAME = "mocktcpserver.xml";
     /**
      * The location of the default {@link #FILENAME resource file}. This folder name is relative to the runtime working folder.
      */
-    public final static String FILENAME_PATH = "configuration";
+    public static final String FILENAME_PATH = "configuration";
     /**
      * The default location, and name, of the configuration file on the file system.
      * <p>
      * The default configuration file is held as a {@link #FILENAME resource file}.
      */
-    public final static String DEFAULT_FILENAME = String.format("%s%s%s", FILENAME_PATH, File.separatorChar, FILENAME);
-    private final static String PORT_PROPERTY_NAME = "server[@port]";
+    public static final String DEFAULT_FILENAME = String.format("%s%s%s", FILENAME_PATH, File.separatorChar, FILENAME);
+    private static final String PORT_PROPERTY_NAME = "server[@port]";
 
     private URL propertiesFile;
     private FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
@@ -124,8 +125,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
 
     @Override
     protected void addPropertyDirect(String arg0, Object arg1) {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("TODO", new UnsupportedOperationException());
+        throw new NotImplementedException(UNSUPPORTED, new UnsupportedOperationException());
     }
 
     /**
@@ -135,8 +135,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     @Override
     protected void clearPropertyDirect(String arg0) {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("TODO", new UnsupportedOperationException());
+        throw new NotImplementedException(UNSUPPORTED, new UnsupportedOperationException());
     }
 
     /**
@@ -146,8 +145,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     @Override
     protected boolean containsKeyInternal(String arg0) {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("TODO", new UnsupportedOperationException());
+        throw new NotImplementedException(UNSUPPORTED, new UnsupportedOperationException());
     }
 
     /**
@@ -157,8 +155,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     @Override
     protected Iterator<String> getKeysInternal() {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("TODO", new UnsupportedOperationException());
+        throw new NotImplementedException(UNSUPPORTED, new UnsupportedOperationException());
     }
 
     /**
@@ -168,8 +165,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     @Override
     protected Object getPropertyInternal(String arg0) {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("TODO", new UnsupportedOperationException());
+        throw new NotImplementedException(UNSUPPORTED, new UnsupportedOperationException());
     }
 
     /**
@@ -179,8 +175,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     @Override
     protected boolean isEmptyInternal() {
-        // TODO Auto-generated method stub
-        throw new NotImplementedException("TODO", new UnsupportedOperationException());
+        throw new NotImplementedException(UNSUPPORTED, new UnsupportedOperationException());
     }
 
     private FileBasedConfigurationBuilder<XMLConfiguration> getConfigurationBuilder() {
@@ -194,7 +189,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
 
             // If the file has not yet been written to the disk, as this is the first execution or the file has been deleted (deletion is a legitimate way to "reset to factory settings"), write it now.
             if (this.isConfigurationInitialisationEnabled() && !this.getDefaultFile().exists()) {
-                // Reinitialise in order to pick up the newly created file;
+                // Reinitialise in order to pick up the newly created file.
                 this.propertiesFile = null;
                 this.save();
                 this.configurationBuilder = null;
@@ -222,18 +217,10 @@ public class ConfigurationSettings extends AbstractConfiguration {
         } catch (final IOException e) {
             this.getLog().error(e.getMessage(), e);
         } finally {
-            FileWriter fileWriter = null;
-            try {
-                fileWriter = new FileWriter(this.getDefaultFile());
-                try {
-                    this.getConfigurationBuilder().getConfiguration().write(fileWriter);
-                } catch (final ConfigurationException e) {
-                    this.getLog().error(e.getMessage(), e);
-                }
-            } catch (final IOException e) {
+            try (final FileWriter fileWriter = new FileWriter(this.getDefaultFile())) {
+                this.getConfigurationBuilder().getConfiguration().write(fileWriter);
+            } catch (final IOException | ConfigurationException e) {
                 this.getLog().error(e.getMessage(), e);
-            } finally {
-                IOUtils.closeQuietly(fileWriter);
             }
         }
     }

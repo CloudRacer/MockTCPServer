@@ -22,19 +22,19 @@ import io.cloudracer.properties.ConfigurationSettings;
  *
  * @author John McDonnell
  */
-public abstract class AbstractTestTools extends TestConstants {
+public abstract class AbstractTestTools {
 
-    private final static Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger();
 
-    private final static File propertiesSourceFile = new File(MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME);
-    private final static File propertiesBackupFile = new File(String.format("%s%s%s-backup.%s", propertiesSourceFile.getParent(), File.separatorChar, FilenameUtils.getBaseName(propertiesSourceFile.getName()), FilenameUtils.getExtension(propertiesSourceFile.getName())));
+    private static final File propertiesSourceFile = new File(TestConstants.MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME);
+    private static final File propertiesBackupFile = new File(String.format("%s%s%s-backup.%s", propertiesSourceFile.getParent(), File.separatorChar, FilenameUtils.getBaseName(propertiesSourceFile.getName()), FilenameUtils.getExtension(propertiesSourceFile.getName())));
 
     private TCPClient client;
     private MockTCPServer server;
     private ConfigurationSettings configurationSettings;
 
     protected static void initialiseSystemProperties() throws IOException {
-        System.getProperties().remove(CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME);
+        System.getProperties().remove(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME);
 
         logger.debug(String.format("Properties: %s.", StringUtils.join(System.getProperties())));
     }
@@ -59,7 +59,7 @@ public abstract class AbstractTestTools extends TestConstants {
             // Pause to allow messages to be flushed to the disk (and, hence, through the appenders).
             TimeUnit.SECONDS.sleep(delayDuration);
         } catch (final InterruptedException e) {
-            // Do nothing
+            Thread.currentThread().interrupt();
         }
         assertNull(String.format("An unexpected message was logged to the file \"%s\".", LogMonitor.getFileName()), LogMonitor.getLastEventLogged());
     }

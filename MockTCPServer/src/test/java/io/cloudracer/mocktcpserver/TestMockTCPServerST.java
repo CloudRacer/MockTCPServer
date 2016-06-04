@@ -8,11 +8,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
+import io.cloudracer.TestConstants;
 
 /**
  * Mock TCP Server tests.
@@ -20,6 +23,9 @@ import io.cloudracer.AbstractTestTools;
  * @author John McDonnell
  */
 public class TestMockTCPServerST extends AbstractTestTools {
+
+    // Print to the console only so that the LogMonitor does not interpret it as an error.
+    private final Logger logger = LogManager.getLogger(TestMockTCPServerST.class);
 
     private static final int TIMEOUT = 10000;
 
@@ -38,12 +44,11 @@ public class TestMockTCPServerST extends AbstractTestTools {
     /**
      * Server returns the expected ACK to a properly terminated message.
      *
-     * @throws ClassNotFoundException see source documentation.
      * @throws IOException see source documentation.
      */
     @Test(timeout = TIMEOUT)
-    public void ack() throws ClassNotFoundException, IOException {
-        assertArrayEquals(ACK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+    public void ack() throws IOException {
+        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
         this.checkLogMonitorForUnexpectedMessages();
     }
@@ -51,14 +56,13 @@ public class TestMockTCPServerST extends AbstractTestTools {
     /**
      * Having set a customised terminator, the server returns the expected ACK to a message terminated with the custom terminator.
      *
-     * @throws ClassNotFoundException see source documentation.
      * @throws IOException see source documentation.
      * @throws InterruptedException
      */
     @Test(timeout = TIMEOUT)
-    public void ackWithCustomTerminator() throws ClassNotFoundException, IOException, InterruptedException {
+    public void ackWithCustomTerminator() throws IOException, InterruptedException {
         final byte[] customTerminator = new byte[] { 88, 89, 90 }; // XYZ
-        final String message = String.format("%s%s", WELLFORMED_XML, new String(customTerminator));
+        final String message = String.format("%s%s", TestConstants.WELLFORMED_XML, new String(customTerminator));
 
         // Set the custom terminator.
         this.getServer().setTerminator(customTerminator);
@@ -68,11 +72,9 @@ public class TestMockTCPServerST extends AbstractTestTools {
             @Override
             public void run() {
                 try {
-                    TestMockTCPServerST.this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR);
-                } catch (final ClassNotFoundException e) {
-                    e.printStackTrace();
+                    TestMockTCPServerST.this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    TestMockTCPServerST.this.logger.error(e.getMessage(), e);
                 }
             }
         };
@@ -89,7 +91,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
         assertFalse(waitForResponse.isAlive());
 
         // Send a message with the correct terminator (i.e. the custom on we set at the start of this method) and wait for the response.
-        assertArrayEquals(ACK, this.getClient().send(message).toByteArray());
+        assertArrayEquals(TestConstants.getAck(), this.getClient().send(message).toByteArray());
 
         this.checkLogMonitorForUnexpectedMessages();
     }
@@ -97,16 +99,15 @@ public class TestMockTCPServerST extends AbstractTestTools {
     /**
      * Having set the Server to always return a NAK, the Server returns the expected NAK when an ACK would normally be expected.
      *
-     * @throws ClassNotFoundException see source documentation.
      * @throws IOException see source documentation.
      */
     @Test(timeout = TIMEOUT)
-    public void forceNAK() throws ClassNotFoundException, IOException {
-        assertArrayEquals(ACK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+    public void forceNAK() throws IOException {
+        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
         this.getServer().setIsAlwaysNAKResponse(true);
 
-        assertArrayEquals(NAK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+        assertArrayEquals(TestConstants.getNak(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
         this.checkLogMonitorForUnexpectedMessages();
     }
@@ -114,15 +115,14 @@ public class TestMockTCPServerST extends AbstractTestTools {
     /**
      * Having set the Server to close after the next response, wait for the Server {@link Thread} to die after sending one message.
      *
-     * @throws ClassNotFoundException see source documentation.
      * @throws IOException see source documentation.
      * @throws InterruptedException see source documentation.
      */
     @Test(timeout = TIMEOUT)
-    public void forceCloseAfterNextResponse() throws ClassNotFoundException, IOException, InterruptedException {
+    public void forceCloseAfterNextResponse() throws IOException, InterruptedException {
         this.getServer().setIsCloseAfterNextResponse(true);
 
-        assertArrayEquals(ACK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
         // Wait for the MockTCPServer to Thread to die.
         final int timeout = 5000; // 5 seconds.
@@ -146,11 +146,9 @@ public class TestMockTCPServerST extends AbstractTestTools {
             @Override
             public void run() {
                 try {
-                    TestMockTCPServerST.this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR);
-                } catch (final ClassNotFoundException e) {
-                    e.printStackTrace();
+                    TestMockTCPServerST.this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR);
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    TestMockTCPServerST.this.logger.error(e.getMessage(), e);
                 }
             }
         };
@@ -166,14 +164,13 @@ public class TestMockTCPServerST extends AbstractTestTools {
     /**
      * Server responses can be ignored; the client will not wait for the Server to respond.
      *
-     * @throws ClassNotFoundException see source documentation.
      * @throws IOException see source documentation.
      */
     @Test(timeout = TIMEOUT)
-    public void ignoreResponse() throws ClassNotFoundException, IOException {
-        assertArrayEquals(ACK, this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+    public void ignoreResponse() throws IOException {
+        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
-        assertNull(this.getClient().send(WELLFORMED_XML_WITH_VALID_TERMINATOR, false));
+        assertNull(this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, false));
 
         this.checkLogMonitorForUnexpectedMessages();
     }
@@ -181,24 +178,23 @@ public class TestMockTCPServerST extends AbstractTestTools {
     /**
      * Having set the Server to expect only messages that match a specified Regular Expression, ensure that a NAK is returned for messages that do not match and an ACK for messages that do match.
      *
-     * @throws ClassNotFoundException see source documentation.
      * @throws IOException see source documentation.
      */
     @Test(timeout = TIMEOUT)
-    public void expectSpecificMessage() throws ClassNotFoundException, IOException {
+    public void expectSpecificMessage() throws IOException {
         final String baseMessage = "Hello World!!";
-        final String message = String.format("%s%s", baseMessage, new String(DEFAULT_TERMINATOR));
+        final String message = String.format("%s%s", baseMessage, new String(TestConstants.DEFAULT_TERMINATOR));
 
         // All messages sent to the Server must match this regular expression.
-        final String messageRegularExpression = String.format("%s%s", "Hello.*", new String(DEFAULT_TERMINATOR));
+        final String messageRegularExpression = String.format("%s%s", "Hello.*", new String(TestConstants.DEFAULT_TERMINATOR));
         final String invalidMessage = String.format("%s%s", "This does not match the expected Regular Expression.",
-                new String(DEFAULT_TERMINATOR));
+                new String(TestConstants.DEFAULT_TERMINATOR));
 
         this.getServer().setExpectedMessage(messageRegularExpression);
 
-        assertArrayEquals(ACK, this.getClient().send(message).toByteArray());
+        assertArrayEquals(TestConstants.getAck(), this.getClient().send(message).toByteArray());
         assertNull(this.getServer().getAssertionError());
-        assertArrayEquals(NAK, this.getClient().send(invalidMessage).toByteArray());
+        assertArrayEquals(TestConstants.getNak(), this.getClient().send(invalidMessage).toByteArray());
         assertNotNull(this.getServer().getAssertionError());
 
         this.checkLogMonitorForUnexpectedMessages();
