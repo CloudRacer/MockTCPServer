@@ -141,7 +141,7 @@ public class MockTCPServer extends Thread implements Closeable {
          * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
          */
         try {
-            final long sleepDuration = 20;
+            final long sleepDuration = 50;
             TimeUnit.MILLISECONDS.sleep(sleepDuration);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
