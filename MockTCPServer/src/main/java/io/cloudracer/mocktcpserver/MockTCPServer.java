@@ -187,9 +187,7 @@ public class MockTCPServer extends Thread implements Closeable {
                 try {
                     waitForThreadToStop(mockTCPServer);
                 } finally {
-                    if (mockTCPServer != null) {
-                        mockTCPServer.close();
-                    }
+                    IOUtils.closeQuietly(mockTCPServer);
                 }
             }
         } catch (final ParseException e1) {
@@ -509,17 +507,17 @@ public class MockTCPServer extends Thread implements Closeable {
             try {
                 super.join(maximumTimeToWait);
             } catch (final InterruptedException e) {
-                // Intermittently, the server fails to close. Retry it indefinitely until it does close; an improvement of blocking forever with no feedback.
-                if (super.isAlive()) {
-                    this.logger.warn(String.format("Failed to close the Server(%s) in %d milliseconds. Trying again to shutdown the Server...", super.getName(), maximumTimeToWait));
-                    if (!super.isInterrupted()) {
-                        this.logger.trace(String.format("Interrupting the Server Thread(%s)...", super.getName()));
-
-                        this.closeStreams();
-                    }
-                }
-
                 Thread.currentThread().interrupt();
+            }
+
+            // Intermittently, the server fails to close. Retry it indefinitely until it does close; an improvement of blocking forever with no feedback.
+            if (super.isAlive()) {
+                this.logger.warn(String.format("Failed to close the Server(%s) in %d milliseconds. Trying again to shutdown the Server...", super.getName(), maximumTimeToWait));
+                if (!super.isInterrupted()) {
+                    this.logger.trace(String.format("Interrupting the Server Thread(%s)...", super.getName()));
+
+                    this.closeStreams();
+                }
             }
         }
 
