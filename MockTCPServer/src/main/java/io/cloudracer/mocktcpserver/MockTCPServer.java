@@ -141,7 +141,7 @@ public class MockTCPServer extends Thread implements Closeable {
          * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
          */
         try {
-            final long sleepDuration = 50;
+            final long sleepDuration = 20;
             TimeUnit.MILLISECONDS.sleep(sleepDuration);
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -185,21 +185,16 @@ public class MockTCPServer extends Thread implements Closeable {
                 });
 
                 try {
-                    waitForThreadToStop(mockTCPServer);
+                    mockTCPServer.join();
+                } catch (final InterruptedException e) {
+                    logger.error(e.getMessage(), e);
+                    Thread.currentThread().interrupt();
                 } finally {
                     IOUtils.closeQuietly(mockTCPServer);
                 }
             }
         } catch (final ParseException e1) {
             Print.printHelp(e1);
-        }
-    }
-
-    private static void waitForThreadToStop(final MockTCPServer mockTCPServer) {
-        try {
-            mockTCPServer.join();
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 
