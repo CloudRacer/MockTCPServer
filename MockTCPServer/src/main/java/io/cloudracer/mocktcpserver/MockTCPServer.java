@@ -187,7 +187,9 @@ public class MockTCPServer extends Thread implements Closeable {
                 try {
                     waitForThreadToStop(mockTCPServer);
                 } finally {
-                    IOUtils.closeQuietly(mockTCPServer);
+                    if (mockTCPServer != null) {
+                        mockTCPServer.close();
+                    }
                 }
             }
         } catch (final ParseException e1) {
