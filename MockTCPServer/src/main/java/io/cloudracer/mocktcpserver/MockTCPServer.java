@@ -212,7 +212,7 @@ public class MockTCPServer extends Thread implements Closeable {
             }
         } catch (final SocketException e) {
             this.logger.warn(e);
-        } catch (final IOException | ConfigurationException e) {
+        } catch (final Exception e) {
             this.logger.error(e.getMessage(), e);
         } finally {
             this.setStatus(Status.CLOSING);
@@ -221,25 +221,21 @@ public class MockTCPServer extends Thread implements Closeable {
         }
     }
 
-    private void readIncomingStream() {
-        try {
-            this.setDataStream(null);
-            while (this.getDataStream().write(this.getInputStream().read()) != -1) {
-                if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
-                    this.incrementMessagesReceivedCount();
+    private void readIncomingStream() throws IOException {
+        this.setDataStream(null);
+        while (this.getDataStream().write(this.getInputStream().read()) != -1) {
+            if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
+                this.incrementMessagesReceivedCount();
 
-                    break;
-                }
+                break;
             }
+        }
 
-            if (this.getDataStream().getLastByte() == -1) {
-                // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
-                this.closeStreams();
-            } else if (this.getDataStream().size() > 0) { // Ignore null (i.e. zero length) in order allow a probing ping e.g. paping.exe
-                this.processIncomingMessage();
-            }
-        } catch (final Exception e) {
-            this.logger.error(e.getMessage(), e);
+        if (this.getDataStream().getLastByte() == -1) {
+            // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
+            this.closeStreams();
+        } else if (this.getDataStream().size() > 0) { // Ignore null (i.e. zero length) in order allow a probing ping e.g. paping.exe
+            this.processIncomingMessage();
         }
     }
 
