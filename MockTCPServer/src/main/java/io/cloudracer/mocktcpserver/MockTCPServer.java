@@ -185,16 +185,22 @@ public class MockTCPServer extends Thread implements Closeable {
                 });
 
                 try {
-                    mockTCPServer.join();
-                } catch (final InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                    Thread.currentThread().interrupt();
+                    waitForThread(logger, mockTCPServer, 0);
                 } finally {
                     IOUtils.closeQuietly(mockTCPServer);
                 }
             }
         } catch (final ParseException e1) {
             Print.printHelp(e1);
+        }
+    }
+
+    private static void waitForThread(final Logger logger, final Thread thread, final long maximumDurationToWait) {
+        try {
+            thread.join(maximumDurationToWait);
+        } catch (final InterruptedException e) {
+            logger.warn(e);
+            Thread.currentThread().interrupt();
         }
     }
 

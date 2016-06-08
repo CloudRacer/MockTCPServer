@@ -2,11 +2,7 @@ package io.cloudracer.mocktcpserver.standalone;
 
 import io.cloudracer.mocktcpserver.MockTCPServer;
 
-public abstract class Bootstrap {
-
-    private Bootstrap() {
-        // Do nothing. This class cannot be instantiated.
-    }
+public interface Bootstrap {
 
     /**
      * Starts a MockTCPServer on a command-line.
