@@ -85,11 +85,17 @@ if [ $RESULT -ne 0 ]; then
 	return $RESULT
 fi
 
+MAINCLASS=io.cloudracer.mocktcpserver.MockTCPServer
+CLASSPATH=*?.?.?.jar
+SERVER_PARAMS=-Dmocktcpserver.configuration.initialisation.enabled=true
 LOG_FOLDER=$PARENT_FOLDER/logs
 LOG_FILE=$LOG_FOLDER/$SCRIPT_FILE.log
 
+echo MAINCLASS:$MAINCLASS.
+echo CLASSPATH:$CLASSPATH.
 echo LOG_FOLDER:$LOG_FOLDER.
 echo LOG_FILE:$LOG_FILE
+echo SERVER_PARAMS:$SERVER_PARAMS.
 
 if [ ! -d "$LOG_FOLDER" ]; then
     mkdir "$LOG_FOLDER"
@@ -97,4 +103,7 @@ fi
 
 pushd "$PARENT_FOLDER"
 
-java -jar "$PARENT_FOLDER/MockTCPServer-Standalone-1.3.0.jar" $1 $2 | tee $LOG_FILE
+echo
+echo
+echo
+java $SERVER_PARAMS -classpath $CLASSPATH $MAINCLASS $1 $2 | tee $LOG_FILE
