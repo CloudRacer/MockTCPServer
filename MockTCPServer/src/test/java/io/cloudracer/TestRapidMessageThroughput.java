@@ -31,15 +31,14 @@ public class TestRapidMessageThroughput extends AbstractTestTools {
      * Send many messages in a tight loop to ensure that "maximum" volume throughput is possible.
      *
      * @throws IOException
-     * @throws ClassNotFoundException
      **/
     @Test(timeout = TestConstants.TEST_TIMEOUT_10_MINUTE)
-    public void rapidMessageThroughput() throws ClassNotFoundException, IOException {
+    public void rapidMessageThroughput() throws IOException {
         final int totalServerRestarts = 1000;
         for (int i = 0; i < totalServerRestarts; i++) {
             final String message = String.format("Test %d%s", i, TestConstants.DEFAULT_TERMINATOR);
 
-            assertArrayEquals("Unexpected server response.", TestConstants.ACK, this.getClient().send(message).toByteArray());
+            assertArrayEquals("Unexpected server response.", TestConstants.getAck(), this.getClient().send(message).toByteArray());
         }
 
         this.checkLogMonitorForUnexpectedMessages();

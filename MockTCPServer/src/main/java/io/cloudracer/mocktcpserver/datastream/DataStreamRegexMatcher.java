@@ -4,7 +4,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 /**
- * Typesafe comparison between a Regular Expression and the content of a {@link DataStream}.
+ * Type-safe comparison between a Regular Expression and the content of a {@link DataStream}.
  *
  * @author John McDonnell
  */

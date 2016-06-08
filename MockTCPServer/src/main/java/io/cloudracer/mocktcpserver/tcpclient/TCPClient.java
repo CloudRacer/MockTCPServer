@@ -109,9 +109,8 @@ public class TCPClient implements Closeable {
      * @param message the message to send.
      * @return the response from the {@link TCPClient#getHostName() server}.
      * @throws IOException see source documentation.
-     * @throws ClassNotFoundException see source documentation.
      */
-    public DataStream send(final String message) throws IOException, ClassNotFoundException {
+    public DataStream send(final String message) throws IOException {
         return this.send(message, true);
     }
 
@@ -122,9 +121,8 @@ public class TCPClient implements Closeable {
      * @param waitForResponse if true, wait for a response from the {@link TCPClient#getHostName() server}, otherwise null is returned.
      * @return the response from the {@link TCPClient#getHostName() server} or null if waitForResponse is false.
      * @throws IOException see source documentation.
-     * @throws ClassNotFoundException see source documentation.
      */
-    public DataStream send(final String message, final boolean waitForResponse) throws IOException, ClassNotFoundException {
+    public DataStream send(final String message, final boolean waitForResponse) throws IOException {
         return this.send(message, waitForResponse, this.getResponseTerminator());
     }
 
@@ -136,9 +134,8 @@ public class TCPClient implements Closeable {
      * @param responseTerminator the terminator to wait for on the response. Ignored if null.
      * @return the response from {@link TCPClient#getHostName() server} or null if waitForResponse is false.
      * @throws IOException
-     * @throws ClassNotFoundException
      */
-    private DataStream send(final String message, final boolean waitForResponse, final byte[] responseTerminator) throws IOException, ClassNotFoundException {
+    private DataStream send(final String message, final boolean waitForResponse, final byte[] responseTerminator) throws IOException {
         this.logger.info(String.format("Sending the message %s.", message));
 
         this.getDataOutputStream().write(message.getBytes(), 0, message.getBytes().length);
@@ -155,7 +152,7 @@ public class TCPClient implements Closeable {
 
                 this.close();
 
-                return new DataStream();
+                return null;
             }
         } else {
             return null;
@@ -181,7 +178,6 @@ public class TCPClient implements Closeable {
      * @throws UnsupportedEncodingException
      * @throws IOException
      * @throws TCPClientUnexpectedResponseException
-     * @throws ClassNotFoundException
      */
     private DataStream getResponse(final byte[] terminator) throws IOException, TCPClientUnexpectedResponseException {
         this.setDataInputStream(new DataInputStream(this.getSocket().getInputStream()));
@@ -203,10 +199,9 @@ public class TCPClient implements Closeable {
     }
 
     private boolean isTerminated(final DataStream dataStream, final byte[] terminator) throws TCPClientUnexpectedResponseException {
-        boolean terminated;
-        terminated = Arrays.equals(dataStream.getTail(), terminator)
-                || dataStream.size() == this.getACK().length && Arrays.equals(dataStream.toByteArray(), this.getACK())
-                || dataStream.size() == this.getNAK().length && Arrays.equals(dataStream.toByteArray(), this.getNAK());
+        final boolean terminated = Arrays.equals(dataStream.getTail(), terminator)
+                || Arrays.equals(dataStream.toByteArray(), this.getACK())
+                || Arrays.equals(dataStream.toByteArray(), this.getNAK());
 
         if (terminator == null && !terminated && (dataStream.size() == this.getACK().length || dataStream.size() == this.getNAK().length)) {
             throw new TCPClientUnexpectedResponseException(dataStream);
@@ -334,7 +329,6 @@ public class TCPClient implements Closeable {
      * Open a Socket, if not already open.
      *
      * @return an open {@link Socket} to the local machine, on the specified port ({@link TCPClient#getPort()}).
-     * @throws UnknownHostException
      * @throws IOException
      */
     private Socket getSocket() throws IOException {
@@ -361,7 +355,7 @@ public class TCPClient implements Closeable {
                 final long sleepDuration = 20;
                 TimeUnit.MILLISECONDS.sleep(sleepDuration);
             } catch (final InterruptedException e) {
-                // Do nothing.
+                Thread.currentThread().interrupt();
             }
         }
 

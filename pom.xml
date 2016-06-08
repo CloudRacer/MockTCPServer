@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.cloudracer</groupId>
     <artifactId>MockTCPServer-root</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <packaging>pom</packaging>
     <name>Mock TCP Server Root</name>
     <description>Simulate a TCP Server that is not available in a CI or testing environment.</description>
@@ -34,8 +33,9 @@
     </scm>
 
     <properties>
-        <maven.compiler.source.version>1.6</maven.compiler.source.version>
-        <maven.compiler.target.version>1.6</maven.compiler.target.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source.version>1.8</maven.compiler.source.version>
+        <maven.compiler.target.version>1.8</maven.compiler.target.version>
         <maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
         <surefire.forkCount>1</surefire.forkCount>
         <surefire.reuseForks>false</surefire.reuseForks>
@@ -120,9 +120,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <!-- Ensures that each test is entirely isolated from
-                        the preceding test. Without this, test results achieved in Eclipse can differ
-                        from those received in Maven. -->
+                    <!-- Ensures that each test is entirely isolated from the preceding test. Without this, test results achieved in Eclipse can differ from those received in Maven. -->
                     <forkCount>${surefire.forkCount}</forkCount>
                     <reuseForks>${surefire.reuseForks}</reuseForks>
                 </configuration>
@@ -183,9 +181,7 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--http://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin
-                    This plugin's configuration is used to store Eclipse m2e settings only. It
-                    has no influence on the Maven build itself. -->
+                <!--http://stackoverflow.com/questions/6352208/how-to-solve-plugin-execution-not-covered-by-lifecycle-configuration-for-sprin This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>

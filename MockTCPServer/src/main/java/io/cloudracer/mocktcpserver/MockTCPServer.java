@@ -3,6 +3,7 @@ package io.cloudracer.mocktcpserver;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -42,9 +43,9 @@ public class MockTCPServer extends Thread implements Closeable {
         OPEN, CLOSING, CLOSED
     }
 
-    private final static byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
-    private final static byte[] DEFAULT_ACK = { 65 };
-    private final static byte[] DEFAULT_NAK = { 78 };
+    private static final byte[] DEFAULT_TERMINATOR = { 13, 10, 10 };
+    private static final byte[] DEFAULT_ACK = { 65 };
+    private static final byte[] DEFAULT_NAK = { 78 };
 
     private byte[] terminator = null;
     private byte[] ack = null;
@@ -69,55 +70,48 @@ public class MockTCPServer extends Thread implements Closeable {
     private Status status = Status.OPEN;
     private final ConfigurationSettings configurationSettings = new ConfigurationSettings();
 
-    /**
-     * This allows an operator to start a stand-alone MockTCPServer. The <code>startup.sh(cmd)</code> file can be used to start the server on a command-line.
-     * <p>
-     * <b>Note</b>: currently, there is no packaged bundle to include all the dependencies and scripts.
-     *
-     * @param args an alternative port number can be passed as the first (and only) parameter.
-     */
-    public static void main(String[] args) {
-        final Logger logger = LogManager.getLogger();
+    private abstract static class Print {
 
-        try {
-            final CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
-            // Version information only.
-            if (commandLine.hasOption("version")) {
-                printVersion();
-            } else if (commandLine.hasOption("help")) {
-                printHelp();
-            } else {
-                final MockTCPServer mockTCPServer;
-                if (commandLine.hasOption("port")) {
-                    final int port = Integer.parseInt(commandLine.getOptionValue("port"));
-                    mockTCPServer = new MockTCPServer(port);
-                } else {
-                    mockTCPServer = new MockTCPServer();
-                }
+        private static final Logger logger = LogManager.getLogger(Print.class.getName());
 
-                // When the Operating System interrupts the thread (kill or CTRL-C), stop the server.
-                Runtime.getRuntime().addShutdownHook(new Thread() {
-                    @Override
-                    public void run() {
-                        logger.info("Operating System interrupt detected.");
+        private Print() {
+            // Do nothing. This class cannot be constructed.
+        }
 
-                        mockTCPServer.close();
-                    }
-                });
+        private static void printVersion() {
+            final String ideWorkingFolder = "classes";
 
-                try {
-                    mockTCPServer.join();
-                } catch (final InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                } finally {
-                    if (mockTCPServer != null) {
-                        mockTCPServer.close();
-                    }
-                }
+            final File executableLocation = new File(MockTCPServer.class.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .getPath());
+            String version = executableLocation.getName();
+            // If this is the IDE, use the full path.
+            if (version.equals(ideWorkingFolder)) {
+                version = executableLocation.getAbsoluteFile().toString();
             }
-        } catch (final ParseException e1) {
-            System.out.println(String.format("Invalid command line: %s", e1.getMessage()));
-            printHelp();
+
+            final Pattern pattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
+            final Matcher matcher = pattern.matcher(version);
+            if (matcher.find()) {
+                logger.info(matcher.group(0));
+            } else {
+                logger.info("Version number cannot be identified.");
+            }
+        }
+
+        private static void printHelp() {
+            printHelp(null);
+        }
+
+        private static void printHelp(final ParseException e1) {
+            if (e1 != null) {
+                logger.info(String.format("Invalid command line: %s", e1.getMessage()));
+            }
+
+            // automatically generate the help statement
+            final HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("MockTCPServer", getCommandLineOptions());
         }
     }
 
@@ -150,7 +144,63 @@ public class MockTCPServer extends Thread implements Closeable {
             final long sleepDuration = 20;
             TimeUnit.MILLISECONDS.sleep(sleepDuration);
         } catch (final InterruptedException e) {
-            // Do nothing.
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * This allows an operator to start a stand-alone MockTCPServer. The <code>startup.sh(cmd)</code> file can be used to start the server on a command-line.
+     * <p>
+     * <b>Note</b>: currently, there is no packaged bundle to include all the dependencies and scripts.
+     *
+     * @param args an alternative port number can be passed as the first (and only) parameter.
+     */
+    public static void main(String[] args) {
+        final Logger logger = LogManager.getLogger();
+
+        try {
+            final CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
+            // Version information only.
+            if (commandLine.hasOption("version")) {
+                Print.printVersion();
+            } else if (commandLine.hasOption("help")) {
+                Print.printHelp();
+            } else {
+                final MockTCPServer mockTCPServer;
+                if (commandLine.hasOption("port")) {
+                    final int port = Integer.parseInt(commandLine.getOptionValue("port"));
+                    mockTCPServer = new MockTCPServer(port);
+                } else {
+                    mockTCPServer = new MockTCPServer();
+                }
+
+                // When the Operating System interrupts the thread (kill or CTRL-C), stop the server.
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    @Override
+                    public void run() {
+                        logger.info("Operating System interrupt detected.");
+
+                        mockTCPServer.close();
+                    }
+                });
+
+                try {
+                    waitForThread(logger, mockTCPServer, 0);
+                } finally {
+                    IOUtils.closeQuietly(mockTCPServer);
+                }
+            }
+        } catch (final ParseException e1) {
+            Print.printHelp(e1);
+        }
+    }
+
+    private static void waitForThread(final Logger logger, final Thread thread, final long maximumDurationToWait) {
+        try {
+            thread.join(maximumDurationToWait);
+        } catch (final InterruptedException e) {
+            logger.warn(e);
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -158,59 +208,12 @@ public class MockTCPServer extends Thread implements Closeable {
     public void run() {
         try {
             while (this.getStatus() == Status.OPEN && this.getSocket() != null) {
-                try {
-                    this.setDataStream(null);
-                    while (this.getDataStream().write(this.getInputStream().read()) != -1) {
-                        if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
-                            this.incrementMessagesReceivedCount();
-
-                            break;
-                        }
-                    }
-
-                    if (this.getDataStream().getLastByte() == -1) {
-                        // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
-                        this.closeStreams();
-                    } else if (this.getDataStream().size() > 0) {
-                        // Ignore null in order allow a probing ping e.g. paping.exe
-                        this.setAssertionError(null);
-                        try {
-                            if (this.getExpectedMessage() != null) {
-                                Assert.assertThat("Unexpected message from the AM Host Client.", this.getDataStream(), this.getExpectedMessage());
-                            }
-                        } catch (final AssertionError e) {
-                            this.setAssertionError(e);
-                        }
-                        this.onMessage(this.getDataStream());
-                        // If the stream has not ended and a response is required, send one.
-                        if (this.getDataStream().getLastByte() != -1 && !this.getIsAlwaysNoResponse()) {
-                            byte[] response = null;
-
-                            if (this.getAssertionError() == null && !this.getIsAlwaysNAKResponse()) {
-                                response = this.getACK();
-                            } else {
-                                response = this.getNAK();
-                            }
-
-                            this.getOutputStream().write(response);
-
-                            this.afterResponse(response);
-                        }
-                    }
-                } catch (final SocketException e) {
-                    this.handleException(e);
-                } catch (final IOException e) {
-                    this.handleException(e);
-                } catch (final Exception e) {
-                    this.handleException(e);
-                }
+                this.readIncomingStream();
             }
         } catch (final SocketException e) {
-            this.handleException(e);
-        } catch (final IOException e) {
-            this.handleException(e);
+            this.logger.warn(e);
         } catch (final Exception e) {
-            this.handleException(e);
+            this.logger.error(e.getMessage(), e);
         } finally {
             this.setStatus(Status.CLOSING);
 
@@ -218,21 +221,47 @@ public class MockTCPServer extends Thread implements Closeable {
         }
     }
 
-    private void handleException(final Exception e) {
-        if (e.getMessage().toLowerCase().equals("socket closed")) {
-            this.logger.warn(e.getMessage());
-        } else if (e.getMessage().toLowerCase().equals("socket input is shutdown")) {
-            this.logger.warn(e.getMessage());
-        } else if (e.getMessage().toLowerCase().equals("socket output is shutdown")) {
-            this.logger.warn(e.getMessage());
-        } else if (e.getMessage().toLowerCase().equals("socket is closed")) {
-            this.logger.warn(e.getMessage());
-        } else if (e.getMessage().toLowerCase().equals("stream closed")) {
-            this.logger.warn(e.getMessage());
-        } else if (e.getMessage().toLowerCase().equals("connection reset")) {
-            this.logger.warn(e.getMessage());
-        } else {
-            this.logger.error(e.getMessage(), e);
+    private void readIncomingStream() throws IOException {
+        this.setDataStream(null);
+        while (this.getDataStream().write(this.getInputStream().read()) != -1) {
+            if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
+                this.incrementMessagesReceivedCount();
+
+                break;
+            }
+        }
+
+        if (this.getDataStream().getLastByte() == -1) {
+            // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
+            this.closeStreams();
+        } else if (this.getDataStream().size() > 0) { // Ignore null (i.e. zero length) in order allow a probing ping e.g. paping.exe
+            this.processIncomingMessage();
+        }
+    }
+
+    private void processIncomingMessage() throws IOException {
+        this.setAssertionError(null);
+        try {
+            if (this.getExpectedMessage() != null) {
+                Assert.assertThat("Unexpected message from the AM Host Client.", this.getDataStream(), this.getExpectedMessage());
+            }
+        } catch (final AssertionError e) {
+            this.setAssertionError(e);
+        }
+        this.onMessage(this.getDataStream());
+        // If the stream has not ended and a response is required, send one.
+        if (this.getDataStream().getLastByte() != -1 && !this.getIsAlwaysNoResponse()) {
+            byte[] response;
+
+            if (this.getAssertionError() == null && !this.getIsAlwaysNAKResponse()) {
+                response = this.getACK();
+            } else {
+                response = this.getNAK();
+            }
+
+            this.getOutputStream().write(response);
+
+            this.afterResponse(response);
         }
     }
 
@@ -436,7 +465,7 @@ public class MockTCPServer extends Thread implements Closeable {
      *
      * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
-    public synchronized void setExpectedMessage(final StringBuffer expectedMessage) {
+    public synchronized void setExpectedMessage(final StringBuilder expectedMessage) {
         this.setExpectedMessage(expectedMessage.toString());
     }
 
@@ -475,7 +504,7 @@ public class MockTCPServer extends Thread implements Closeable {
             try {
                 super.join(maximumTimeToWait);
             } catch (final InterruptedException e) {
-                // Do nothing.
+                Thread.currentThread().interrupt();
             }
 
             // Intermittently, the server fails to close. Retry it indefinitely until it does close; an improvement of blocking forever with no feedback.
@@ -500,8 +529,8 @@ public class MockTCPServer extends Thread implements Closeable {
             if (this.getConnectionSocket() != null && !this.getConnectionSocket().isOutputShutdown()) {
                 this.getConnectionSocket().shutdownOutput();
             }
-        } catch (final Exception e) {
-            this.handleException(e);
+        } catch (final IOException e) {
+            this.logger.error(e.getMessage(), e);
         }
         this.setInputStream(null);
         this.setOutputStream(null);
@@ -550,7 +579,7 @@ public class MockTCPServer extends Thread implements Closeable {
             this.setSocket(new ServerSocket(this.getPort()));
             this.logger.info("Waiting for a connection...");
             this.setConnectionSocket(this.socket.accept());
-            this.logger.info(String.format("Accepted a connection."));
+            this.logger.info("Accepted a connection.");
             this.setInputStream(new BufferedReader(new InputStreamReader(this.getConnectionSocket().getInputStream())));
             this.setOutputStream(new DataOutputStream(this.getConnectionSocket().getOutputStream()));
             this.logger.info("Ready to receive input.");
@@ -611,28 +640,6 @@ public class MockTCPServer extends Thread implements Closeable {
         this.outputStream = outputStream;
     }
 
-    private static void printVersion() {
-        final String version = new java.io.File(MockTCPServer.class.getProtectionDomain()
-                .getCodeSource()
-                .getLocation()
-                .getPath())
-                        .getName();
-
-        final Pattern pattern = Pattern.compile("\\d+\\.\\d+\\.\\d+");
-        final Matcher matcher = pattern.matcher(version);
-        if (matcher.find()) {
-            System.out.println(matcher.group(0));
-        } else {
-            System.out.println("Version number cannot be identified.");
-        }
-    }
-
-    private static void printHelp() {
-        // automatically generate the help statement
-        final HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("MockTCPServer", getCommandLineOptions());
-    }
-
     private static Options getCommandLineOptions() {
         // create the Options
         final Options options = new Options();
@@ -664,13 +671,13 @@ public class MockTCPServer extends Thread implements Closeable {
         final String delimeter = ".";
         final String regEx = "\\.";
 
-        String name = null;
+        String name;
 
         if (StringUtils.isNotBlank(this.getClass().getSimpleName())) {
             name = this.getClass().getSimpleName();
         } else {
             if (this.getClass().getName().contains(delimeter)) {
-                final String nameSegments[] = this.getClass().getName().split(regEx);
+                final String[] nameSegments = this.getClass().getName().split(regEx);
 
                 name = String.format("%s-%s", this.getClass().getSuperclass().getSimpleName(), nameSegments[nameSegments.length - 1]);
             } else {
