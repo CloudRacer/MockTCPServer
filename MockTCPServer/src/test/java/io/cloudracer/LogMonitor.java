@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.appender.FileAppender;
@@ -60,8 +59,6 @@ public final class LogMonitor extends AbstractAppender {
 
     private static final long serialVersionUID = -4319748955513985321L;
 
-    private static LogMonitor logMonitor;
-
     private static LogEvent lastEventLogged = null;
 
     private LogMonitor(String name, Filter filter, Layout<?> layout, final boolean ignoreExceptions) {
@@ -80,16 +77,15 @@ public final class LogMonitor extends AbstractAppender {
     @PluginFactory
     public static LogMonitor createAppender(@PluginAttribute("name") String name,
             @PluginElement("Layout") Layout<?> layout, @PluginElement("Filter") final Filter filter,
-            @PluginAttribute("otherAttribute") String otherAttribute) {
+            @PluginAttribute("otherAttribute") String otherAttribute) { // NOSONAR
         if (name == null) {
             LOGGER.error("No name provided for TestLog4j2Appender");
             return null;
         }
         if (layout == null) {
-            layout = PatternLayout.createDefaultLayout();
+            layout = PatternLayout.createDefaultLayout(); // NOSONAR
         }
-        setLogMonitor(new LogMonitor(name, filter, layout, true));
-        return getLogMonitor();
+        return new LogMonitor(name, filter, layout, true);
     }
 
     // The append method is where the appender does the work.
@@ -101,20 +97,6 @@ public final class LogMonitor extends AbstractAppender {
     @Override
     public void append(LogEvent event) {
         LogMonitor.setLastEventLogged(event);
-    }
-
-    /**
-     * Add a new LogMonitor log4j2 Appender to the provided {@link Logger}.
-     *
-     * @param logger
-     * @return a LogMonitor instance.
-     */
-    public static LogMonitor createAppender(final Logger logger) {
-        setLogMonitor(createAppender(logger.getName(), null, null, null));
-
-        addLogMonitor(logger);
-
-        return logMonitor;
     }
 
     /**
@@ -136,32 +118,9 @@ public final class LogMonitor extends AbstractAppender {
      * @return the file being appended to by the FILE Appender, or null if a FILE Appender is <b>not</b> specified in the log4j2 configuration.
      */
     public static URI getFileName() {
-        if (getLogMonitor() != null) {
-            final LoggerContext context = (LoggerContext) LogManager.getContext(false);
-            final Configuration configuration = context.getConfiguration();
-
-            return new File(((FileAppender) configuration.getAppender("FILE")).getFileName()).toURI();
-        } else {
-            return null;
-        }
-    }
-
-    private static void addLogMonitor(final Logger logger) {
-        logger.addAppender(getLogMonitor());
-    }
-
-    private static LogMonitor getLogMonitor() {
-        return logMonitor;
-    }
-
-    private static void setLogMonitor(LogMonitor logMonitor) {
         final LoggerContext context = (LoggerContext) LogManager.getContext(false);
         final Configuration configuration = context.getConfiguration();
 
-        logMonitor.start();
-        configuration.addAppender(logMonitor);
-        context.updateLoggers();
-
-        LogMonitor.logMonitor = logMonitor;
+        return new File(((FileAppender) configuration.getAppender("FILE")).getFileName()).toURI();
     }
 }
