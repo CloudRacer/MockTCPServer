@@ -33,6 +33,8 @@ public class TestMockTCPServerST extends AbstractTestTools {
     @Before
     public void setUp() throws IOException {
         super.setUp();
+
+        this.getServer().setIsSendResponses(false);
     }
 
     @Override
@@ -69,6 +71,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
 
         // Send a message with an incorrect terminator (i.e. the default, that we just changed) and wait for the response.
         final Thread waitForResponse = new Thread("WaitForResponse") {
+
             @Override
             public void run() {
                 try {
@@ -143,6 +146,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
         this.getServer().setIsAlwaysNoResponse(true);
 
         final Thread waitForResponse = new Thread("WaitForResponse") {
+
             @Override
             public void run() {
                 try {

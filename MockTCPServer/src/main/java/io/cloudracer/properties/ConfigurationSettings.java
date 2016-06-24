@@ -8,6 +8,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
@@ -25,6 +33,14 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import io.cloudracer.mocktcpserver.MockTCPServer;
+import io.cloudracer.mocktcpserver.responses.ResponseDAO;
+import io.cloudracer.mocktcpserver.responses.Responses;
 
 /**
  * A {@link ConfigurationSettings#FILENAME resource file} is used as a default configuration file. If the {@link #CONFIGURATION_INITIALISATION_ENABLED System Property} is set with a value of true, the {@link #FILENAME resource file} will be written to the {@link #DEFAULT_FILENAME default location}. This behaviour allow for self-configuration and the ability to "reset to factory settings" if the operator deletes the {@link #getFileName() Configuration File} and restarts MockTCPServer.
@@ -55,7 +71,11 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * The default configuration file is held as a {@link #FILENAME resource file}.
      */
     public static final String DEFAULT_FILENAME = String.format("%s%s%s", FILENAME_PATH, File.separatorChar, FILENAME);
-    private static final String PORT_PROPERTY_NAME = "server[@port]";
+    private static final String RESPONSES_ELEMENT_NAME = "responses";
+    private static final String RESPONSE_ELEMENT_NAME = "response";
+    private static final String MESSAGE_ELEMENT_NAME = "message";
+    private static final String PORT_ATTRIBUTE_NAME = "port";
+    private static final String PORT_PROPERTY_NAME = String.format("server[@%s]", PORT_ATTRIBUTE_NAME);
 
     private URL propertiesFile;
     private FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
@@ -81,6 +101,85 @@ public class ConfigurationSettings extends AbstractConfiguration {
      */
     public void setPort(int port) throws ConfigurationException {
         this.getConfigurationBuilder().getConfiguration().setProperty(PORT_PROPERTY_NAME, port);
+    }
+
+    /**
+     * Returns all of the responses specified for the {@link MockTCPServer} configured on the specified port.
+     *
+     * @param port of the {@link MockTCPServer} in question.
+     * @return The responses for the {@link MockTCPServer} running on the specified port.
+     * @throws ConfigurationException
+     */
+    public Responses getResponses(int port) throws ConfigurationException {
+        final Responses responses = new Responses();
+
+        final NodeList incomingList = getIncomingMessages(port);
+        for (int incomingIndex = 0; incomingIndex <= incomingList.getLength() - 1; ++incomingIndex) {
+            final Node incoming = incomingList.item(incomingIndex);
+            final String incomingMessage = getIncomingMessage(incoming);
+            final Node responseList = getIncomingResponses(incoming);
+            for (int responseIndex = 0; responseIndex <= responseList.getChildNodes().getLength() - 1; ++responseIndex) {
+                final Node response = responseList.getChildNodes().item(responseIndex);
+                if (response.getNodeName().equals(RESPONSE_ELEMENT_NAME)) {
+                    responses.add(incomingMessage, createResponseDAO(response));
+                }
+            }
+        }
+
+        return responses;
+    }
+
+    private NodeList getIncomingMessages(final int port) throws ConfigurationException {
+        try {
+            final String expression = String.format("/configuration/server[@port='%d']/incoming", port);
+            final XPath xPath = XPathFactory.newInstance().newXPath();
+
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document document = builder.parse(getFileName().toString());
+            return (NodeList) xPath.compile(expression).evaluate(document, XPathConstants.NODESET);
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            throw new ConfigurationException(e);
+        }
+
+    }
+
+    private String getIncomingMessage(final Node incoming) {
+        String message = null;
+
+        for (int i = 0; i <= incoming.getChildNodes().getLength() - 1; ++i) {
+            final Node node = incoming.getChildNodes().item(i);
+            if (node.getNodeName().equals(MESSAGE_ELEMENT_NAME)) {
+                message = incoming.getChildNodes().item(i).getTextContent();
+
+                break;
+            }
+        }
+
+        return message;
+    }
+
+    private Node getIncomingResponses(final Node incoming) {
+        Node responses = null;
+
+        for (int i = 0; i <= incoming.getChildNodes().getLength() - 1; ++i) {
+            final Node node = incoming.getChildNodes().item(i);
+            if (node.getNodeName().equals(RESPONSES_ELEMENT_NAME)) {
+                responses = incoming.getChildNodes().item(i);
+
+                break;
+            }
+        }
+
+        return responses;
+    }
+
+    private ResponseDAO createResponseDAO(final Node response) {
+        final String machineName = response.getAttributes().getNamedItem("machine").getTextContent();
+        final int machinePort = Integer.parseInt(response.getAttributes().getNamedItem(PORT_ATTRIBUTE_NAME).getTextContent());
+        final String responseMessage = response.getFirstChild().getTextContent();
+
+        return new ResponseDAO(machineName, machinePort, responseMessage);
     }
 
     /**
