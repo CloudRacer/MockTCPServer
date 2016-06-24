@@ -109,6 +109,13 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * @param port of the {@link MockTCPServer} in question.
      * @return The responses for the {@link MockTCPServer} running on the specified port.
      * @throws ConfigurationException
+     *             <<<<<<< HEAD
+     *             =======
+     * @throws XPathExpressionException
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
+     *             >>>>>>> 85d2324b5eb8de1685414b187ceae2b73a93a4b4
      */
     public Responses getResponses(int port) throws ConfigurationException {
         final Responses responses = new Responses();
