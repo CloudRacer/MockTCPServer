@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class TestPrintVersion {
+
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
     @Before
@@ -25,7 +26,7 @@ public class TestPrintVersion {
     @Test
     public void printVersion() {
         final String[] parameters = { "--version" };
-        final String expected = String.format("1.4.0%s", System.getProperty("line.separator"));
+        final String expected = String.format("1.5.0%s", System.getProperty("line.separator"));
 
         Bootstrap.main(parameters);
         assertEquals(expected, this.outContent.toString());

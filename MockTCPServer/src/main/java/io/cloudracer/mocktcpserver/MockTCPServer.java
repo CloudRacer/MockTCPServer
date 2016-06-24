@@ -10,9 +10,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -25,9 +34,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
+import org.xml.sax.SAXException;
 
 import io.cloudracer.mocktcpserver.datastream.DataStream;
 import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
+import io.cloudracer.mocktcpserver.responses.ResponseDAO;
+import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
 import io.cloudracer.properties.ConfigurationSettings;
 
 /**
@@ -65,6 +77,7 @@ public class MockTCPServer extends Thread implements Closeable {
     private boolean setIsAlwaysNAKResponse = false;
     private boolean setIsAlwaysNoResponse = false;
     private boolean isCloseAfterNextResponse = false;
+    private boolean isSendResponses = true;
     private int messagesReceivedCount = 0;
 
     private Status status = Status.OPEN;
@@ -176,6 +189,7 @@ public class MockTCPServer extends Thread implements Closeable {
 
                 // When the Operating System interrupts the thread (kill or CTRL-C), stop the server.
                 Runtime.getRuntime().addShutdownHook(new Thread() {
+
                     @Override
                     public void run() {
                         logger.info("Operating System interrupt detected.");
@@ -221,7 +235,7 @@ public class MockTCPServer extends Thread implements Closeable {
         }
     }
 
-    private void readIncomingStream() throws IOException {
+    private void readIncomingStream() throws IOException, XPathExpressionException, ConfigurationException, ParserConfigurationException, SAXException {
         this.setDataStream(null);
         while (this.getDataStream().write(this.getInputStream().read()) != -1) {
             if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
@@ -236,6 +250,21 @@ public class MockTCPServer extends Thread implements Closeable {
             this.closeStreams();
         } else if (this.getDataStream().size() > 0) { // Ignore null (i.e. zero length) in order allow a probing ping e.g. paping.exe
             this.processIncomingMessage();
+        }
+
+        sendResponses();
+    }
+
+    private void sendResponses() throws XPathExpressionException, ConfigurationException, ParserConfigurationException, SAXException, IOException {
+        if (isSendResponses()) {
+            final String message = this.getDataStream().toString().substring(0, this.getDataStream().toString().length() - this.getDataStream().getTail().length);
+            Set<TCPClient> clients = getResponses().get(message);
+            if (clients != null) {
+                for (TCPClient tcpClient : clients) {
+                    logger.debug("Sending a responses to \"{}\".", tcpClient.toString());
+                    tcpClient.sendResponses();
+                }
+            }
         }
     }
 
@@ -442,6 +471,29 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
+     * The server will send the responses described by {@link #getResponses()}.
+     * <p>
+     * Default is true.
+     *
+     * @return true, if the {@link #getResponses() responses} are to be sent.
+     */
+    public boolean isSendResponses() {
+        return isSendResponses;
+    }
+
+    /**
+     * The server will send the responses described by {@link #getResponses()}.
+     * <p>
+     * Default is true.
+     *
+     * @param isSendResponses true, if the {@link #getResponses() responses} are to be sent
+     *
+     */
+    public void setIsSendResponses(boolean isSendResponses) {
+        this.isSendResponses = isSendResponses;
+    }
+
+    /**
      * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
      *
      * @return ignore if null.
@@ -483,6 +535,40 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     private void incrementMessagesReceivedCount() {
         this.messagesReceivedCount++;
+    }
+
+    public Map<String, Set<TCPClient>> getResponses() throws ConfigurationException, IOException {
+        final Map<String, Set<TCPClient>> tcpClients = new HashMap<>();
+        final Map<String, List<ResponseDAO>> responsesDAOs = this.configurationSettings.getResponses(getPort()).getResponses();
+
+        for (Map.Entry<String, List<ResponseDAO>> incommingMessage : responsesDAOs.entrySet()) {
+            for (ResponseDAO responseDAO : incommingMessage.getValue()) {
+                final TCPClient tcpClient = new TCPClient(responseDAO.getMachineName(), responseDAO.getPort());
+                tcpClient.addResponse(responseDAO.getResponse());
+                final Set<TCPClient> client = new HashSet<>(Arrays.asList(tcpClient));
+                if (tcpClients.containsKey(incommingMessage.getKey())) {
+                    Set<TCPClient> currentClients = tcpClients.get(incommingMessage.getKey());
+                    updateTCPClientList(currentClients, tcpClient);
+                } else {
+                    tcpClients.put(incommingMessage.getKey(), client);
+                }
+            }
+        }
+
+        return tcpClients;
+    }
+
+    private void updateTCPClientList(Set<TCPClient> currentClients, final TCPClient tcpClient) {
+        if (currentClients.contains(tcpClient)) {
+            for (Iterator<TCPClient> it = currentClients.iterator(); it.hasNext();) {
+                TCPClient currentClient = it.next();
+                if (currentClient.equals(tcpClient)) {
+                    currentClient.addResponse(tcpClient.getResponses().get(0));
+                }
+            }
+        } else {
+            currentClients.add(tcpClient);
+        }
     }
 
     /**

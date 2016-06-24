@@ -8,11 +8,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,6 +53,8 @@ public class TCPClient implements Closeable {
     private DataOutputStream dataOutputStream;
 
     private DataInputStream dataInputStream;
+
+    private List<String> responses = new ArrayList<>();
 
     /**
      * Use the default port. Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
@@ -123,7 +129,9 @@ public class TCPClient implements Closeable {
      * @throws IOException see source documentation.
      */
     public DataStream send(final String message, final boolean waitForResponse) throws IOException {
-        return this.send(message, waitForResponse, this.getResponseTerminator());
+        final String formattedMessage = StringEscapeUtils.unescapeJava(message);
+
+        return this.send(formattedMessage, waitForResponse, this.getResponseTerminator());
     }
 
     /**
@@ -392,5 +400,77 @@ public class TCPClient implements Closeable {
         }
 
         this.dataInputStream = dataInputStream;
+    }
+
+    /**
+     * Read-only copy of the {@link java.util.List list} of responses that will be sent by {@link #sendResponses()}.
+     *
+     * @param response the new response to add.
+     */
+    public List<String> getResponses() {
+        return Collections.unmodifiableList(responses);
+    }
+
+    /**
+     * Add a message to the {@link java.util.List list} of responses that will be sent by {@link #sendResponses()}.
+     *
+     * @param response the new response to add.
+     */
+    public void addResponse(String response) {
+        responses.add(response);
+    }
+
+    /**
+     * Send the responses added with {@link #addResponse(String)}.
+     *
+     * @throws IOException
+     */
+    public void sendResponses() throws IOException {
+        for (String response : responses) {
+            send(response, false);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "TCPClient [hostName=" + hostName + ", port=" + port + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((hostName == null) ? 0 : hostName.hashCode());
+        result = prime * result + ((port == null) ? 0 : port.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        TCPClient other = (TCPClient) obj;
+        if (hostName == null) {
+            if (other.hostName != null) {
+                return false;
+            }
+        } else if (!hostName.equals(other.hostName)) {
+            return false;
+        }
+        if (port == null) {
+            if (other.port != null) {
+                return false;
+            }
+        } else if (!port.equals(other.port)) {
+            return false;
+        }
+        return true;
     }
 }

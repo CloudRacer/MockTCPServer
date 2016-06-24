@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <configuration xmlns="http://mocktcpserver.cloudracer.io/schemas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mocktcpserver.cloudracer.io/schemas http://mocktcpserver.cloudracer.io/schemas/inserts">
-
-    <server port="6789">
-        <incoming>
-            <![CDATA[This is a message.]]>
-            <response machine="destinationA" port="1111">
-            </response>
-            <response machine="destinationA" port="2222">
-            </response>
-        </incoming>
-    </server>
-
+	<server port="6789">
+	</server>
 </configuration>

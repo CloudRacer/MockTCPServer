@@ -6,12 +6,16 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
@@ -65,5 +69,12 @@ public class TestServerConfigurationSettingsST extends AbstractTestTools {
 
         this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_PORT);
         assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
+    }
+
+    @Test
+    public void getResponses() throws ConfigurationException, XPathExpressionException, ParserConfigurationException, SAXException, IOException {
+        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
+
+        assertEquals(TestConstants.EXPECTED_INCOMING_ALL_MESSAGE_RESPONSES_RESULT, this.getConfigurationSettings().getResponses(TestConstants.MOCK_SERVER_PORT).toString());
     }
 }
