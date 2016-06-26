@@ -107,6 +107,7 @@ public class DataStream implements Closeable {
         if (this.output == null) {
             // The ByteArrayOutputStream is closed automatically when the class is destroyed.
             this.output = new ByteArrayOutputStream() { // NOSONAR
+
                 @Override
                 public synchronized void write(final int b) {
                     super.write(b);
@@ -254,7 +255,7 @@ public class DataStream implements Closeable {
      *
      * @return String the log4j root logger name
      */
-    private String getRootLoggerName() {
+    public String getRootLoggerName() {
         if (this.rootLoggerName == null) {
             this.rootLoggerName = this.getClssName();
         }

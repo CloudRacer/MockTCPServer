@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Start and stop the Client and Server, in a tight, without sending a message {@link TestReliability#TOTAL_SERVER_RESTARTS many} times.
+ * Start and stop the Client and Server many times, in a tight, without sending a message.
  *
  * @author John McDonnell
  */
@@ -33,7 +33,7 @@ public class TestReliability extends AbstractTestTools {
     }
 
     /**
-     * Start and stop the Client and Server, in a tight, without sending a message {@link TestReliability#TOTAL_SERVER_RESTARTS many} times.
+     * Start and stop the Client and Server many time, in a tight, without sending a message.
      *
      * @throws Exception
      */

@@ -92,7 +92,7 @@ public abstract class AbstractTestTools {
         return this.server;
     }
 
-    public ConfigurationSettings getConfigurationSettings() {
+    protected ConfigurationSettings getConfigurationSettings() {
         if (this.configurationSettings == null) {
             this.configurationSettings = new ConfigurationSettings();
         }

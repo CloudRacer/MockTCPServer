@@ -494,7 +494,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#getAssertionError() assertion error}.
      *
      * @return ignore if null.
      */
@@ -503,7 +503,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error} and respond with a {@link MockTCPServer#getNAK() NAK}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#getAssertionError() assertion error} and respond with a {@link MockTCPServer#getNAK() NAK}.
      *
      * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
@@ -513,7 +513,7 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#setAssertionError(AssertionError) assertion error} and respond with a {@link MockTCPServer#getNAK() NAK}.
+     * If any message, other that this one, is the next message to be received, record it as an {@link MockTCPServer#getAssertionError() assertion error} and respond with a {@link MockTCPServer#getNAK() NAK}.
      *
      * @param expectedMessage a Regular Expression that describes what the next received message will be.
      */
@@ -537,6 +537,13 @@ public class MockTCPServer extends Thread implements Closeable {
         this.messagesReceivedCount++;
     }
 
+    /**
+     * Get the messages, initialised from the configuration file, that will be sent when specified messages are received.
+     *
+     * @return the server responses.
+     * @throws ConfigurationException
+     * @throws IOException
+     */
     public Map<String, Set<TCPClient>> getResponses() throws ConfigurationException, IOException {
         final Map<String, Set<TCPClient>> tcpClients = new HashMap<>();
         final Map<String, List<ResponseDAO>> responsesDAOs = this.configurationSettings.getResponses(getPort()).getResponses();

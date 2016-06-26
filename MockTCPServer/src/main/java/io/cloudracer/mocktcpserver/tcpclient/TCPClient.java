@@ -405,12 +405,7 @@ public class TCPClient implements Closeable {
     /**
      * Read-only copy of the {@link java.util.List list} of responses that will be sent by {@link #sendResponses()}.
      *
-     * <<<<<<< HEAD
-     * 
      * @return response the new response to add.
-     *         =======
-     * @param response the new response to add.
-     *            >>>>>>> 85d2324b5eb8de1685414b187ceae2b73a93a4b4
      */
     public List<String> getResponses() {
         return Collections.unmodifiableList(responses);

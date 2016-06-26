@@ -75,7 +75,10 @@ public class ConfigurationSettings extends AbstractConfiguration {
     private static final String RESPONSE_ELEMENT_NAME = "response";
     private static final String MESSAGE_ELEMENT_NAME = "message";
     private static final String PORT_ATTRIBUTE_NAME = "port";
-    private static final String PORT_PROPERTY_NAME = String.format("server[@%s]", PORT_ATTRIBUTE_NAME);
+    /**
+     * The name of the attribute, in the configuration file, that specifies this servers port number.
+     */
+    public static final String PORT_PROPERTY_NAME = String.format("server[@%s]", PORT_ATTRIBUTE_NAME);
 
     private URL propertiesFile;
     private FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
@@ -109,13 +112,6 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * @param port of the {@link MockTCPServer} in question.
      * @return The responses for the {@link MockTCPServer} running on the specified port.
      * @throws ConfigurationException
-     *             <<<<<<< HEAD
-     *             =======
-     * @throws XPathExpressionException
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
-     *             >>>>>>> 85d2324b5eb8de1685414b187ceae2b73a93a4b4
      */
     public Responses getResponses(int port) throws ConfigurationException {
         final Responses responses = new Responses();

@@ -5,6 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A DAO class that contains a {@link Map} of incoming messages with corresponding responses i.e. message sent when a specific message is received.
+ *
+ * @author John McDonnell
+ *
+ */
 public class Responses {
 
     private final HashMap<String, List<ResponseDAO>> messageResponses = new HashMap<>();

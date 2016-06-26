@@ -9,20 +9,35 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Print the version of the MockTCPServer to the console.
+ *
+ * @author John McDonnell
+ *
+ */
 public class TestPrintVersion {
 
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
+    /**
+     * Before
+     */
     @Before
     public void setup() {
         System.setOut(new PrintStream(this.outContent));
     }
 
+    /**
+     * After
+     */
     @After
     public void cleanUpStreams() {
         System.setOut(null);
     }
 
+    /**
+     * Print the version of the MockTCPServer to the console.
+     */
     @Test
     public void printVersion() {
         final String[] parameters = { "--version" };

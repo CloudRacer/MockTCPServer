@@ -2,6 +2,12 @@ package io.cloudracer.mocktcpserver.standalone;
 
 import io.cloudracer.mocktcpserver.MockTCPServer;
 
+/**
+ * Control the startup of the MockTCPServer.
+ *
+ * @author John McDonnell
+ *
+ */
 public interface Bootstrap {
 
     /**

@@ -39,7 +39,7 @@ public class ResponseDAO {
     }
 
     /**
-     * The port, on the {@link ResponseDAO#getMachineName() machine}, that the {@link ResponseDAO#getMessage() message} is to be sent to.
+     * The port, on the {@link ResponseDAO#getMachineName() machine}, that the {@link ResponseDAO#getResponse() response message} is to be sent to.
      *
      * @return the port number
      */

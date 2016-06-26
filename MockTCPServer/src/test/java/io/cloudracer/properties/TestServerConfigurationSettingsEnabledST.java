@@ -18,19 +18,35 @@ import org.junit.Test;
 import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
 
+/**
+ * Configuration initialisation (i.e. write a default configuration file to disk if one does not already exist) and modification.
+ *
+ * @author John McDonnell
+ *
+ */
 public class TestServerConfigurationSettingsEnabledST extends AbstractTestTools {
 
     private static Logger logger = LogManager.getLogger();
 
+    /**
+     * BeforeClass
+     *
+     * @throws IOException
+     */
     @BeforeClass
     public static void setupClass() throws IOException {
         resetConfiguration();
 
-        System.getProperties().put(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME, TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_VALUE_TRUE);
+        System.getProperties().put(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME, TestConstants.TRUE);
 
         logger.debug(String.format("Properties: %s.", StringUtils.join(System.getProperties())));
     }
 
+    /**
+     * AfterClass
+     *
+     * @throws IOException
+     */
     @Override
     @Before
     public void setUp() throws IOException {
@@ -43,9 +59,14 @@ public class TestServerConfigurationSettingsEnabledST extends AbstractTestTools 
         deleteConfigurationFolder();
     }
 
+    /**
+     * Initialise the configuration (i.e. write a default configuration to disk, if one does not already exist) and then modify it.
+     *
+     * @throws ConfigurationException
+     */
     @Test
     public void configurationInitialisation() throws ConfigurationException {
-        assertEquals(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_VALUE_TRUE, System.getProperty(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME));
+        assertEquals(TestConstants.TRUE, System.getProperty(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME));
         assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
         this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_NEW_PORT);
         assertEquals(TestConstants.MOCK_SERVER_NEW_PORT, this.getConfigurationSettings().getPort());
