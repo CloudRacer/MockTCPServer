@@ -341,10 +341,18 @@ public class TCPClient implements Closeable {
      */
     private Socket getSocket() throws IOException {
         if (this.socket == null) {
-            try {
-                this.socket = new Socket(this.getHostName(), this.getPort());
-            } catch (final IOException e) {
-                throw new IOException(String.format("Unable to connect to the Server \"%s\" on the port %d.", this.getHostName(), this.getPort()), e);
+            final int delayBetweenRetries = 10;
+            final int timeout = 1000;
+
+            int i = 0;
+            while (this.socket == null && timeout > (i * delayBetweenRetries)) {
+                i++;
+
+                try {
+                    this.socket = new Socket(this.getHostName(), this.getPort());
+                } catch (final IOException e) {
+                    logger.info(String.format("Unable to connect to the Server \"%s\" on the port %d.", this.getHostName(), this.getPort()), e);
+                }
             }
         }
 
@@ -356,14 +364,21 @@ public class TCPClient implements Closeable {
             this.setDataInputStream(null);
             this.setDataOutputStream(null);
             IOUtils.closeQuietly(this.socket);
+
             /*
              * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
              */
-            try {
-                final long sleepDuration = 20;
-                TimeUnit.MILLISECONDS.sleep(sleepDuration);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
+            final long sleepDuration = 20;
+            final long timeoutDuration = 1000;
+            int i = 0;
+            while (!this.socket.isClosed() && this.socket.isBound() && timeoutDuration > (i * sleepDuration)) {
+                i++;
+
+                try {
+                    TimeUnit.MILLISECONDS.sleep(sleepDuration);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
 

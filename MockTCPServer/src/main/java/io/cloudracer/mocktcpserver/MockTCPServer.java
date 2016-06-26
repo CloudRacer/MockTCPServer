@@ -591,8 +591,8 @@ public class MockTCPServer extends Thread implements Closeable {
 
         this.closeStreams();
 
-        while (super.isAlive() && this.getStatus() != Status.CLOSING) {
-            final long maximumTimeToWait = 10000;
+        while ((!socket.isClosed() && socket.isBound()) || (super.isAlive() && this.getStatus() != Status.CLOSING)) {
+            final long maximumTimeToWait = 10;
 
             try {
                 super.join(maximumTimeToWait);
