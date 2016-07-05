@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <configuration xmlns="http://mocktcpserver.cloudracer.io/schemas" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mocktcpserver.cloudracer.io/schemas http://mocktcpserver.cloudracer.io/schemas/inserts">
-	<server port="6789">
-		<incoming>
-			<message><![CDATA[Incoming Message One]]></message>
-			<responses>
-                <response machine="destinationA" port="1234"><![CDATA[Response to destinationA\u000d\u000a\u000a]]></response>
-				<response machine="destinationB" port="1234"><![CDATA[Response to destinationB\u000d\u000a\u000a]]></response>
-			</responses>
-		</incoming>
+    <server port="1234">
         <incoming>
-            <message><![CDATA[<test-root><test-element></test-element></test-root>]]></message>
+            <message><![CDATA[Incoming Message One]]></message>
             <responses>
-                <response machine="localhost" port="1234"><![CDATA[Response to destinationA\u000d\u000a\u000a]]></response>
-                <response machine="localhost" port="1234"><![CDATA[Response to destinationB\u000d\u000a\u000a]]></response>
+                <response machine="destinationA" port="1234"><![CDATA[Response to destinationA\u000d\u000a\u000a]]></response>
+                <response machine="destinationB" port="1234"><![CDATA[Response to destinationB\u000d\u000a\u000a]]></response>
             </responses>
         </incoming>
-	</server>
+    </server>
+    <server port="6789">
+        <incoming>
+            <message><![CDATA[Incoming Message One]]></message>
+            <responses>
+                <response machine="destinationA" port="1234"><![CDATA[Response to destinationA\u000d\u000a\u000a]]></response>
+                <response machine="destinationB" port="1234"><![CDATA[Response to destinationB\u000d\u000a\u000a]]></response>
+            </responses>
+        </incoming>
+    </server>
 </configuration>

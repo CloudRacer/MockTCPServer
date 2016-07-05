@@ -9,23 +9,31 @@
                             <xs:element name="incoming" minOccurs="0" maxOccurs="unbounded">
                                 <xs:complexType mixed="true">
                                     <xs:sequence>
-                                        <xs:element name="response" minOccurs="0" maxOccurs="unbounded">
+                                        <xs:element name="message" minOccurs="1" maxOccurs="1">
+                                        </xs:element>
+                                        <xs:element name="responses" minOccurs="1" maxOccurs="1">
                                             <xs:complexType>
-                                                <xs:simpleContent>
-                                                    <xs:extension base="xs:string">
-                                                        <xs:attribute type="xs:string" name="machine" use="required" />
-                                                        <xs:attribute type="xs:short" name="port" use="required" />
-                                                    </xs:extension>
-                                                </xs:simpleContent>
+                                                <xs:sequence>
+                                                    <xs:element name="response" minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:simpleContent>
+                                                                <xs:extension base="xs:string">
+                                                                    <xs:attribute type="xs:string" name="machine" use="required" />
+                                                                    <xs:attribute type="xs:short" name="port" use="required" />
+                                                                </xs:extension>
+                                                            </xs:simpleContent>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
                                             </xs:complexType>
+                                            <xs:unique name="ResponseUniquePort">
+                                                <xs:selector xpath="o:response" />
+                                                <xs:field xpath="@machine" />
+                                                <xs:field xpath="@port" />
+                                            </xs:unique>
                                         </xs:element>
                                     </xs:sequence>
                                 </xs:complexType>
-                                <xs:unique name="ResponseUniquePort">
-                                    <xs:selector xpath="o:response" />
-                                    <xs:field xpath="@machine" />
-                                    <xs:field xpath="@port" />
-                                </xs:unique>
                             </xs:element>
                         </xs:sequence>
                         <xs:attribute type="xs:short" name="port" use="optional" />
@@ -38,5 +46,4 @@
             <xs:field xpath="@port" />
         </xs:unique>
     </xs:element>
-
 </xs:schema>
