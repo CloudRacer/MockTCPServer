@@ -4,17 +4,17 @@
         <incoming>
             <message><![CDATA[Incoming Message One]]></message>
             <responses>
-                <response machine="destinationA" port="1234"><![CDATA[Response to destinationA\u000d\u000a\u000a]]></response>
-                <response machine="destinationB" port="1234"><![CDATA[Response to destinationB\u000d\u000a\u000a]]></response>
+                <response machine="destinationA" port="1234" message="Response to destinationA\u000d\u000a\u000a" />
+                <response machine="destinationB" port="1234" message="Response to destinationB\u000d\u000a\u000a" />
             </responses>
         </incoming>
     </server>
     <server port="6789">
         <incoming>
-            <message><![CDATA[Incoming Message One]]></message>
+            <message><![CDATA[<test-root><test-element></test-element></test-root>]]></message>
             <responses>
-                <response machine="destinationA" port="1234"><![CDATA[Response to destinationA\u000d\u000a\u000a]]></response>
-                <response machine="destinationB" port="1234"><![CDATA[Response to destinationB\u000d\u000a\u000a]]></response>
+                <response machine="localhost" port="1234" message="Response to destinationA\u000d\u000a\u000a" />
+                <response machine="localhost" port="1234" message="Response to destinationB\u000d\u000a\u000a" />
             </responses>
         </incoming>
     </server>
