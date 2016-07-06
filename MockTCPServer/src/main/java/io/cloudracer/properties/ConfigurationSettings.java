@@ -5,8 +5,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -75,35 +78,43 @@ public class ConfigurationSettings extends AbstractConfiguration {
     private static final String RESPONSE_ELEMENT_NAME = "response";
     private static final String MESSAGE_ELEMENT_NAME = "message";
     private static final String PORT_ATTRIBUTE_NAME = "port";
+    private static final String SERVER_ELEMENT_NAME = "server";
     /**
      * The name of the attribute, in the configuration file, that specifies this servers port number.
      */
-    public static final String PORT_PROPERTY_NAME = String.format("server[@%s]", PORT_ATTRIBUTE_NAME);
+    public static final String PORT_PROPERTY_NAME = String.format("%s[@%s]", SERVER_ELEMENT_NAME, PORT_ATTRIBUTE_NAME);
 
     private URL propertiesFile;
     private FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
 
     /**
-     * The port the MockTCPServer will listen to, as read from the {@link #getFileName() configuration file} (from the property name defined as {@link #PORT_PROPERTY_NAME}).
+     * Retrieve a unmodifiable set of server port numbers, to listen on, that are specified in the {@link #getFileName() configuration file}.
      *
-     * @return the port the MockTCPServer will listen to.
-     * @throws ConfigurationException see source documentation.
-     * @see #isConfigurationInitialisationEnabled()
+     * @return an unmodifiable set of server port numbers specified in the {@link #getFileName() configuration file}
+     * @throws ConfigurationException
      */
-    public int getPort() throws ConfigurationException {
-        // Retrieve the "port" attribute of the "server" element.
-        return Integer.parseInt(this.getConfigurationBuilder().getConfiguration().getProperty(PORT_PROPERTY_NAME).toString());
-    }
+    public Set<Integer> getPorts() throws ConfigurationException {
+        try {
+            final String expression = "/configuration/server";
+            final XPath xPath = XPathFactory.newInstance().newXPath();
 
-    /**
-     * Set the port the MockTCPServer will listen to, the port number will be written to the {@link #getFileName() configuration file} (to the property name defined as {@link #PORT_PROPERTY_NAME}).
-     *
-     * @param port the port the MockTCPServer will listen to.
-     * @throws ConfigurationException see source documentation.
-     * @see #isConfigurationInitialisationEnabled()
-     */
-    public void setPort(int port) throws ConfigurationException {
-        this.getConfigurationBuilder().getConfiguration().setProperty(PORT_PROPERTY_NAME, port);
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document document = builder.parse(getFileName().toString());
+            final NodeList portNodes = (NodeList) xPath.compile(expression).evaluate(document, XPathConstants.NODESET);
+            final Set<Integer> ports = new HashSet<>();
+            for (int i = 0; i < portNodes.getLength(); i++) {
+                final Node server = portNodes.item(i);
+                final String portValue = server.getAttributes().getNamedItem(PORT_ATTRIBUTE_NAME).getNodeValue();
+                final Integer port = Integer.parseInt(portValue);
+
+                ports.add(port);
+            }
+
+            return Collections.unmodifiableSet(ports);
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            throw new ConfigurationException(e);
+        }
     }
 
     /**
@@ -180,7 +191,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
     private ResponseDAO createResponseDAO(final Node response) {
         final String machineName = response.getAttributes().getNamedItem("machine").getTextContent();
         final int machinePort = Integer.parseInt(response.getAttributes().getNamedItem(PORT_ATTRIBUTE_NAME).getTextContent());
-        final String responseMessage = response.getFirstChild().getTextContent();
+        final String responseMessage = response.getAttributes().getNamedItem("message").getTextContent();
 
         return new ResponseDAO(machineName, machinePort, responseMessage);
     }

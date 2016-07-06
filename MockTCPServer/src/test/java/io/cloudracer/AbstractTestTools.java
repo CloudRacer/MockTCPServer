@@ -70,7 +70,7 @@ public abstract class AbstractTestTools {
 
     protected TCPClient getClient() throws IOException {
         if (this.client == null) {
-            this.client = new TCPClient();
+            this.client = new TCPClient(TestConstants.MOCK_SERVER_PORT_6789);
         }
 
         return this.client;
@@ -86,7 +86,7 @@ public abstract class AbstractTestTools {
 
     protected MockTCPServer getServer() {
         if (this.server == null) {
-            this.server = new MockTCPServer();
+            this.server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT_6789);
         }
 
         return this.server;

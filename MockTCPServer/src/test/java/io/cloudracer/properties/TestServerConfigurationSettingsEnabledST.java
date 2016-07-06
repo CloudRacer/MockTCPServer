@@ -67,10 +67,8 @@ public class TestServerConfigurationSettingsEnabledST extends AbstractTestTools 
     @Test
     public void configurationInitialisation() throws ConfigurationException {
         assertEquals(TestConstants.TRUE, System.getProperty(TestConstants.CONFIGURATION_INITIALISATION_ENABLED_PROPERTY_NAME));
-        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
-        this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_NEW_PORT);
-        assertEquals(TestConstants.MOCK_SERVER_NEW_PORT, this.getConfigurationSettings().getPort());
         assertTrue(this.getConfigurationSettings().getFileName().getFile().endsWith(TestConstants.MOCKTCPSERVER_XML_FULL_PATH_SUFFIX));
         assertTrue(new File(this.getConfigurationSettings().getFileName().getFile()).exists());
+        assertEquals(TestConstants.PORT_SET, this.getConfigurationSettings().getPorts());
     }
 }

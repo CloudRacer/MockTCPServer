@@ -14,14 +14,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.cloudracer.mocktcpserver.datastream.DataStream;
-import io.cloudracer.properties.ConfigurationSettings;
 
 /**
  * A TCP Client provided primarily for demonstration purposes, and for use in test suites.
@@ -35,8 +33,6 @@ import io.cloudracer.properties.ConfigurationSettings;
 public class TCPClient implements Closeable {
 
     private final Logger logger = LogManager.getLogger(this.getClass().getSimpleName());
-
-    private final ConfigurationSettings configurationSettings = new ConfigurationSettings();
 
     private static final byte[] DEFAULT_ACK = { 65 };
     private byte[] ack;
@@ -57,23 +53,12 @@ public class TCPClient implements Closeable {
     private List<String> responses = new ArrayList<>();
 
     /**
-     * Use the default port. Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
-     */
-    public TCPClient() {
-        this(null);
-    }
-
-    /**
-     * Use the specified port. Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
+     * Messages will be sent to the specified port. Specify the {@link TCPClient#getPort() port} that the TCP {@link TCPClient#getHostName() server} is listening on.
      *
      * @param port the port that the TCP {@link TCPClient#getHostName() server} is listening on. If null, the default port will be used.
      */
-    public TCPClient(final Integer port) {
-        if (port == null) {
-            this.getPort();
-        } else {
-            this.setPort(port);
-        }
+    public TCPClient(final int port) {
+        this.setPort(port);
     }
 
     /**
@@ -224,14 +209,6 @@ public class TCPClient implements Closeable {
      * @return the port number.
      */
     public int getPort() {
-        if (this.port == null) {
-            try {
-                this.port = this.configurationSettings.getPort();
-            } catch (final ConfigurationException e) {
-                this.logger.error(e.getMessage(), e);
-            }
-        }
-
         return this.port;
     }
 

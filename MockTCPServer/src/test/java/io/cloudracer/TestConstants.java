@@ -3,6 +3,11 @@
  */
 package io.cloudracer;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import io.cloudracer.mocktcpserver.responses.ResponseDAO;
 import io.cloudracer.mocktcpserver.responses.Responses;
 import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
@@ -41,13 +46,21 @@ public abstract class TestConstants {
 
     protected static final int CLIENT_PORT = 6000;
     /**
-     * Default server port.
+     * Server port 6789.
      */
-    public static final int MOCK_SERVER_PORT = 6789;
+    public static final int MOCK_SERVER_PORT_6789 = 6789;
+    /**
+     * Server port 1234.
+     */
+    public static final int MOCK_SERVER_PORT_1234 = 1234;
     /**
      * New server port.
      */
     public static final int MOCK_SERVER_NEW_PORT = 1111;
+    /**
+     * Default set of configured ports.
+     */
+    public static final Set<Integer> PORT_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(MOCK_SERVER_PORT_1234, MOCK_SERVER_PORT_6789)));
 
     private static final byte[] ACK = { 65 }; // Default ACK.
     private static final byte[] NAK = { 78 }; // Default NAK.
@@ -118,9 +131,9 @@ public abstract class TestConstants {
      */
     public static final String EXPECTED_CLIENT_LOCALHOST = String.format(TCPCLIENT_TEMPLATE, TCPClient.class.getSimpleName(), MACHINE_LOCALHOST_NAME, MACHINE_LOCALHOST_PORT);
     /**
-     * Client list.
+     * Client list for the listener to port 6789.
      */
-    public static final String EXPECTED_CLIENT_LIST = String.format("{%s=[%s, %s], %s=[%s]}", INCOMING_MESSAGE_ONE, EXPECTED_CLIENT_A, EXPECTED_CLIENT_B, WELLFORMED_XML, EXPECTED_CLIENT_LOCALHOST);
+    public static final String EXPECTED_CLIENT_LIST_FOR_PORT_6789 = String.format("{%s=[%s]}", WELLFORMED_XML, EXPECTED_CLIENT_LOCALHOST);
     /**
      * Response DAO.
      */
@@ -141,10 +154,11 @@ public abstract class TestConstants {
      * Incoming message responses.
      */
     public static final String EXPECTED_INCOMING_MESSAGE_ONE_RESPONSES_RESULT = String.format("%s [messageResponses={%s=[%s, %s]}]", Responses.class.getSimpleName(), INCOMING_MESSAGE_ONE, EXPECTED_MACHINE_A_RESPONSE_DAO_RESULT, EXPECTED_MACHINE_B_RESPONSE_DAO_RESULT);
+
     /**
-     * Incoming message responses.
+     * Incoming message responses for port 6789.
      */
-    public static final String EXPECTED_INCOMING_ALL_MESSAGE_RESPONSES_RESULT = String.format("%s [messageResponses={%s=[%s, %s], %s=[%s, %s]}]", Responses.class.getSimpleName(), INCOMING_MESSAGE_ONE, EXPECTED_MACHINE_A_RESPONSE_DAO_RESULT, EXPECTED_MACHINE_B_RESPONSE_DAO_RESULT, WELLFORMED_XML, EXPECTED_LOCALHOST_A_RESPONSE_DAO_RESULT, EXPECTED_LOCALHOST_B_RESPONSE_DAO_RESULT);
+    public static final String EXPECTED_INCOMING_MESSAGE_RESPONSES_RESULT_FOR_PORT_6789 = String.format("%s [messageResponses={%s=[%s, %s]}]", Responses.class.getSimpleName(), WELLFORMED_XML, EXPECTED_LOCALHOST_A_RESPONSE_DAO_RESULT, EXPECTED_LOCALHOST_B_RESPONSE_DAO_RESULT);
 
     private TestConstants() {
         // Do nothing. This class cannot be instantiated.

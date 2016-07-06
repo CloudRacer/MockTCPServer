@@ -52,7 +52,7 @@ public class TestMockTCPServerSendResponsesST extends AbstractTestTools {
         final List<String> actualMessages = new ArrayList<>();
         final List<String> expectedMessages = new ArrayList<>(Arrays.asList(StringEscapeUtils.unescapeJava(TestConstants.MACHINE_A_RESPONSE_MESSAGE), StringEscapeUtils.unescapeJava(TestConstants.MACHINE_B_RESPONSE_MESSAGE)));
 
-        final MockTCPServer mockTCPServer = new MockTCPServer(1234) {
+        final MockTCPServer mockTCPServer = new MockTCPServer(TestConstants.MOCK_SERVER_PORT_1234) {
 
             @Override
             public void onMessage(DataStream message) {
@@ -73,6 +73,8 @@ public class TestMockTCPServerSendResponsesST extends AbstractTestTools {
             mockTCPServer.join(ONE_TENTH_OF_A_SECOND);
         }
 
+        mockTCPServer.close();
+        
         assertEquals(expectedMessages, actualMessages);
 
         this.checkLogMonitorForUnexpectedMessages();

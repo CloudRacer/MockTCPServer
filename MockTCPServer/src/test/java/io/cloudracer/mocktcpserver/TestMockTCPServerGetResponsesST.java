@@ -41,7 +41,7 @@ public class TestMockTCPServerGetResponsesST extends AbstractTestTools {
      */
     @Test(timeout = TIMEOUT)
     public void getResponses() throws ConfigurationException, IOException {
-        assertEquals(TestConstants.EXPECTED_CLIENT_LIST, this.getServer().getResponses().toString());
+        assertEquals(TestConstants.EXPECTED_CLIENT_LIST_FOR_PORT_6789, this.getServer().getResponses().toString());
 
         this.checkLogMonitorForUnexpectedMessages();
     }

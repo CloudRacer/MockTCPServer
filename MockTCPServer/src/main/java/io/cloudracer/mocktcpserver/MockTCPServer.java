@@ -26,6 +26,8 @@ import javax.xml.xpath.XPathExpressionException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -129,13 +131,6 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     /**
-     * Start the server on the default port. This constructor is the equivalent of passing null to the constructor {@link MockTCPServer#MockTCPServer(Integer)}.
-     */
-    public MockTCPServer() {
-        this(null);
-    }
-
-    /**
      * Start the server on the specified port.
      *
      * @param port the TCP Server will listen on this port. If null, the default port will be used.
@@ -172,7 +167,11 @@ public class MockTCPServer extends Thread implements Closeable {
         final Logger logger = LogManager.getLogger();
 
         try {
-            final CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
+            CommandLine commandLine = new DefaultParser().parse(getCommandLineOptions(), args);
+            // If no options have been provided, output the help text
+            if (commandLine.getOptions().length <= 0) {
+                commandLine = new DefaultParser().parse(getCommandLineOptions(), new String[] { "--help" });
+            }
             // Version information only.
             if (commandLine.hasOption("version")) {
                 Print.printVersion();
@@ -180,12 +179,8 @@ public class MockTCPServer extends Thread implements Closeable {
                 Print.printHelp();
             } else {
                 final MockTCPServer mockTCPServer;
-                if (commandLine.hasOption("port")) {
-                    final int port = Integer.parseInt(commandLine.getOptionValue("port"));
-                    mockTCPServer = new MockTCPServer(port);
-                } else {
-                    mockTCPServer = new MockTCPServer();
-                }
+                final int port = Integer.parseInt(commandLine.getOptionValue("port"));
+                mockTCPServer = new MockTCPServer(port);
 
                 // When the Operating System interrupts the thread (kill or CTRL-C), stop the server.
                 Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -641,15 +636,12 @@ public class MockTCPServer extends Thread implements Closeable {
         this.status = status;
     }
 
-    private int getPort() {
-        try {
-            if (this.port == null) {
-                this.port = this.configurationSettings.getPort();
-            }
-        } catch (final ConfigurationException e) {
-            this.logger.error(e.getMessage(), e);
-        }
-
+    /**
+     * The port that this server is listening on.
+     *
+     * @return the port that this server is listening on.
+     */
+    public int getPort() {
         return this.port;
     }
 
@@ -737,8 +729,15 @@ public class MockTCPServer extends Thread implements Closeable {
         // create the Options
         final Options options = new Options();
 
-        options.addOption("p", "port", false, "use this port instead of the default one, or the one specified in the configuration file.");
-        options.getOption("port").setArgs(1);
+        final OptionGroup startup = new OptionGroup();
+        final Option port = Option.builder("p")
+                .longOpt("port")
+                .desc("the port that the server will listen on.")
+                .type(Integer.class)
+                .numberOfArgs(1)
+                .build();
+        startup.addOption(port);
+        options.addOptionGroup(startup);
         options.addOption("h", "help", false, "print these usage instructions and exit.");
         options.addOption("?", "help", false, "print these usage instructions and exit.");
         options.addOption("v", "version", false, "print product version and exit.");

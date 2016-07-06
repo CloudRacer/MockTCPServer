@@ -84,24 +84,8 @@ public class TestServerConfigurationSettingsST extends AbstractTestTools {
      * @throws ConfigurationException
      */
     @Test
-    public void retrieveProperties() throws ConfigurationException {
-        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
-    }
-
-    /**
-     * Update the servers port in the configuration file.
-     *
-     * @throws ConfigurationException
-     */
-    @Test
-    public void setPropertyValue() throws ConfigurationException {
-        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
-
-        this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_NEW_PORT);
-        assertEquals(TestConstants.MOCK_SERVER_NEW_PORT, this.getConfigurationSettings().getPort());
-
-        this.getConfigurationSettings().setPort(TestConstants.MOCK_SERVER_PORT);
-        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
+    public void getPorts() throws ConfigurationException {
+        assertEquals(TestConstants.PORT_SET, this.getConfigurationSettings().getPorts());
     }
 
     /**
@@ -115,8 +99,6 @@ public class TestServerConfigurationSettingsST extends AbstractTestTools {
      */
     @Test
     public void getResponses() throws ConfigurationException, XPathExpressionException, ParserConfigurationException, SAXException, IOException {
-        assertEquals(TestConstants.MOCK_SERVER_PORT, this.getConfigurationSettings().getPort());
-
-        assertEquals(TestConstants.EXPECTED_INCOMING_ALL_MESSAGE_RESPONSES_RESULT, this.getConfigurationSettings().getResponses(TestConstants.MOCK_SERVER_PORT).toString());
+        assertEquals(TestConstants.EXPECTED_INCOMING_MESSAGE_RESPONSES_RESULT_FOR_PORT_6789, this.getConfigurationSettings().getResponses(TestConstants.MOCK_SERVER_PORT_6789).toString());
     }
 }
