@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import io.cloudracer.mocktcpserver.datastream.DataStream;
+import io.cloudracer.mocktcpserver.responses.ResponseDAO;
 
 /**
  * A TCP Client provided primarily for demonstration purposes, and for use in test suites.
@@ -66,9 +67,8 @@ public class TCPClient implements Closeable {
      *
      * @param hostName the machine name to communicate with.
      * @param port the port number that the machine (specified by hostName) is listening on.
-     * @throws IOException see source documentation.
      */
-    public TCPClient(final String hostName, final int port) throws IOException {
+    public TCPClient(final String hostName, final int port) {
         this(port);
 
         this.setHostName(hostName);
@@ -111,7 +111,7 @@ public class TCPClient implements Closeable {
      * @param message the message to send.
      * @param waitForResponse if true, wait for a response from the {@link TCPClient#getHostName() server}, otherwise null is returned.
      * @return the response from the {@link TCPClient#getHostName() server} or null if waitForResponse is false.
-     * @throws IOException see source documentation.
+     * @throws IOException there was an error while sending a message to the server
      */
     public DataStream send(final String message, final boolean waitForResponse) throws IOException {
         final String formattedMessage = StringEscapeUtils.unescapeJava(message);
@@ -126,7 +126,7 @@ public class TCPClient implements Closeable {
      * @param waitForResponse if true, wait for a response from the {@link TCPClient#getHostName() server}, otherwise return null.
      * @param responseTerminator the terminator to wait for on the response. Ignored if null.
      * @return the response from {@link TCPClient#getHostName() server} or null if waitForResponse is false.
-     * @throws IOException
+     * @throws IOException there was an error while sending a message to the server
      */
     private DataStream send(final String message, final boolean waitForResponse, final byte[] responseTerminator) throws IOException {
         this.logger.info(String.format("Sending the message %s.", message));
@@ -415,12 +415,20 @@ public class TCPClient implements Closeable {
     /**
      * Send the responses added with {@link #addResponse(String)}.
      *
-     * @throws IOException
+     * @return a {@link List} of {@link ResponseDAO responses} sent.
+     *
+     * @throws IOException there was an error while sending a message to the server
      */
-    public void sendResponses() throws IOException {
+    public List<ResponseDAO> sendResponses() throws IOException {
+        List<ResponseDAO> responsesSent = new ArrayList<>();
+
         for (String response : responses) {
             send(response, false);
+
+            responsesSent.add(new ResponseDAO(new String(getHostName()), getPort(), new String(response)));
         }
+
+        return responsesSent;
     }
 
     @Override

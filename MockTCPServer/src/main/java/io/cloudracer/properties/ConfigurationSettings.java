@@ -91,7 +91,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      * Retrieve a unmodifiable set of server port numbers, to listen on, that are specified in the {@link #getFileName() configuration file}.
      *
      * @return an unmodifiable set of server port numbers specified in the {@link #getFileName() configuration file}
-     * @throws ConfigurationException
+     * @throws ConfigurationException error reading the configuration file
      */
     public Set<Integer> getPorts() throws ConfigurationException {
         try {
@@ -122,7 +122,7 @@ public class ConfigurationSettings extends AbstractConfiguration {
      *
      * @param port of the {@link MockTCPServer} in question.
      * @return The responses for the {@link MockTCPServer} running on the specified port.
-     * @throws ConfigurationException
+     * @throws ConfigurationException error reading the configuration file
      */
     public Responses getResponses(int port) throws ConfigurationException {
         final Responses responses = new Responses();

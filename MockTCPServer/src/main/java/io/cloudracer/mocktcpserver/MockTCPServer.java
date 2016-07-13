@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -84,6 +86,8 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private Status status = Status.OPEN;
     private final ConfigurationSettings configurationSettings = new ConfigurationSettings();
+
+    private final List<ResponseDAO> responsesSent = new ArrayList<>();
 
     private abstract static class Print {
 
@@ -247,20 +251,34 @@ public class MockTCPServer extends Thread implements Closeable {
             this.processIncomingMessage();
         }
 
-        sendResponses();
+        final List<ResponseDAO> responses = sendResponses();
+        responsesSent.addAll(responses);
     }
 
-    private void sendResponses() throws XPathExpressionException, ConfigurationException, ParserConfigurationException, SAXException, IOException {
+    private List<ResponseDAO> sendResponses() throws XPathExpressionException, ConfigurationException, ParserConfigurationException, SAXException, IOException {
+        final List<ResponseDAO> responses = new ArrayList<>();
+
         if (isSendResponses()) {
             final String message = this.getDataStream().toString().substring(0, this.getDataStream().toString().length() - this.getDataStream().getTail().length);
             Set<TCPClient> clients = getResponses().get(message);
             if (clients != null) {
                 for (TCPClient tcpClient : clients) {
-                    logger.debug("Sending a responses to \"{}\".", tcpClient.toString());
-                    tcpClient.sendResponses();
+                    logger.debug("Sending responses from \"{}\".", tcpClient.toString());
+                    responses.addAll(tcpClient.sendResponses());
                 }
             }
         }
+
+        return responses;
+    }
+
+    /**
+     * A read-only {@link List} of responses already sent.
+     *
+     * @return a {@link List} of responses already sent
+     */
+    public List<ResponseDAO> getResponsesSent() {
+        return Collections.unmodifiableList(responsesSent);
     }
 
     private void processIncomingMessage() throws IOException {
@@ -536,10 +554,9 @@ public class MockTCPServer extends Thread implements Closeable {
      * Get the messages, initialised from the configuration file, that will be sent when specified messages are received.
      *
      * @return the server responses.
-     * @throws ConfigurationException
-     * @throws IOException
+     * @throws ConfigurationException error reading the configuration file
      */
-    public Map<String, Set<TCPClient>> getResponses() throws ConfigurationException, IOException {
+    public Map<String, Set<TCPClient>> getResponses() throws ConfigurationException {
         final Map<String, Set<TCPClient>> tcpClients = new HashMap<>();
         final Map<String, List<ResponseDAO>> responsesDAOs = this.configurationSettings.getResponses(getPort()).getResponses();
 
