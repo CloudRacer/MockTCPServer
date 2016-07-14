@@ -271,6 +271,8 @@ public class MockTCPServer extends Thread implements Closeable {
                 for (TCPClient tcpClient : clients) {
                     logger.debug("Sending responses from \"{}\".", tcpClient.toString());
                     responses.addAll(tcpClient.sendResponses());
+
+                    tcpClient.close();
                 }
             }
         }
