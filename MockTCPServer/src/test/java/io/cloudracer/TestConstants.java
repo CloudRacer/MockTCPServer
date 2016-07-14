@@ -119,7 +119,7 @@ public abstract class TestConstants {
      * Generic Machine Name of the local machine.
      */
     public static final String MACHINE_LOCALHOST_NAME = "localhost";
-    private static final int MACHINE_LOCALHOST_PORT = 1234;
+    private static final int MACHINE_LOCALHOST_PORT = 5678;
     /**
      * Incoming message.
      */
@@ -133,6 +133,10 @@ public abstract class TestConstants {
      */
     public static final int MACHINE_A_PORT = 1234;
     /**
+     * Port number to responded to.
+     */
+    public static final int MACHINE_A_RESPONSE_PORT = 2345;
+    /**
      * Response message.
      */
     public static final String MACHINE_A_RESPONSE_MESSAGE = "Response to destinationA\\u000d\\u000a\\u000a";
@@ -143,7 +147,11 @@ public abstract class TestConstants {
     /**
      * Port number.
      */
-    public static final int MACHINE_B_PORT = 1234;
+    public static final int MACHINE_B_PORT = 6789;
+    /**
+     * Port number to responded to.
+     */
+    public static final int MACHINE_B_RESPONSE_PORT = 5678;
     /**
      * Response message.
      */
@@ -175,11 +183,11 @@ public abstract class TestConstants {
     /**
      * Response DAO.
      */
-    public static final String EXPECTED_LOCALHOST_A_RESPONSE_DAO_RESULT = String.format(RESPONSEDAO_TEMPLATE, ResponseDAO.class.getSimpleName(), MACHINE_LOCALHOST_NAME, MACHINE_A_PORT, MACHINE_A_RESPONSE_MESSAGE);
+    public static final String EXPECTED_LOCALHOST_A_RESPONSE_DAO_RESULT = String.format(RESPONSEDAO_TEMPLATE, ResponseDAO.class.getSimpleName(), MACHINE_LOCALHOST_NAME, MACHINE_B_RESPONSE_PORT, MACHINE_A_RESPONSE_MESSAGE);
     /**
      * Response DAO.
      */
-    public static final String EXPECTED_LOCALHOST_B_RESPONSE_DAO_RESULT = String.format(RESPONSEDAO_TEMPLATE, ResponseDAO.class.getSimpleName(), MACHINE_LOCALHOST_NAME, MACHINE_B_PORT, MACHINE_B_RESPONSE_MESSAGE);
+    public static final String EXPECTED_LOCALHOST_B_RESPONSE_DAO_RESULT = String.format(RESPONSEDAO_TEMPLATE, ResponseDAO.class.getSimpleName(), MACHINE_LOCALHOST_NAME, MACHINE_B_RESPONSE_PORT, MACHINE_B_RESPONSE_MESSAGE);
     /**
      * Incoming message responses.
      */
