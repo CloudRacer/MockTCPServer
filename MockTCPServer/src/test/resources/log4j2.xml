@@ -28,7 +28,7 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Root level="all">
+        <Root level="info">
             <AppenderRef ref="ASYNC" />
         </Root>
         <Logger name="io.cloudracer.mocktcpserver.MockTCPServer$Print" level="all" additivity="false">

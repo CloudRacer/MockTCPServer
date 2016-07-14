@@ -640,9 +640,9 @@ public class MockTCPServer extends Thread implements Closeable {
         this.setInputStream(null);
         this.setOutputStream(null);
         // Do not set the ServerSocket to null; just close the Stream.
-        this.logger.info("Closing the socket...");
+        this.logger.debug("Closing the socket...");
         IOUtils.closeQuietly(this.socket);
-        this.logger.info("Closed the socket.");
+        this.logger.debug("Closed the socket.");
     }
 
     private Status getStatus() {
@@ -677,14 +677,14 @@ public class MockTCPServer extends Thread implements Closeable {
      */
     private ServerSocket getSocket() throws IOException, ConfigurationException {
         if (this.socket == null || this.socket.isClosed()) {
-            this.logger.info(String.format("Opening a socket on port %d...", this.getPort()));
+            this.logger.debug(String.format("Opening a socket on port %d...", this.getPort()));
             this.setSocket(new ServerSocket(this.getPort()));
-            this.logger.info("Waiting for a connection...");
+            this.logger.info(String.format("Waiting for a connection on port %d...", this.getPort()));
             this.setConnectionSocket(this.socket.accept());
-            this.logger.info("Accepted a connection.");
+            this.logger.debug(String.format("Accepted a connection on port %d...", this.getPort()));
             this.setInputStream(new BufferedReader(new InputStreamReader(this.getConnectionSocket().getInputStream())));
             this.setOutputStream(new DataOutputStream(this.getConnectionSocket().getOutputStream()));
-            this.logger.info("Ready to receive input.");
+            this.logger.debug("Ready to receive input.");
         }
 
         return this.socket;
@@ -723,9 +723,9 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setInputStream(final BufferedReader inputStream) {
-        this.logger.info("Closing input stream...");
+        this.logger.debug("Closing input stream...");
         IOUtils.closeQuietly(this.inputStream);
-        this.logger.info("Closed input stream.");
+        this.logger.debug("Closed input stream.");
 
         this.inputStream = inputStream;
     }
@@ -735,9 +735,9 @@ public class MockTCPServer extends Thread implements Closeable {
     }
 
     private void setOutputStream(final DataOutputStream outputStream) {
-        this.logger.info("Closing the output stream...");
+        this.logger.debug("Closing the output stream...");
         IOUtils.closeQuietly(this.outputStream);
-        this.logger.info("Closed the output stream.");
+        this.logger.debug("Closed the output stream.");
 
         this.outputStream = outputStream;
     }
