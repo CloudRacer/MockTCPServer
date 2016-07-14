@@ -25,6 +25,17 @@ public class MockTCPServerPool {
     }
 
     /**
+     * Get a specific {@link MockTCPServer server} from the {@link MockTCPServerPool server pool}.
+     *
+     * @param port the port being listened too by the required {@link MockTCPServer server}
+     *
+     * @return the requested {@link MockTCPServer server}
+     */
+    public MockTCPServer get(final int port) {
+        return mockTCPServerSet.get(port);
+    }
+
+    /**
      * Close all {@link MockTCPServer servers} in the pool.
      */
     public void shutdown() {

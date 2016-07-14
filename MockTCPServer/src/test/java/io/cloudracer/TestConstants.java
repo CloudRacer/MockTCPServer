@@ -41,7 +41,26 @@ public abstract class TestConstants {
      */
     public static final String MOCKTCPSERVER_XML_FULL_RESOURCE_PATH_SUFFIX = "/MockTCPServer/" + MOCKTCPSERVER_XML_RESOURCE_TARGET_FILE_NAME;
 
-    protected static final int TEST_TIMEOUT_5_MINUTE = 300000;
+    /**
+     * Duration of 1/10th of one second, expressed in milliseconds.
+     */
+    public static final int ONE_TENTH_OF_A_SECOND = 100;
+    /**
+     * Duration of 1 second, expressed in milliseconds.
+     */
+    public static final int ONE_SECOND = ONE_TENTH_OF_A_SECOND * 10;
+    /**
+     * Duration of 1 minute, expressed in milliseconds.
+     */
+    public static final int ONE_MINUTE = ONE_SECOND * 60;
+    /**
+     * Duration of 1/10th of one second, expressed in milliseconds.
+     */
+    public static final int SERVER_TIMEOUT = (ONE_MINUTE * 2) + (ONE_SECOND * 30);
+    /**
+     * Duration of 5 minutes, expressed in milliseconds.
+     */
+    public static final int TEST_TIMEOUT_5_MINUTE = ONE_MINUTE * 5;
     protected static final int TEST_TIMEOUT_10_MINUTE = TEST_TIMEOUT_5_MINUTE * 2;
 
     protected static final int CLIENT_PORT = 6000;
@@ -53,6 +72,14 @@ public abstract class TestConstants {
      * Server port 1234.
      */
     public static final int MOCK_SERVER_PORT_1234 = 1234;
+    /**
+     * Server port 5678.
+     */
+    public static final int MOCK_SERVER_PORT_5678 = 5678;
+    /**
+     * Server port 2345.
+     */
+    public static final int MOCK_SERVER_PORT_2345 = 2345;
     /**
      * New server port.
      */
@@ -88,7 +115,10 @@ public abstract class TestConstants {
     // Responses
     private static final String TCPCLIENT_TEMPLATE = "%s [hostName=%s, port=%s]";
     private static final String RESPONSEDAO_TEMPLATE = "%s [machineName=%s, port=%s, response=%s]";
-    private static final String MACHINE_LOCALHOST_NAME = "localhost";
+    /**
+     * Generic Machine Name of the local machine.
+     */
+    public static final String MACHINE_LOCALHOST_NAME = "localhost";
     private static final int MACHINE_LOCALHOST_PORT = 1234;
     /**
      * Incoming message.

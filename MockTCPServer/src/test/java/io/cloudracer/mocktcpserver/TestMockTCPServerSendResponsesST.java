@@ -1,13 +1,12 @@
 package io.cloudracer.mocktcpserver;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,11 +21,6 @@ import io.cloudracer.mocktcpserver.responses.ResponseDAO;
  * @author John McDonnell
  */
 public class TestMockTCPServerSendResponsesST extends AbstractTestTools {
-
-    private static final int ONE_TENTH_OF_A_SECOND = 100;
-    private static final int ONE_SECOND = ONE_TENTH_OF_A_SECOND * 10;
-    private static final int TIMEOUT = ONE_SECOND * 150;
-    private static final int SERVER_TIMEOUT = ONE_SECOND * 5;
 
     @Override
     @Before
@@ -47,30 +41,14 @@ public class TestMockTCPServerSendResponsesST extends AbstractTestTools {
      * @throws InterruptedException
      * @throws ConfigurationException
      */
-    @Test(timeout = TIMEOUT)
+    @Test(timeout = TestConstants.TEST_TIMEOUT_5_MINUTE)
     public void sendResponses() throws IOException, InterruptedException, ConfigurationException {
         final List<ResponseDAO> expectedResponses = Arrays.asList(
-                new ResponseDAO("localhost", TestConstants.MOCK_SERVER_PORT_1234, TestConstants.MACHINE_A_RESPONSE_MESSAGE),
-                new ResponseDAO("localhost", TestConstants.MOCK_SERVER_PORT_1234, TestConstants.MACHINE_B_RESPONSE_MESSAGE));
+                new ResponseDAO("localhost", TestConstants.MOCK_SERVER_PORT_5678, TestConstants.MACHINE_A_RESPONSE_MESSAGE),
+                new ResponseDAO("localhost", TestConstants.MOCK_SERVER_PORT_5678, TestConstants.MACHINE_B_RESPONSE_MESSAGE));
+        final List<String> expectedMessages = new ArrayList<>(Arrays.asList(StringEscapeUtils.unescapeJava(TestConstants.MACHINE_A_RESPONSE_MESSAGE), StringEscapeUtils.unescapeJava(TestConstants.MACHINE_B_RESPONSE_MESSAGE)));
 
-        final MockTCPServer mockTCPServer = new MockTCPServer(TestConstants.MOCK_SERVER_PORT_1234);
-        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
-        this.getClient().close();
-
-        for (int i = 0; i < SERVER_TIMEOUT; i = i + (ONE_TENTH_OF_A_SECOND)) {
-            mockTCPServer.join(ONE_TENTH_OF_A_SECOND);
-
-            if (!mockTCPServer.isAlive() || getServer().getResponsesSent().size() == expectedResponses.size()) {
-                break;
-            }
-            if (i == (SERVER_TIMEOUT - ONE_TENTH_OF_A_SECOND)) {
-                System.out.println(String.format("Timed out waiting for the Server listening to port %d to close.", mockTCPServer.getPort()));
-            }
-        }
-
-        assertEquals(expectedResponses, getServer().getResponsesSent());
-
-        mockTCPServer.close();
+        testResponses(getServer(), TestConstants.MOCK_SERVER_PORT_5678, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, expectedResponses, expectedMessages, TestConstants.SERVER_TIMEOUT, TestConstants.ONE_TENTH_OF_A_SECOND);
 
         this.checkLogMonitorForUnexpectedMessages();
     }

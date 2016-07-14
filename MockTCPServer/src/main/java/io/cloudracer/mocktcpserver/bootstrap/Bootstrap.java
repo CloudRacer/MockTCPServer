@@ -52,7 +52,12 @@ public final class Bootstrap {
         Bootstrap.configurationSettings = configurationSettings;
     }
 
-    private MockTCPServerPool getServerPool() {
+    /**
+     * Get the {@link MockTCPServerPool server pool}; one for each port in the configuration file.
+     *
+     * @return the {@link MockTCPServerPool server pool}
+     */
+    public MockTCPServerPool getServerPool() {
         if (serverPool == null) {
             this.serverPool = new MockTCPServerPool();
         }

@@ -1,9 +1,13 @@
 package io.cloudracer;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -14,6 +18,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Appender;
 
 import io.cloudracer.mocktcpserver.MockTCPServer;
+import io.cloudracer.mocktcpserver.datastream.DataStream;
+import io.cloudracer.mocktcpserver.responses.ResponseDAO;
 import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
 import io.cloudracer.properties.ConfigurationSettings;
 
@@ -121,6 +127,49 @@ public abstract class AbstractTestTools {
     protected static void resetConfiguration() throws IOException {
         restoreConfigurationFile();
         deleteConfigurationFolder();
+    }
+
+    protected void testResponses(final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException {
+        testResponses(getServer(), responseListenerPort, message, expectedResponses, expectedMessages, timeout, retryInterval);
+    }
+
+    protected void testResponses(final MockTCPServer server, final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException {
+        final List<String> actualMessages = new ArrayList<>();
+        final MockTCPServer mockTCPServer = new MockTCPServer(responseListenerPort) {
+
+            @Override
+            public void onMessage(DataStream message) {
+                actualMessages.add(message.toString());
+
+                super.onMessage(message);
+
+                if (actualMessages.size() == expectedMessages.size()) {
+                    setIsCloseAfterNextResponse(true);
+                }
+            }
+        };
+        final TCPClient tcpClient = new TCPClient(server.getPort());
+        assertArrayEquals(TestConstants.getAck(), tcpClient.send(message).toByteArray());
+        tcpClient.close();
+        // Will close when the expected number of messages are received.
+        mockTCPServer.join();
+
+        for (int i = 0; i < timeout; i = i + (retryInterval)) {
+            if (server.isAlive() && server.getResponsesSent().size() == expectedResponses.size()) {
+                break;
+            }
+
+            server.join(retryInterval);
+
+            if (i == (timeout - retryInterval)) {
+                System.out.println(String.format("Timed out waiting for the Server listening to port %d to close.", mockTCPServer.getPort()));
+            }
+        }
+
+        assertEquals(expectedResponses, server.getResponsesSent());
+        assertEquals(expectedMessages, actualMessages);
+
+        mockTCPServer.close();
     }
 
     protected void setServer(MockTCPServer server) {
