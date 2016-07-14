@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -236,23 +237,28 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void readIncomingStream() throws IOException, XPathExpressionException, ConfigurationException, ParserConfigurationException, SAXException {
         this.setDataStream(null);
-        while (this.getDataStream().write(this.getInputStream().read()) != -1) {
-            if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
-                this.incrementMessagesReceivedCount();
+        try {
+            while (this.getDataStream().write(this.getInputStream().read()) != -1) {
+                if (Arrays.equals(this.getDataStream().getTail(), this.getTerminator())) {
+                    this.incrementMessagesReceivedCount();
 
-                break;
+                    break;
+                }
             }
-        }
 
-        if (this.getDataStream().getLastByte() == -1) {
-            // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
-            this.closeStreams();
-        } else if (this.getDataStream().size() > 0) { // Ignore null (i.e. zero length) in order allow a probing ping e.g. paping.exe
-            this.processIncomingMessage();
-        }
+            if (this.getDataStream().getLastByte() == -1) {
+                // The stream has ended so close all streams so that a new ServerSocket is opened and a new connection can be accepted.
+                this.closeStreams();
+            } else if (this.getDataStream().size() > 0) { // Ignore null (i.e. zero length) in order allow a probing ping e.g. paping.exe
+                this.processIncomingMessage();
+            }
 
-        final List<ResponseDAO> responses = sendResponses();
-        responsesSent.addAll(responses);
+            final List<ResponseDAO> responses = sendResponses();
+            responsesSent.addAll(responses);
+        } catch (SocketTimeoutException e) {
+            // Do nothing. This occurs because a client was not closed and the read timeout on the locked stream (i.e. blocked thread) is 60 seconds.
+            this.logger.warn(e);
+        }
     }
 
     private List<ResponseDAO> sendResponses() throws XPathExpressionException, ConfigurationException, ParserConfigurationException, SAXException, IOException {
