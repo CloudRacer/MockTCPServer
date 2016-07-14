@@ -628,11 +628,13 @@ public class MockTCPServer extends Thread implements Closeable {
 
     private void closeStreams() {
         try {
-            if (this.getConnectionSocket() != null && !this.getConnectionSocket().isInputShutdown()) {
-                this.getConnectionSocket().shutdownInput();
-            }
-            if (this.getConnectionSocket() != null && !this.getConnectionSocket().isOutputShutdown()) {
-                this.getConnectionSocket().shutdownOutput();
+            if (this.getConnectionSocket() != null && !this.getConnectionSocket().isClosed() && this.getConnectionSocket().isConnected()) {
+                if (!this.getConnectionSocket().isInputShutdown()) {
+                    this.getConnectionSocket().shutdownInput();
+                }
+                if (!this.getConnectionSocket().isOutputShutdown()) {
+                    this.getConnectionSocket().shutdownOutput();
+                }
             }
         } catch (final IOException e) {
             this.logger.error(e.getMessage(), e);
