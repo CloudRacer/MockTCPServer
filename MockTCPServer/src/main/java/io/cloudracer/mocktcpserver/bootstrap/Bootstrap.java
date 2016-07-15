@@ -14,13 +14,13 @@ import io.cloudracer.properties.ConfigurationSettings;
  * @author John McDonnell
  *
  */
-public final class Bootstrap {
+public final class Bootstrap extends MockTCPServerPool {
 
     private static ConfigurationSettings configurationSettings;
     private MockTCPServerPool serverPool;
 
     /**
-     * Start the Server; listen on all specified threads.
+     * Start the Server and listen on all ports specified in the configured file.
      *
      * @throws ConfigurationException error reading the configuration file
      * @throws InterruptedException the MockTCPServer was unexpectedly interrupted
@@ -32,11 +32,14 @@ public final class Bootstrap {
 
             getServerPool().add(new MockTCPServer(port));
         }
+
+        super.start();
     }
 
     /**
      * Stop listening to any ports i.e. stop all threads.
      */
+    @Override
     public void shutdown() {
         getServerPool().shutdown();
     }

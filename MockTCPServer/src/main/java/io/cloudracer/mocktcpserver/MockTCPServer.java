@@ -41,6 +41,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.xml.sax.SAXException;
 
+import io.cloudracer.mocktcpserver.bootstrap.Bootstrap;
 import io.cloudracer.mocktcpserver.datastream.DataStream;
 import io.cloudracer.mocktcpserver.datastream.DataStreamRegexMatcher;
 import io.cloudracer.mocktcpserver.responses.ResponseDAO;
@@ -139,17 +140,28 @@ public class MockTCPServer extends Thread implements Closeable {
      * Start the server on the specified port.
      *
      * @param port the TCP Server will listen on this port. If null, the default port will be used.
+     *
+     * @throws ConfigurationException error reading the configuration file
+     * @throws InterruptedException the MockTCPServer was unexpectedly interrupted
      */
-    public MockTCPServer(final Integer port) {
-        this.logger.info("Starting...");
+    public MockTCPServer(final Integer port) throws ConfigurationException, InterruptedException {
+        // If the port is specified as -1, creating a connection pool containing a separate server to listen on each port specified in the configuration file.
+        if (port == -1) {
+            this.logger.info("Starting a connection pool...");
 
-        if (port != null) {
-            this.setPort(port);
+            new Bootstrap().startup();
+        } else {
+            this.logger.info(String.format("Starting to listen on port %d only...", port));
+
+            if (port != null) {
+                this.setPort(port);
+            }
+
+            super.setName(String.format("%s-%d", this.getThreadName(), this.getPort()));
+
+            this.start();
         }
 
-        super.setName(String.format("%s-%d", this.getThreadName(), this.getPort()));
-
-        this.start();
         /*
          * If this pause is not done here, a test that *immediately* tries to connect, may get a "connection refused" error.
          */
@@ -167,8 +179,11 @@ public class MockTCPServer extends Thread implements Closeable {
      * <b>Note</b>: currently, there is no packaged bundle to include all the dependencies and scripts.
      *
      * @param args an alternative port number can be passed as the first (and only) parameter.
+     *
+     * @throws ConfigurationException error reading the configuration file
+     * @throws InterruptedException the MockTCPServer was unexpectedly interrupted
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ConfigurationException, InterruptedException {
         final Logger logger = LogManager.getLogger();
 
         try {
@@ -659,7 +674,7 @@ public class MockTCPServer extends Thread implements Closeable {
         return this.status;
     }
 
-    private synchronized void setStatus(final Status status) {
+    private void setStatus(final Status status) {
         this.status = status;
     }
 

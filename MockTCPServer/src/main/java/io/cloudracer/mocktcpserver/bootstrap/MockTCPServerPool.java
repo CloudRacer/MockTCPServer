@@ -1,8 +1,11 @@
 package io.cloudracer.mocktcpserver.bootstrap;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import io.cloudracer.mocktcpserver.MockTCPServer;
 
@@ -11,9 +14,51 @@ import io.cloudracer.mocktcpserver.MockTCPServer;
  *
  * @author John McDonnell
  */
-public class MockTCPServerPool {
+public class MockTCPServerPool extends Thread implements Closeable {
+
+    /**
+     * The status of the server pool.
+     */
+    public enum Status {
+        /**
+         * The server pool is started.
+         */
+        STARTED,
+        /**
+         * The server pool is in the process of being stopped.
+         */
+        STOPPING,
+        /**
+         * The server pool is stopped.
+         */
+        STOPPED,
+        /**
+         * Failed to stop.
+         */
+        STOPPING_FAILED
+    }
+
+    private static Status status = Status.STARTED;
 
     private static Map<Integer, MockTCPServer> mockTCPServerSet = new HashMap<>();
+
+    /**
+     * The pool will remain active until it is {@link #shutdown() shutdown)} (i.e. the {@link #getStatus() status)} is STOPPED).
+     */
+    @Override
+    public void run() {
+        super.run();
+
+        final int interval = 1;
+
+        while (!getStatus().equals(Status.STOPPED)) {
+            try {
+                TimeUnit.SECONDS.sleep(interval);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
 
     /**
      * Add a {@link MockTCPServer server} to the pool.
@@ -42,5 +87,26 @@ public class MockTCPServerPool {
         for (Entry<Integer, MockTCPServer> entry : mockTCPServerSet.entrySet()) {
             entry.getValue().close();
         }
+    }
+
+    /**
+     * The {@link Status} of the connection pool.
+     */
+    private static void setStatus(final Status status) {
+        setStatus(status);
+    }
+
+    /**
+     * The {@link Status} of the connection pool.
+     *
+     * @return the {@link Status} of the connection pool
+     */
+    public static Status getStatus() {
+        return status;
+    }
+
+    @Override
+    public void close() throws IOException {
+        shutdown();
     }
 }

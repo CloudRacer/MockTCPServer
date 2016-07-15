@@ -2,6 +2,7 @@ package io.cloudracer;
 
 import java.io.IOException;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
@@ -21,7 +22,7 @@ public class TestReliability extends AbstractTestTools {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ConfigurationException, InterruptedException {
         this.getServer();
         this.getClient();
     }

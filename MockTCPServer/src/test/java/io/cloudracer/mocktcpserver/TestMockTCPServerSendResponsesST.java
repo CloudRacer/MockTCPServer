@@ -24,7 +24,7 @@ public class TestMockTCPServerSendResponsesST extends AbstractTestTools {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ConfigurationException, InterruptedException {
         super.setUp();
     }
 

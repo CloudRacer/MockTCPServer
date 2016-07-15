@@ -23,7 +23,7 @@ public class TestMockTCPServerGetResponsesST extends AbstractTestTools {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ConfigurationException, InterruptedException {
         super.setUp();
     }
 
@@ -38,9 +38,10 @@ public class TestMockTCPServerGetResponsesST extends AbstractTestTools {
      *
      * @throws ConfigurationException
      * @throws IOException
+     * @throws InterruptedException
      */
     @Test(timeout = TIMEOUT)
-    public void getResponses() throws ConfigurationException, IOException {
+    public void getResponses() throws ConfigurationException, IOException, InterruptedException {
         assertEquals(TestConstants.EXPECTED_CLIENT_LIST_FOR_PORT_6789, this.getServer().getResponses().toString());
 
         this.checkLogMonitorForUnexpectedMessages();

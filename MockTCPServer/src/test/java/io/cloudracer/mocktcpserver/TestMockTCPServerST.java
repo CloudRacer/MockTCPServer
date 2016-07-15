@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
@@ -31,7 +32,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ConfigurationException, InterruptedException {
         super.setUp();
 
         this.getServer().setIsSendResponses(false);
@@ -60,9 +61,10 @@ public class TestMockTCPServerST extends AbstractTestTools {
      *
      * @throws IOException see source documentation.
      * @throws InterruptedException
+     * @throws ConfigurationException
      */
     @Test(timeout = TIMEOUT)
-    public void ackWithCustomTerminator() throws IOException, InterruptedException {
+    public void ackWithCustomTerminator() throws IOException, InterruptedException, ConfigurationException {
         final byte[] customTerminator = new byte[] { 88, 89, 90 }; // XYZ
         final String message = String.format("%s%s", TestConstants.WELLFORMED_XML, new String(customTerminator));
 
@@ -103,9 +105,11 @@ public class TestMockTCPServerST extends AbstractTestTools {
      * Having set the Server to always return a NAK, the Server returns the expected NAK when an ACK would normally be expected.
      *
      * @throws IOException see source documentation.
+     * @throws InterruptedException
+     * @throws ConfigurationException
      */
     @Test(timeout = TIMEOUT)
-    public void forceNAK() throws IOException {
+    public void forceNAK() throws IOException, ConfigurationException, InterruptedException {
         assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
         this.getServer().setIsAlwaysNAKResponse(true);
@@ -120,9 +124,10 @@ public class TestMockTCPServerST extends AbstractTestTools {
      *
      * @throws IOException see source documentation.
      * @throws InterruptedException see source documentation.
+     * @throws ConfigurationException
      */
     @Test(timeout = TIMEOUT)
-    public void forceCloseAfterNextResponse() throws IOException, InterruptedException {
+    public void forceCloseAfterNextResponse() throws IOException, InterruptedException, ConfigurationException {
         this.getServer().setIsCloseAfterNextResponse(true);
 
         assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
@@ -140,9 +145,10 @@ public class TestMockTCPServerST extends AbstractTestTools {
      * Having set the Server to never respond, wait for the Server {@link Thread} to die. If the server has not responded after 5 seconds, assume that it never will.
      *
      * @throws InterruptedException see source documentation.
+     * @throws ConfigurationException
      */
     @Test(timeout = TIMEOUT)
-    public void forceNoResponse() throws InterruptedException {
+    public void forceNoResponse() throws InterruptedException, ConfigurationException {
         this.getServer().setIsAlwaysNoResponse(true);
 
         final Thread waitForResponse = new Thread("WaitForResponse") {
@@ -183,9 +189,11 @@ public class TestMockTCPServerST extends AbstractTestTools {
      * Having set the Server to expect only messages that match a specified Regular Expression, ensure that a NAK is returned for messages that do not match and an ACK for messages that do match.
      *
      * @throws IOException see source documentation.
+     * @throws InterruptedException
+     * @throws ConfigurationException
      */
     @Test(timeout = TIMEOUT)
-    public void expectSpecificMessage() throws IOException {
+    public void expectSpecificMessage() throws IOException, ConfigurationException, InterruptedException {
         final String baseMessage = "Hello World!!";
         final String message = String.format("%s%s", baseMessage, new String(TestConstants.DEFAULT_TERMINATOR));
 

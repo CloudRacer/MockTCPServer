@@ -50,6 +50,18 @@ public abstract class TestConstants {
      */
     public static final int ONE_SECOND = ONE_TENTH_OF_A_SECOND * 10;
     /**
+     * Duration of 2 seconds, expressed in milliseconds.
+     */
+    public static final int TWO_SECONDS = ONE_SECOND * 2;
+    /**
+     * Duration of 5 seconds, expressed in milliseconds.
+     */
+    public static final int FIVE_SECONDS = ONE_SECOND * 5;
+    /**
+     * Duration of 10 seconds, expressed in milliseconds.
+     */
+    public static final int TEN_SECONDS = ONE_SECOND * 10;
+    /**
      * Duration of 1 minute, expressed in milliseconds.
      */
     public static final int ONE_MINUTE = ONE_SECOND * 60;

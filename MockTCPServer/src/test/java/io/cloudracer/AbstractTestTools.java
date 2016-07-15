@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,7 @@ public abstract class AbstractTestTools {
         logger.debug(String.format("Properties: %s.", StringUtils.join(System.getProperties())));
     }
 
-    protected void setUp() throws IOException {
+    protected void setUp() throws IOException, ConfigurationException, InterruptedException {
         this.resetLogMonitor();
 
         this.getServer();
@@ -90,7 +91,7 @@ public abstract class AbstractTestTools {
         this.client = client;
     }
 
-    protected MockTCPServer getServer() {
+    protected MockTCPServer getServer() throws ConfigurationException, InterruptedException {
         if (this.server == null) {
             this.server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT_6789);
         }
@@ -129,11 +130,11 @@ public abstract class AbstractTestTools {
         deleteConfigurationFolder();
     }
 
-    protected void testResponses(final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException {
+    protected void testResponses(final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException, ConfigurationException {
         testResponses(getServer(), responseListenerPort, message, expectedResponses, expectedMessages, timeout, retryInterval);
     }
 
-    protected void testResponses(final MockTCPServer server, final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException {
+    protected void testResponses(final MockTCPServer server, final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException, ConfigurationException {
         final List<String> actualMessages = new ArrayList<>();
         final MockTCPServer mockTCPServer = new MockTCPServer(responseListenerPort) {
 

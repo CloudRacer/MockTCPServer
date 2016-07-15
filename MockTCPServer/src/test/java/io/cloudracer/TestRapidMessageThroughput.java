@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.io.IOException;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +18,7 @@ public class TestRapidMessageThroughput extends AbstractTestTools {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, ConfigurationException, InterruptedException {
         super.setUp();
     }
 

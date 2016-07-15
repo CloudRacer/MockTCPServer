@@ -23,8 +23,8 @@ public class TestBootstrap extends AbstractTestTools {
     /**
      * Bootstrap multiple servers using details from the configuration file.
      *
-     * @throws ConfigurationException
-     * @throws InterruptedException
+     * @throws ConfigurationException error reading the configuration file
+     * @throws InterruptedException the MockTCPServer was unexpectedly interrupted
      * @throws IOException error while sending responses
      */
     @Test(timeout = TestConstants.TEST_TIMEOUT_5_MINUTE)
