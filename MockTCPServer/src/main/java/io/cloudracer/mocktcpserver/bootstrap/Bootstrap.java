@@ -45,13 +45,13 @@ public final class Bootstrap extends MockTCPServerPool {
     }
 
     static ConfigurationSettings getConfigurationSettings() {
-        if (configurationSettings == null) {
-            configurationSettings = new ConfigurationSettings();
+        if (Bootstrap.configurationSettings == null) {
+            Bootstrap.configurationSettings = new ConfigurationSettings();
         }
-        return configurationSettings;
+        return Bootstrap.configurationSettings;
     }
 
-    void setConfigurationSettings(ConfigurationSettings configurationSettings) {
+    static void setConfigurationSettings(ConfigurationSettings configurationSettings) {
         Bootstrap.configurationSettings = configurationSettings;
     }
 

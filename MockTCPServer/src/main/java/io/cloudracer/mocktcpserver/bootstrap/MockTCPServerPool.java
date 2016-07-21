@@ -91,13 +91,6 @@ public class MockTCPServerPool extends Thread implements Closeable {
 
     /**
      * The {@link Status} of the connection pool.
-     */
-    private static void setStatus(final Status status) {
-        setStatus(status);
-    }
-
-    /**
-     * The {@link Status} of the connection pool.
      *
      * @return the {@link Status} of the connection pool
      */

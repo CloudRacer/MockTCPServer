@@ -19,8 +19,6 @@ import io.cloudracer.TestConstants;
  */
 public class TestMockTCPServerGetResponsesST extends AbstractTestTools {
 
-    private static final int TIMEOUT = 10000;
-
     @Override
     @Before
     public void setUp() throws IOException, ConfigurationException, InterruptedException {
@@ -40,7 +38,7 @@ public class TestMockTCPServerGetResponsesST extends AbstractTestTools {
      * @throws IOException
      * @throws InterruptedException
      */
-    @Test(timeout = TIMEOUT)
+    @Test(timeout = TestConstants.TEN_SECONDS)
     public void getResponses() throws ConfigurationException, IOException, InterruptedException {
         assertEquals(TestConstants.EXPECTED_CLIENT_LIST_FOR_PORT_6789, this.getServer().getResponses().toString());
 

@@ -5,7 +5,7 @@
                 <xs:element name="server" maxOccurs="unbounded" minOccurs="1">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="incoming" minOccurs="1" maxOccurs="1" >
+                            <xs:element name="incoming" minOccurs="0" maxOccurs="1" >
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element type="xs:string" name="message" minOccurs="1" maxOccurs="1" />

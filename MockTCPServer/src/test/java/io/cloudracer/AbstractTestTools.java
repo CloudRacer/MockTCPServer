@@ -2,6 +2,7 @@ package io.cloudracer;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
@@ -20,7 +21,6 @@ import org.apache.logging.log4j.core.Appender;
 
 import io.cloudracer.mocktcpserver.MockTCPServer;
 import io.cloudracer.mocktcpserver.datastream.DataStream;
-import io.cloudracer.mocktcpserver.responses.ResponseDAO;
 import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
 import io.cloudracer.properties.ConfigurationSettings;
 
@@ -77,10 +77,22 @@ public abstract class AbstractTestTools {
 
     protected TCPClient getClient() throws IOException {
         if (this.client == null) {
-            this.client = new TCPClient(TestConstants.MOCK_SERVER_PORT_6789);
+            this.client = getClientFactory(TestConstants.MOCK_SERVER_PORT_6789);
         }
 
         return this.client;
+    }
+
+    protected TCPClient getClient(final int port) throws IOException {
+        if (this.client == null) {
+            this.client = getClientFactory(port);
+        }
+
+        return this.client;
+    }
+
+    protected TCPClient getClientFactory(final int port) throws IOException {
+        return new TCPClient(port);
     }
 
     protected void setClient(TCPClient client) throws IOException {
@@ -92,11 +104,27 @@ public abstract class AbstractTestTools {
     }
 
     protected MockTCPServer getServer() throws ConfigurationException, InterruptedException {
+        return getServer(TestConstants.MOCK_SERVER_PORT_6789, true);
+    }
+
+    protected MockTCPServer getServer(final boolean start) throws ConfigurationException, InterruptedException {
+        return getServer(TestConstants.MOCK_SERVER_PORT_6789, start);
+    }
+
+    protected MockTCPServer getServer(final int port) throws ConfigurationException, InterruptedException {
+        return getServer(port, true);
+    }
+
+    protected MockTCPServer getServer(final int port, final boolean start) throws ConfigurationException, InterruptedException {
         if (this.server == null) {
-            this.server = new MockTCPServer(TestConstants.MOCK_SERVER_PORT_6789);
+            this.server = getServerFactory(port, start);
         }
 
         return this.server;
+    }
+
+    protected MockTCPServer getServerFactory(int port, final boolean start) throws ConfigurationException, InterruptedException {
+        return new MockTCPServer(port, start);
     }
 
     protected ConfigurationSettings getConfigurationSettings() {
@@ -130,11 +158,11 @@ public abstract class AbstractTestTools {
         deleteConfigurationFolder();
     }
 
-    protected void testResponses(final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException, ConfigurationException {
-        testResponses(getServer(), responseListenerPort, message, expectedResponses, expectedMessages, timeout, retryInterval);
+    protected void testResponses(final int responseListenerPort, final String message, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException, ConfigurationException {
+        testResponses(getServer(), responseListenerPort, message, expectedMessages, timeout, retryInterval);
     }
 
-    protected void testResponses(final MockTCPServer server, final int responseListenerPort, final String message, final List<ResponseDAO> expectedResponses, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException, ConfigurationException {
+    protected void testResponses(final MockTCPServer server, final int responseListenerPort, final String message, final List<String> expectedMessages, final int timeout, final int retryInterval) throws IOException, InterruptedException, ConfigurationException {
         final List<String> actualMessages = new ArrayList<>();
         final MockTCPServer mockTCPServer = new MockTCPServer(responseListenerPort) {
 
@@ -145,7 +173,7 @@ public abstract class AbstractTestTools {
                 super.onMessage(message);
 
                 if (actualMessages.size() == expectedMessages.size()) {
-                    setIsCloseAfterNextResponse(true);
+                    close();
                 }
             }
         };
@@ -154,20 +182,17 @@ public abstract class AbstractTestTools {
         tcpClient.close();
         // Will close when the expected number of messages are received.
         mockTCPServer.join();
+        server.close();
 
-        for (int i = 0; i < timeout; i = i + (retryInterval)) {
-            if (server.isAlive() && server.getResponsesSent().size() == expectedResponses.size()) {
-                break;
-            }
-
+        int i = 0;
+        while (server.isAlive()) {
             server.join(retryInterval);
 
-            if (i == (timeout - retryInterval)) {
-                System.out.println(String.format("Timed out waiting for the Server listening to port %d to close.", mockTCPServer.getPort()));
-            }
+            assertFalse(String.format("Timed out waiting for the Server listening to port %d to close.", mockTCPServer.getPort()), !(i < timeout));
+
+            i = i + (retryInterval);
         }
 
-        assertEquals(expectedResponses, server.getResponsesSent());
         assertEquals(expectedMessages, actualMessages);
 
         mockTCPServer.close();

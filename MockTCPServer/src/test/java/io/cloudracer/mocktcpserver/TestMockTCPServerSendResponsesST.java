@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
-import io.cloudracer.mocktcpserver.responses.ResponseDAO;
 
 /**
  * Mock TCP Server tests.
@@ -43,12 +42,9 @@ public class TestMockTCPServerSendResponsesST extends AbstractTestTools {
      */
     @Test(timeout = TestConstants.TEST_TIMEOUT_5_MINUTE)
     public void sendResponses() throws IOException, InterruptedException, ConfigurationException {
-        final List<ResponseDAO> expectedResponses = Arrays.asList(
-                new ResponseDAO("localhost", TestConstants.MOCK_SERVER_PORT_5678, TestConstants.MACHINE_A_RESPONSE_MESSAGE),
-                new ResponseDAO("localhost", TestConstants.MOCK_SERVER_PORT_5678, TestConstants.MACHINE_B_RESPONSE_MESSAGE));
         final List<String> expectedMessages = new ArrayList<>(Arrays.asList(StringEscapeUtils.unescapeJava(TestConstants.MACHINE_A_RESPONSE_MESSAGE), StringEscapeUtils.unescapeJava(TestConstants.MACHINE_B_RESPONSE_MESSAGE)));
 
-        testResponses(getServer(), TestConstants.MOCK_SERVER_PORT_5678, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, expectedResponses, expectedMessages, TestConstants.SERVER_TIMEOUT, TestConstants.ONE_TENTH_OF_A_SECOND);
+        testResponses(getServer(), TestConstants.MOCK_SERVER_PORT_5678, TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR, expectedMessages, TestConstants.SERVER_TIMEOUT, TestConstants.ONE_TENTH_OF_A_SECOND);
 
         this.checkLogMonitorForUnexpectedMessages();
     }

@@ -18,4 +18,6 @@
             </responses>
         </incoming>
     </server>
+    <server port="1111">
+    </server>
 </configuration>

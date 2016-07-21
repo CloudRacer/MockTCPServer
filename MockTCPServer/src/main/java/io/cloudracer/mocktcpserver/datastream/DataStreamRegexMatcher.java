@@ -10,20 +10,20 @@ import org.hamcrest.TypeSafeMatcher;
  */
 public class DataStreamRegexMatcher extends TypeSafeMatcher<DataStream> {
 
-    private final String regex;
+    private String regEx;
 
     /**
      * Specify the Regular Expression to compares.
      *
-     * @param regex {@link DataStreamRegexMatcher#matchesSafely(DataStream)} will parse this Regular Expression against the content of a provided {@link DataStream}.
+     * @param regEx {@link DataStreamRegexMatcher#matchesSafely(DataStream)} will parse this Regular Expression against the content of a provided {@link DataStream}.
      */
-    public DataStreamRegexMatcher(final String regex) {
-        this.regex = regex;
+    public DataStreamRegexMatcher(final String regEx) {
+        setRegEx(regEx);
     }
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText(String.format("Match the regular expression: %s.", this.regex));
+        description.appendText(String.format("Match the regular expression: %s.", getRegEx()));
     }
 
     /**
@@ -32,6 +32,19 @@ public class DataStreamRegexMatcher extends TypeSafeMatcher<DataStream> {
      */
     @Override
     public boolean matchesSafely(final DataStream data) {
-        return data.toString().matches(this.regex);
+        return data.toString().matches(getRegEx());
+    }
+
+    /**
+     * Regular Expression used by this comparison.
+     *
+     * @return the Regular Expression used by this comparison
+     */
+    public String getRegEx() {
+        return new String(regEx);
+    }
+
+    private void setRegEx(String regex) {
+        this.regEx = regex;
     }
 }

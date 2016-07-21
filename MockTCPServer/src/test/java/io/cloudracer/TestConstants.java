@@ -93,13 +93,13 @@ public abstract class TestConstants {
      */
     public static final int MOCK_SERVER_PORT_2345 = 2345;
     /**
-     * New server port.
+     * Server port 1111.
      */
-    public static final int MOCK_SERVER_NEW_PORT = 1111;
+    public static final int MOCK_SERVER_PORT_1111 = 1111;
     /**
      * Default set of configured ports.
      */
-    public static final Set<Integer> PORT_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(MOCK_SERVER_PORT_1234, MOCK_SERVER_PORT_6789)));
+    public static final Set<Integer> PORT_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(MOCK_SERVER_PORT_1234, MOCK_SERVER_PORT_6789, MOCK_SERVER_PORT_1111)));
 
     private static final byte[] ACK = { 65 }; // Default ACK.
     private static final byte[] NAK = { 78 }; // Default NAK.

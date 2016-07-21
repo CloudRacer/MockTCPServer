@@ -48,10 +48,18 @@ public class TestMockTCPServerST extends AbstractTestTools {
      * Server returns the expected ACK to a properly terminated message.
      *
      * @throws IOException see source documentation.
+     * @throws ConfigurationException error reading the configuration file
+     * @throws InterruptedException the MockTCPServer was unexpectedly interrupted
      */
     @Test(timeout = TIMEOUT)
-    public void ack() throws IOException {
-        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+    public void ack() throws IOException, ConfigurationException, InterruptedException {
+        try (final MockTCPServer mockTCPServer1111 = getServerFactory(TestConstants.MOCK_SERVER_PORT_1111, true);) {
+            mockTCPServer1111.setIsSendResponses(false);
+
+            for (int i = 0; i < 10; i++) {
+                assertArrayEquals(TestConstants.getAck(), getClientFactory(TestConstants.MOCK_SERVER_PORT_1111).send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+            }
+        }
 
         this.checkLogMonitorForUnexpectedMessages();
     }
@@ -85,7 +93,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
         };
         waitForResponse.start();
 
-        // Wait to confirm that the response is not received as the Client Thread is still alive.
+        // Wait to confirm that the message read is not terminated as the Client has not returned.
         final int timeout = 5000; // 5 seconds.
         waitForResponse.join(timeout);
         assertTrue(waitForResponse.isAlive());
@@ -95,7 +103,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
         waitForResponse.join(timeout);
         assertFalse(waitForResponse.isAlive());
 
-        // Send a message with the correct terminator (i.e. the custom on we set at the start of this method) and wait for the response.
+        // Send a message with the correct terminator (i.e. the custom one we set at the start of this method).
         assertArrayEquals(TestConstants.getAck(), this.getClient().send(message).toByteArray());
 
         this.checkLogMonitorForUnexpectedMessages();
@@ -112,31 +120,10 @@ public class TestMockTCPServerST extends AbstractTestTools {
     public void forceNAK() throws IOException, ConfigurationException, InterruptedException {
         assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
 
+        this.getClient().close();
         this.getServer().setIsAlwaysNAKResponse(true);
 
         assertArrayEquals(TestConstants.getNak(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
-
-        this.checkLogMonitorForUnexpectedMessages();
-    }
-
-    /**
-     * Having set the Server to close after the next response, wait for the Server {@link Thread} to die after sending one message.
-     *
-     * @throws IOException see source documentation.
-     * @throws InterruptedException see source documentation.
-     * @throws ConfigurationException
-     */
-    @Test(timeout = TIMEOUT)
-    public void forceCloseAfterNextResponse() throws IOException, InterruptedException, ConfigurationException {
-        this.getServer().setIsCloseAfterNextResponse(true);
-
-        assertArrayEquals(TestConstants.getAck(), this.getClient().send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
-
-        // Wait for the MockTCPServer to Thread to die.
-        final int timeout = 5000; // 5 seconds.
-        this.getServer().join(timeout);
-
-        assertFalse(this.getServer().isAlive());
 
         this.checkLogMonitorForUnexpectedMessages();
     }
