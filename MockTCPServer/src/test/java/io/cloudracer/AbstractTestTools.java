@@ -193,7 +193,14 @@ public abstract class AbstractTestTools {
             i = i + (retryInterval);
         }
 
-        assertEquals(expectedMessages, actualMessages);
+        /**
+         * Messages can arrive an any order so test that each, and every, received message is an expected one.
+         * This may mean that duplicates can cause a false positive under certain, albeit unlikely, circumstances. If the expected list does not contain duplicates of more than one message, such duplicates do not pose a problem.
+         */
+        assertEquals(expectedMessages.size(), actualMessages.size());
+        for (String messageReceived : actualMessages) {
+            expectedMessages.contains(messageReceived);
+        }
 
         mockTCPServer.close();
     }

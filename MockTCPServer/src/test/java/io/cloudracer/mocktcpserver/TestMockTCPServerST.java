@@ -7,6 +7,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +20,7 @@ import org.junit.Test;
 
 import io.cloudracer.AbstractTestTools;
 import io.cloudracer.TestConstants;
+import io.cloudracer.mocktcpserver.tcpclient.TCPClient;
 
 /**
  * Mock TCP Server tests.
@@ -30,18 +34,40 @@ public class TestMockTCPServerST extends AbstractTestTools {
 
     private static final int TIMEOUT = 10000;
 
+    MockTCPServer server1111;
+    MockTCPServer server2222;
+
+    final List<TCPClient> clientList = new ArrayList<>();
+
     @Override
     @Before
     public void setUp() throws IOException, ConfigurationException, InterruptedException {
         super.setUp();
 
-        this.getServer().setIsSendResponses(false);
+        getServer().setIsSendResponses(false);
+
+        server1111 = getServerFactory(TestConstants.MOCK_SERVER_PORT_1111, true);
+        server1111.setIsSendResponses(false);
+        server2222 = getServerFactory(TestConstants.MOCK_SERVER_PORT_2222, true);
+        server2222.setIsSendResponses(false);
     }
 
     @Override
     @After
     public void cleanUp() throws IOException {
         super.cleanUp();
+
+        // Close all open clients and remove them from the list.
+        for (Iterator<TCPClient> iterator = clientList.iterator(); iterator.hasNext();) {
+            TCPClient tcpClient = iterator.next();
+            tcpClient.close();
+            iterator.remove();
+        }
+
+        server1111.close();
+        server2222.close();
+
+        this.checkLogMonitorForUnexpectedMessages();
     }
 
     /**
@@ -53,12 +79,21 @@ public class TestMockTCPServerST extends AbstractTestTools {
      */
     @Test(timeout = TIMEOUT)
     public void ack() throws IOException, ConfigurationException, InterruptedException {
-        try (final MockTCPServer mockTCPServer1111 = getServerFactory(TestConstants.MOCK_SERVER_PORT_1111, true);) {
-            mockTCPServer1111.setIsSendResponses(false);
+        final int totalClientsPerServer = 1000;
 
-            for (int i = 0; i < 10; i++) {
-                assertArrayEquals(TestConstants.getAck(), getClientFactory(TestConstants.MOCK_SERVER_PORT_1111).send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
-            }
+        // Start the client connections and send two messages from each one.
+        for (int i = 0; i < totalClientsPerServer; i++) {
+            clientList.add(clientList.size(), getClientFactory(TestConstants.MOCK_SERVER_PORT_1111));
+            assertArrayEquals(TestConstants.getAck(), clientList.get(clientList.size() - 1).send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+            assertArrayEquals(TestConstants.getAck(), clientList.get(clientList.size() - 1).send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+            clientList.add(clientList.size(), getClientFactory(TestConstants.MOCK_SERVER_PORT_2222));
+            assertArrayEquals(TestConstants.getAck(), clientList.get(clientList.size() - 1).send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+            assertArrayEquals(TestConstants.getAck(), clientList.get(clientList.size() - 1).send(TestConstants.WELLFORMED_XML_WITH_VALID_TERMINATOR).toByteArray());
+        }
+
+        // Confirm that each client is still open.
+        for (TCPClient tcpClient : clientList) {
+            assertTrue(tcpClient.isConectionActive());
         }
 
         this.checkLogMonitorForUnexpectedMessages();

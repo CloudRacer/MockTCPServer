@@ -431,6 +431,21 @@ public class TCPClient implements Closeable {
         return responsesSent;
     }
 
+    /**
+     * True when the client has an connected, and bound, connection with the server.
+     *
+     * @return true when the client has an connected, and bound, connection with the server
+     */
+    public boolean isConectionActive() {
+        boolean isOpen = false;
+
+        if (this.socket != null && !this.socket.isClosed() && this.socket.isBound() && this.socket.isConnected()) {
+            isOpen = true;
+        }
+
+        return isOpen;
+    }
+
     @Override
     public String toString() {
         return "TCPClient [hostName=" + hostName + ", port=" + port + "]";

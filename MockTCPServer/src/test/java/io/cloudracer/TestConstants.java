@@ -97,6 +97,10 @@ public abstract class TestConstants {
      */
     public static final int MOCK_SERVER_PORT_1111 = 1111;
     /**
+     * Server port 2222.
+     */
+    public static final int MOCK_SERVER_PORT_2222 = 2222;
+    /**
      * Default set of configured ports.
      */
     public static final Set<Integer> PORT_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(MOCK_SERVER_PORT_1234, MOCK_SERVER_PORT_6789, MOCK_SERVER_PORT_1111)));
