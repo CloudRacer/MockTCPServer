@@ -79,7 +79,7 @@ public class TestMockTCPServerST extends AbstractTestTools {
      */
     @Test(timeout = TIMEOUT)
     public void ack() throws IOException, ConfigurationException, InterruptedException {
-        final int totalClientsPerServer = 1000;
+        final int totalClientsPerServer = 500;
 
         // Start the client connections and send two messages from each one.
         for (int i = 0; i < totalClientsPerServer; i++) {
